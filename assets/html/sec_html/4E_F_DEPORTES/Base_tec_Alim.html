@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Guías Alimentarias de Bolivia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .feedback-correct {
+            color: #16a34a; /* green-600 */
+            background-color: #dcfce7; /* green-100 */
+            border-color: #4ade80; /* green-400 */
+        }
+        .feedback-incorrect {
+            color: #dc2626; /* red-600 */
+            background-color: #fee2e2; /* red-100 */
+            border-color: #f87171; /* red-400 */
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .option-button {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="quiz-container" class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-700">Cuestionario sobre las Guías Alimentarias de Bolivia</h1>
+            <p class="mt-2 text-lg text-gray-600">Pon a prueba tus conocimientos sobre una alimentación saludable.</p>
+        </header>
+
+        <div id="quiz-content" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+            <!-- Start Screen -->
+            <div id="start-screen" class="text-center">
+                <p class="text-xl mb-6">El cuestionario tiene 25 preguntas. Cada respuesta correcta vale 4 puntos. ¡Mucha suerte!</p>
+                <button id="start-btn" class="bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 transition-colors duration-300 shadow-md">
+                    Comenzar Cuestionario
+                </button>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="question-screen" class="hidden">
+                <div class="mb-6 text-center">
+                    <p class="text-gray-500">Pregunta <span id="question-number"></span> de 25</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                        <div id="progress-bar" class="bg-teal-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                <h2 id="question-text" class="text-2xl font-semibold mb-6 text-center"></h2>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options will be inserted here -->
+                </div>
+                <div id="feedback-section" class="mt-6 p-4 rounded-lg border hidden"></div>
+                <div class="text-center mt-6">
+                    <button id="next-btn" class="bg-gray-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-900 transition-colors duration-300 shadow-md hidden">
+                        Siguiente Pregunta
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="results-screen" class="hidden text-center">
+                <h2 class="text-3xl font-bold mb-4 text-teal-700">¡Cuestionario completado!</h2>
+                <p class="text-2xl mb-2">Tu puntuación total es:</p>
+                <p id="score" class="text-5xl font-bold text-teal-500 mb-6"></p>
+                <div id="general-feedback" class="p-5 rounded-lg border mb-8"></div>
+                <button id="restart-btn" class="bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 transition-colors duration-300 shadow-md">
+                    Intentar de Nuevo
+                </button>
+            </div>
+        </div>
+        
+        <footer class="text-center mt-8 text-sm text-gray-500">
+            <p>PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el propósito principal de las Guías Alimentarias para la población boliviana?",
+                options: [
+                    "Promover el consumo de alimentos importados",
+                    "Promover una alimentación saludable para mejorar el estado nutricional y prevenir problemas por déficit o exceso",
+                    "Establecer una dieta única para todos los bolivianos",
+                    "Fomentar únicamente el consumo de productos de origen animal"
+                ],
+                answer: "Promover una alimentación saludable para mejorar el estado nutricional y prevenir problemas por déficit o exceso",
+                feedback: "Correcto. El propósito es promover una alimentación saludable y prevenir problemas nutricionales, adaptando conocimientos científicos a mensajes prácticos y culturalmente aceptables.",
+                page: 37
+            },
+            {
+                question: "Según el 'Arco de la Alimentación', ¿qué grupo de alimentos debe consumirse en mayor proporción?",
+                options: [
+                    "Carnes y huevos",
+                    "Lácteos",
+                    "Cereales, leguminosas, tubérculos y derivados",
+                    "Azúcares y grasas"
+                ],
+                answer: "Cereales, leguminosas, tubérculos y derivados",
+                feedback: "Correcto. El grupo de cereales, leguminosas y tubérculos es el más grande en el Arco, indicando que debe ser la base de la alimentación y consumirse en mayor cantidad (3 a 10 porciones).",
+                page: 41
+            },
+            {
+                question: "¿Cuántas porciones de frutas se recomienda consumir al día?",
+                options: [
+                    "De 2 a 4 porciones",
+                    "Solo una porción",
+                    "Más de 7 porciones",
+                    "No es necesario consumir frutas"
+                ],
+                answer: "De 2 a 4 porciones",
+                feedback: "Correcto. Las frutas son importantes por su aporte de vitaminas, minerales y fibra. Se recomienda consumir de 2 a 4 porciones diarias.",
+                page: 44
+            },
+            {
+                question: "¿Qué recomendación se da sobre el consumo de sal?",
+                options: [
+                    "Eliminarla completamente de la dieta",
+                    "Usar cualquier tipo de sal en abundancia",
+                    "Usar siempre sal yodada en las comidas sin exageración",
+                    "Usar solo sal marina sin yodo"
+                ],
+                answer: "Usar siempre sal yodada en las comidas sin exageración",
+                feedback: "Correcto. Se debe usar sal yodada para prevenir desórdenes por deficiencia de yodo, pero con moderación para evitar la hipertensión arterial.",
+                page: 55
+            },
+            {
+                question: "¿Cuántos vasos de agua se recomienda consumir diariamente, además de los líquidos de las comidas?",
+                options: [
+                    "1 a 2 vasos",
+                    "No es necesario beber agua extra",
+                    "Solo cuando se tiene sed",
+                    "De 6 a 8 vasos"
+                ],
+                answer: "De 6 a 8 vasos",
+                feedback: "Correcto. El agua es vital para el organismo. Se recomienda un consumo diario de 6 a 8 vasos (aproximadamente 2 litros) para mantenerse bien hidratado.",
+                page: 56
+            },
+            {
+                question: "¿Cuál es la recomendación sobre el consumo de aceites y grasas?",
+                options: [
+                    "Consumir solo grasas de origen animal",
+                    "Preferir aceites vegetales y evitar grasas de origen animal y aceites recalentados",
+                    "Freír todos los alimentos para mejorar el sabor",
+                    "Eliminar todas las grasas de la dieta"
+                ],
+                answer: "Preferir aceites vegetales y evitar grasas de origen animal y aceites recalentados",
+                feedback: "Correcto. Se deben preferir los aceites vegetales (soya, girasol) y evitar las grasas animales (manteca) y los aceites recalentados, que son dañinos para la salud cardiovascular.",
+                page: 52
+            },
+            {
+                question: "¿Qué se debe hacer para evitar la anemia nutricional?",
+                options: [
+                    "Comer más azúcar y dulces",
+                    "Consumir por lo menos 3 veces a la semana alimentos de origen animal ricos en hierro (carnes y vísceras)",
+                    "Beber mucho café y té con las comidas",
+                    "Evitar el consumo de frutas y verduras"
+                ],
+                answer: "Consumir por lo menos 3 veces a la semana alimentos de origen animal ricos en hierro (carnes y vísceras)",
+                feedback: "Correcto. Las carnes y vísceras son fuentes importantes de hierro de alta absorción, fundamental para prevenir la anemia.",
+                page: 50
+            },
+            {
+                question: "El consumo exagerado de azúcar, dulces y bebidas gaseosas está asociado principalmente con:",
+                options: [
+                    "Mejora de la salud dental",
+                    "Prevención de la obesidad",
+                    "Aparición de caries dentales y riesgo de obesidad y diabetes",
+                    "Fortalecimiento de los huesos"
+                ],
+                answer: "Aparición de caries dentales y riesgo de obesidad y diabetes",
+                feedback: "Correcto. El alto consumo de azúcares simples provoca caries y aumenta el riesgo de desarrollar enfermedades crónicas como la obesidad y la diabetes.",
+                page: 58
+            },
+            {
+                question: "¿Qué práctica de higiene es fundamental antes de preparar y comer los alimentos?",
+                options: [
+                    "Secarse las manos en la ropa",
+                    "Solo enjuagarse con agua",
+                    "Lavarse las manos con agua y jabón",
+                    "No es necesario lavarse las manos si se ven limpias"
+                ],
+                answer: "Lavarse las manos con agua y jabón",
+                feedback: "Correcto. Lavarse las manos con agua y jabón es una medida esencial para prevenir la contaminación de los alimentos y las enfermedades de transmisión alimentaria como la diarrea.",
+                page: 64
+            },
+            {
+                question: "¿Cuánta actividad física se recomienda realizar diariamente para mantener un estilo de vida saludable?",
+                options: [
+                    "5 minutos de estiramiento",
+                    "Solo los fines de semana",
+                    "Por lo menos 30 minutos",
+                    "No es necesaria si la dieta es buena"
+                ],
+                answer: "Por lo menos 30 minutos",
+                feedback: "Correcto. Realizar al menos 30 minutos de actividad física diaria, como caminata o deportes, es fundamental para mantener la salud, controlar el peso y prevenir enfermedades.",
+                page: 60
+            },
+             {
+                question: "La leche y sus derivados son una fuente importante de:",
+                options: [
+                    "Fibra y Vitamina C",
+                    "Proteínas de alto valor biológico, calcio y vitamina D",
+                    "Solo azúcares",
+                    "Hierro y Vitamina A"
+                ],
+                answer: "Proteínas de alto valor biológico, calcio y vitamina D",
+                feedback: "Correcto. Estos nutrientes son esenciales para el crecimiento, la formación de huesos y dientes fuertes, y la prevención de la osteoporosis.",
+                page: 49
+            },
+            {
+                question: "¿Por qué se recomienda reducir el consumo de té y café, especialmente con las comidas?",
+                options: [
+                    "Porque contienen demasiadas calorías",
+                    "Porque los taninos que contienen inhiben la absorción del hierro",
+                    "Porque causan sueño",
+                    "Porque manchan los dientes"
+                ],
+                answer: "Porque los taninos que contienen inhiben la absorción del hierro",
+                feedback: "Correcto. El té y el café contienen taninos, que dificultan la absorción del hierro de los alimentos, pudiendo contribuir a la anemia si se consumen junto con las comidas principales.",
+                page: 60
+            },
+            {
+                question: "Dentro de los problemas de salud priorizados en Bolivia se encuentran:",
+                options: [
+                    "Solo problemas por exceso de peso",
+                    "Desnutrición infantil, anemias nutricionales y enfermedades crónicas (diabetes, obesidad)",
+                    "Únicamente enfermedades infecciosas",
+                    "Alergias alimentarias"
+                ],
+                answer: "Desnutrición infantil, anemias nutricionales y enfermedades crónicas (diabetes, obesidad)",
+                feedback: "Correcto. Bolivia enfrenta una 'polarización epidemiológica', con problemas tanto por déficit (desnutrición, anemia) como por exceso (obesidad, diabetes), los cuales fueron priorizados para la elaboración de las guías.",
+                page: 37
+            },
+            {
+                question: "¿Qué es la 'contaminación cruzada' en la cocina?",
+                options: [
+                    "Mezclar ingredientes de diferentes países",
+                    "Cocinar alimentos a temperaturas muy altas",
+                    "El contacto entre alimentos crudos y cocidos, que puede transferir microbios",
+                    "Añadir demasiadas especias a una comida"
+                ],
+                answer: "El contacto entre alimentos crudos y cocidos, que puede transferir microbios",
+                feedback: "Correcto. La contaminación cruzada ocurre cuando microbios de un alimento crudo (como pollo) se transfieren a un alimento listo para comer, por ejemplo, a través de una tabla de cortar o un cuchillo mal lavado.",
+                page: 69
+            },
+            {
+                question: "Alimentos como la quinua, el amaranto y la cañahua son considerados valiosos porque:",
+                options: [
+                    "Son económicos y fáciles de cocinar",
+                    "Son alimentos ancestrales de alto valor nutritivo, ricos en proteínas y minerales",
+                    "Solo se pueden consumir como postre",
+                    "Tienen un alto contenido de grasa y azúcar"
+                ],
+                answer: "Son alimentos ancestrales de alto valor nutritivo, ricos en proteínas y minerales",
+                feedback: "Correcto. Estos granos andinos son altamente nutritivos, superiores a muchos cereales comunes, y forman parte importante de la cultura culinaria y la seguridad alimentaria de Bolivia.",
+                page: 41
+            },
+            {
+                question: "¿Qué porcentaje de la energía total diaria deben aportar las proteínas?",
+                options: [
+                    "Menos del 5%",
+                    "Entre el 10% y el 15%",
+                    "Más del 30%",
+                    "El 50%"
+                ],
+                answer: "Entre el 10% y el 15%",
+                feedback: "Correcto. Las metas nutricionales establecen que las proteínas deben constituir del 10 al 15% del aporte energético total, siendo importantes para la formación y reparación de tejidos.",
+                page: 38
+            },
+             {
+                question: "¿Cuál es un riesgo asociado al consumo de aceites recalentados o quemados?",
+                options: [
+                    "Mejora la digestión",
+                    "Aumenta el valor nutritivo de los alimentos",
+                    "Produce compuestos tóxicos que a largo plazo pueden ser cancerígenos",
+                    "Reduce las calorías de la comida"
+                ],
+                answer: "Produce compuestos tóxicos que a largo plazo pueden ser cancerígenos",
+                feedback: "Correcto. Al recalentar el aceite a altas temperaturas, se producen compuestos tóxicos y potencialmente cancerígenos. Por eso se recomienda no reutilizar el aceite de las frituras.",
+                page: 54
+            },
+            {
+                question: "Las verduras de color amarillo, anaranjado y verde intenso son una fuente importante de:",
+                options: [
+                    "Vitamina A",
+                    "Calcio",
+                    "Proteínas",
+                    "Grasas saludables"
+                ],
+                answer: "Vitamina A",
+                feedback: "Correcto. Estos colores indican la presencia de carotenos, que el cuerpo convierte en Vitamina A, esencial para la vista, la piel y las defensas del organismo.",
+                page: 48
+            },
+            {
+                question: "Según el documento, la obesidad en adultos está asociada con un mayor riesgo de padecer:",
+                options: [
+                    "Anemia",
+                    "Desnutrición",
+                    "Diabetes, hipertensión y enfermedades cardiovasculares",
+                    "Infecciones respiratorias"
+                ],
+                answer: "Diabetes, hipertensión y enfermedades cardiovasculares",
+                feedback: "Correcto. La obesidad es un factor de riesgo importante para desarrollar enfermedades crónicas no transmisibles, que son un problema de salud creciente en la población adulta boliviana.",
+                page: 23
+            },
+            {
+                question: "¿Cuál es la recomendación para el consumo de carnes?",
+                options: [
+                    "Consumirlas todos los días en grandes cantidades",
+                    "Evitarlas por completo",
+                    "Consumirlas al menos 3 veces por semana, incluyendo vísceras",
+                    "Comer solo carnes procesadas como embutidos"
+                ],
+                answer: "Consumirlas al menos 3 veces por semana, incluyendo vísceras",
+                feedback: "Correcto. Esta frecuencia asegura un buen aporte de proteínas de alta calidad y hierro, fundamental para prevenir la anemia y la desnutrición.",
+                page: 50
+            },
+            {
+                question: "La combinación de un cereal (ej. arroz) con una leguminosa (ej. lenteja) permite obtener:",
+                options: [
+                    "Una comida con muchas grasas",
+                    "Una proteína de alto valor biológico, similar a la de la carne",
+                    "Un plato con exceso de azúcar",
+                    "Una comida que inhibe la absorción de vitaminas"
+                ],
+                answer: "Una proteína de alto valor biológico, similar a la de la carne",
+                feedback: "Correcto. La mezcla de cereales y leguminosas complementa sus aminoácidos, creando una proteína de alta calidad, siendo una excelente opción nutricional y económica.",
+                page: 45
+            },
+            {
+                question: "¿Cuál de estos alimentos NO pertenece al grupo de 'Azúcares y mermeladas' en el Arco de la Alimentación?",
+                options: [
+                    "Miel",
+                    "Dulces",
+                    "Palta",
+                    "Chancaca"
+                ],
+                answer: "Palta",
+                feedback: "Correcto. La palta, a pesar de ser una fruta, se clasifica en el grupo de 'Grasas y aceites' por su alto contenido de grasas saludables.",
+                page: 46
+            },
+            {
+                question: "Para prevenir las Enfermedades de Transmisión Alimentaria (ETAs), además de lavarse las manos, es importante:",
+                options: [
+                    "Comer siempre los alimentos crudos",
+                    "Cocinar bien los alimentos, especialmente las carnes, y mantener la limpieza en la cocina",
+                    "Guardar la comida cocida a temperatura ambiente por muchas horas",
+                    "Mezclar alimentos crudos y cocidos en el mismo recipiente"
+                ],
+                answer: "Cocinar bien los alimentos, especialmente las carnes, y mantener la limpieza en la cocina",
+                feedback: "Correcto. La cocción adecuada mata los microorganismos peligrosos y mantener la higiene en todas las superficies evita la contaminación.",
+                page: 68
+            },
+            {
+                question: "¿A qué grupo de la población están dirigidas principalmente las Guías Alimentarias?",
+                options: [
+                    "Solo a deportistas de alto rendimiento",
+                    "Solo a niños menores de 2 años",
+                    "A la población en general, sana y mayor de dos años, con énfasis en los diferentes grupos de edad",
+                    "Únicamente a personas con enfermedades crónicas"
+                ],
+                answer: "A la población en general, sana y mayor de dos años, con énfasis en los diferentes grupos de edad",
+                feedback: "Correcto. Las guías son para toda la población sana mayor de 2 años, pero se adaptan con mensajes específicos para cada etapa de la vida (niños, adolescentes, embarazadas, adultos mayores).",
+                page: 38
+            },
+            {
+                question: "El consumo de fibra, presente en frutas, verduras y cereales integrales, ayuda a:",
+                options: [
+                    "Aumentar el colesterol en la sangre",
+                    "Causar deshidratación",
+                    "Prevenir el estreñimiento y reducir el riesgo de ciertas enfermedades",
+                    "Aumentar de peso rápidamente"
+                ],
+                answer: "Prevenir el estreñimiento y reducir el riesgo de ciertas enfermedades",
+                feedback: "Correcto. La fibra es esencial para el buen funcionamiento del sistema digestivo, previene el estreñimiento y tiene efectos beneficiosos en la prevención de enfermedades cardiovasculares y algunos tipos de cáncer.",
+                page: 48
+            }
+        ];
+
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackSectionEl = document.getElementById('feedback-section');
+        const scoreEl = document.getElementById('score');
+        const generalFeedbackEl = document.getElementById('general-feedback');
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            
+            score = 0;
+            currentQuestionIndex = 0;
+            shuffledQuestions = [...quizData];
+            shuffleArray(shuffledQuestions);
+
+            showQuestion();
+        }
+        
+        function showQuestion() {
+            resetState();
+            const question = shuffledQuestions[currentQuestionIndex];
+            
+            questionNumberEl.textContent = currentQuestionIndex + 1;
+            const progress = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBarEl.style.width = `${progress}%`;
+
+            questionTextEl.textContent = question.question;
+
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('w-full', 'p-4', 'text-left', 'bg-white', 'border-2', 'border-gray-300', 'rounded-lg', 'option-button', 'hover:border-teal-500', 'hover:bg-teal-50');
+                button.addEventListener('click', selectAnswer);
+                optionsContainerEl.appendChild(button);
+            });
+        }
+        
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackSectionEl.classList.add('hidden');
+            feedbackSectionEl.innerHTML = '';
+            while (optionsContainerEl.firstChild) {
+                optionsContainerEl.removeChild(optionsContainerEl.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correct = selectedButton.innerText === shuffledQuestions[currentQuestionIndex].answer;
+            
+            if (correct) {
+                score += 4;
+            }
+            
+            showFeedback(correct);
+
+            Array.from(optionsContainerEl.children).forEach(button => {
+                button.disabled = true;
+                if (button.innerText === shuffledQuestions[currentQuestionIndex].answer) {
+                    button.classList.add('bg-green-200', 'border-green-500');
+                } else {
+                    button.classList.add('opacity-50');
+                }
+            });
+
+            if (shuffledQuestions.length > currentQuestionIndex + 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                setTimeout(showResults, 1500);
+            }
+        }
+
+        function showFeedback(isCorrect) {
+            const question = shuffledQuestions[currentQuestionIndex];
+            feedbackSectionEl.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackSectionEl.innerHTML = `<p class="font-bold">¡Correcto!</p><p>${question.feedback}</p><p class="mt-2 text-sm">Referencia: Página ${question.page} del PDF.</p>`;
+                feedbackSectionEl.className = 'mt-6 p-4 rounded-lg border feedback-correct';
+            } else {
+                feedbackSectionEl.innerHTML = `<p class="font-bold">Incorrecto.</p><p>${question.feedback}</p><p class="mt-2 text-sm">Referencia: Página ${question.page} del PDF.</p>`;
+                feedbackSectionEl.className = 'mt-6 p-4 rounded-lg border feedback-incorrect';
+            }
+        }
+        
+        function showResults() {
+            questionScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreEl.textContent = `${score} / 100`;
+
+            let feedbackMessage = '';
+            let feedbackClass = '';
+
+            if (score >= 80) {
+                feedbackMessage = "¡Excelente! Tienes un conocimiento muy sólido sobre las guías alimentarias de Bolivia. Sigue aplicando estos principios para una vida saludable.";
+                feedbackClass = 'feedback-correct';
+            } else if (score >= 52) {
+                feedbackMessage = "¡Buen trabajo! Tienes una buena base de conocimientos, pero hay algunos puntos que puedes repasar para fortalecerlos aún más. ¡Sigue aprendiendo!";
+                 feedbackClass = 'bg-yellow-100 border-yellow-400 text-yellow-700';
+            } else {
+                feedbackMessage = "Parece que hay varios conceptos que no quedaron claros. Te recomendamos revisar el documento 'Bases técnicas de las guías alimentarias' para mejorar tu conocimiento. ¡No te desanimes y vuelve a intentarlo!";
+                feedbackClass = 'feedback-incorrect';
+            }
+            
+            generalFeedbackEl.innerHTML = feedbackMessage;
+            generalFeedbackEl.classList.add(feedbackClass);
+
+        }
+
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            showQuestion();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo: Teorías del Desarrollo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-button {
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+        .option-button:hover {
+            background-color: #e0f2fe; /* light sky blue */
+        }
+        .option-button:active {
+            transform: scale(0.98);
+        }
+        .correct {
+            background-color: #dcfce7 !important; /* light green */
+            border-color: #22c55e !important; /* green */
+        }
+        .incorrect {
+            background-color: #fee2e2 !important; /* light red */
+            border-color: #ef4444 !important; /* red */
+        }
+        .feedback-correct {
+            color: #166534; /* dark green */
+        }
+        .feedback-incorrect {
+            color: #991b1b; /* dark red */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-sky-200">
+
+    <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl transform transition-all duration-500">
+        <h1 class="text-2xl sm:text-3xl font-bold text-center text-sky-700 mb-6">Cuestionario: Teorías del Desarrollo</h1>
+
+        <div id="start-screen" class="text-center">
+            <p class="mb-6 text-lg">Pon a prueba tus conocimientos sobre las teorías de Vygotsky, Piaget, Bandura y Bruner.</p>
+            <p class="mb-8 text-md">Obtendrás 10 puntos por cada respuesta correcta. ¡Mucha suerte!</p>
+            <button id="start-button" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <div id="question-screen" class="hidden">
+            <div id="progress-bar-container" class="w-full bg-slate-200 rounded-full h-2.5 mb-4">
+                <div id="progress-bar" class="bg-sky-500 h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-sm text-slate-600 mb-4">
+                <span id="question-counter"></span>
+                <span id="current-score">Puntuación: 0</span>
+            </div>
+            
+            <div id="question-text" class="text-lg sm:text-xl font-semibold mb-6 min-h-[60px]"></div>
+            <div id="options-container" class="space-y-3 mb-6">
+                </div>
+            <button id="next-button" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50" disabled>
+                Siguiente Pregunta
+            </button>
+            <div id="feedback-container" class="mt-6 p-4 rounded-lg text-sm min-h-[80px]">
+                </div>
+        </div>
+
+        <div id="results-screen" class="hidden text-center">
+            <h2 class="text-2xl sm:text-3xl font-bold text-sky-700 mb-4">Resultados del Cuestionario</h2>
+            <p class="text-xl mb-2">Tu puntuación final es:</p>
+            <p id="final-score" class="text-5xl font-bold text-sky-600 mb-6"></p>
+            <div id="final-feedback" class="text-lg mb-8 p-4 bg-sky-50 rounded-lg border border-sky-200"></div>
+            <button id="restart-button" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50">
+                Reiniciar Cuestionario
+            </button>
+        </div>
+        
+        <p id="creator-tag" class="text-center text-xs text-slate-500 mt-8">Creado por Victor Crespo</p>
+    </div>
+
+    <script>
+        // --- Question Data ---
+        const questions = [
+            {
+                question: "Según Vygotsky, la Zona de Desarrollo Próximo (ZDP) representa fundamentalmente:",
+                options: [
+                    "Las funciones intelectuales que ya han madurado completamente en el niño.",
+                    "La distancia entre el nivel de desarrollo real del niño determinado por la resolución independiente de problemas y el nivel de desarrollo potencial determinado bajo la guía de un adulto o en colaboración con un compañero más capaz.",
+                    "El conjunto de habilidades biológicamente predeterminadas que emergen sin influencia social.",
+                    "Un proceso cognitivo exclusivamente individual que no requiere interacción social para su avance."
+                ],
+                answer: 1,
+                feedback: "La ZDP se define como 'la diferencia entre lo que el niño puede lograr independientemente y lo que puede lograr en conjunción con una persona más competente, mediador en la formación de los conceptos'. Esto se encuentra en la página 4 del documento."
+            },
+            {
+                question: "La 'Ley de la Doble Formación de los Procesos Superiores' de Vygotsky postula que:",
+                options: [
+                    "Los procesos mentales superiores se originan primero a nivel individual y luego se socializan.",
+                    "Toda función en el desarrollo cultural del niño aparece dos veces: primero en el nivel social (interpsicológica) y luego en el nivel individual (intrapsicológica).",
+                    "El desarrollo cognitivo depende exclusivamente de la maduración biológica, con una doble manifestación.",
+                    "Los procesos elementales y superiores se forman simultáneamente sin una secuencia específica."
+                ],
+                answer: 1,
+                feedback: "Esta ley, clave en la psicología vygotskyana, describe el paso de la regulación interpsicológica (social) a la intrapsicológica (individual). Se menciona en la página 4."
+            },
+            {
+                question: "Piaget describe la asimilación como el proceso mediante el cual:",
+                options: [
+                    "Las estructuras mentales existentes se reorganizan para incorporar aspectos nuevos del mundo exterior.",
+                    "El sujeto incorpora eventos, objetos o situaciones dentro de las formas de pensamiento existentes.",
+                    "Se alcanza un estado de desequilibrio cognitivo que impulsa el aprendizaje.",
+                    "El desarrollo progresa de un aspecto social a uno individual."
+                ],
+                answer: 1,
+                feedback: "La asimilación implica incorporar nueva información a esquemas preexistentes. La definición se encuentra en la página 5: 'En la asimilación, el sujeto incorpora eventos, objetos, o situaciones dentro de las formas de pensamiento existentes'."
+            },
+            {
+                question: "¿Cuál fue un cambio significativo en la teoría de Piaget durante la década de los 70, según el texto?",
+                options: [
+                    "Abandonó completamente su teoría de etapas del desarrollo.",
+                    "Reforzó la idea de que el conflicto cognitivo era la única fuente de desequilibrio.",
+                    "Alteró su teoría para hacerla más funcional y permitir otras fuentes de desequilibrio, destacando la importancia del factor social.",
+                    "Se centró exclusivamente en el desarrollo sensorio-motor, dejando de lado las operaciones formales."
+                ],
+                answer: 2,
+                feedback: "El texto indica en la página 5 que Piaget 'alteró su teoría radicalmente para hacerla más funcional y permitir otras fuentes de desequilibrio. Es por esta razón que a partir de este momento se destaca en su trabajo y en el de sus colaboradores la importancia del factor social en el desarrollo'."
+            },
+            {
+                question: "El concepto de 'reciprocidad triádica' de Bandura se refiere a la interacción entre:",
+                options: [
+                    "Observación, imitación y refuerzo.",
+                    "Pensamiento, lenguaje y acción.",
+                    "La acción, la cognición y los factores ambientales.",
+                    "Estímulo, respuesta y consecuencia."
+                ],
+                answer: 2,
+                feedback: "La reciprocidad triádica es un modelo que explica el comportamiento humano a través de la interacción de estos tres componentes. Se describe en la página 7: 'la acción, la cognición y los factores ambientales, los cuales actúan juntos para producir los cambios psicológicos'."
+            },
+            {
+                question: "Según Bandura, ¿qué papel juegan los procesos de autorregulación en el funcionamiento psicosocial?",
+                options: [
+                    "Son procesos secundarios, menos importantes que la imitación directa.",
+                    "Permiten la regulación de la motivación y la acción a través de criterios internos y respuestas evaluativas, siendo fundamentales.",
+                    "Dependen exclusivamente de la aprobación o desaprobación externa.",
+                    "Se limitan a la infancia temprana y pierden relevancia en la adultez."
+                ],
+                answer: 1,
+                feedback: "Bandura enfatiza la capacidad de autorregulación. En la página 6 se menciona: 'la regulación de la motivación y de la acción actúan, en parte, a través de criterios internos y de repuestas evaluativas de las propias ejecuciones'."
+            },
+            {
+                question: "Para Bruner, la mente se concibe principalmente como:",
+                options: [
+                    "Un receptor pasivo de información del entorno.",
+                    "Un sistema de almacenamiento de datos sin capacidad de inferencia.",
+                    "El funcionamiento cualitativo del cerebro que sirve de medio para la construcción de modelos mentales.",
+                    "Una entidad determinada exclusivamente por factores genéticos."
+                ],
+                answer: 2,
+                feedback: "Bruner ve la mente como un constructor activo de significado. La página 7 describe la mente según Bruner como 'el funcionamiento cualitativo del cerebro, la cual sirve de medio para la construcción de modelos mentales'."
+            },
+            {
+                question: "El concepto de 'andamios' (scaffolding) propuesto por Bruner se refiere a:",
+                options: [
+                    "Estructuras físicas permanentes que facilitan el aprendizaje.",
+                    "El apoyo transitorio que compañeros, adultos, instrumentos o tecnologías aportan en una situación de enseñanza, retirándose progresivamente.",
+                    "Un método de evaluación basado en la observación directa del comportamiento.",
+                    "La capacidad innata del individuo para aprender sin ayuda externa."
+                ],
+                answer: 1,
+                feedback: "El andamiaje es un apoyo temporal. La página 8 explica el concepto de andamios como 'el apoyo que los compañeros de su misma edad, los adultos, los instrumentos, las herramientas y los apoyos tecnológicos aportan en una situación específica de enseñanza... dicho soporte es retirado de forma progresiva'."
+            },
+            {
+                question: "A pesar de sus diferencias, ¿en qué aspecto fundamental coincidieron Vygotsky y Piaget respecto al origen del conocimiento, según el texto?",
+                options: [
+                    "En que el conocimiento es primordialmente innato y se despliega con la maduración.",
+                    "En que el conocimiento es un proceso de construcción por parte del sujeto.",
+                    "En que los factores sociales tienen un rol menor en la adquisición del conocimiento.",
+                    "En que el lenguaje es el único mediador en la construcción del conocimiento."
+                ],
+                answer: 1,
+                feedback: "Ambos teóricos, aunque con enfoques distintos, vieron al sujeto como constructor de su conocimiento. La página 9 señala: 'Con notables diferencias en cuanto al origen del conocimiento, tanto Piaget como Vygotsky coincidieron en que el mismo es un proceso de construcción por parte del sujeto'."
+            },
+            {
+                question: "Vygotsky argumentó enfáticamente que los factores genéticos en la génesis del desarrollo:",
+                options: [
+                    "Juegan un rol predominante, siendo los factores sociales secundarios.",
+                    "Son igualmente determinantes que los factores sociales.",
+                    "Juegan un rol menor, mientras que los factores sociales son absolutamente determinantes para las funciones psicológicas superiores.",
+                    "No tienen ninguna influencia en el desarrollo cognitivo."
+                ],
+                answer: 2,
+                feedback: "Vygotsky priorizó el papel de lo social. En la página 4, se indica: 'Su énfasis se centró en argumentar que los factores genéticos juegan un rol menor en la génesis del desarrollo, mientras que los factores sociales son absolutamente determinantes'."
+            }
+        ];
+
+        // --- DOM Elements ---
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const startButton = document.getElementById('start-button');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        
+        const progressBar = document.getElementById('progress-bar');
+        const questionCounter = document.getElementById('question-counter');
+        const currentScoreDisplay = document.getElementById('current-score');
+        
+        const finalScoreDisplay = document.getElementById('final-score');
+        const finalFeedbackDisplay = document.getElementById('final-feedback');
+
+        // --- Quiz State ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let shuffledQuestions = [];
+        let answerSelected = false;
+
+        // --- Functions ---
+
+        function shuffleArray(array) {
+            // Fisher-Yates shuffle algorithm
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            answerSelected = false;
+            shuffledQuestions = shuffleArray([...questions]); // Shuffle a copy of questions
+            
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            
+            updateScoreDisplay();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answerSelected = false;
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            questionText.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = ''; // Clear previous options
+            feedbackContainer.innerHTML = '';
+            feedbackContainer.className = 'mt-6 p-4 rounded-lg text-sm min-h-[80px]'; // Reset feedback class
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button', 'w-full', 'text-left', 'p-4', 'bg-slate-50', 'hover:bg-sky-100', 'border', 'border-slate-300', 'rounded-lg', 'focus:outline-none', 'focus:ring-2', 'focus:ring-sky-300');
+                button.dataset.index = index;
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+
+            nextButton.disabled = true;
+            updateProgress();
+        }
+
+        function selectAnswer(event) {
+            if (answerSelected) return; // Prevent changing answer after selection
+            answerSelected = true;
+
+            const selectedButton = event.target.closest('button');
+            const selectedAnswerIndex = parseInt(selectedButton.dataset.index);
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const correctAnswerIndex = currentQuestion.answer;
+
+            // Disable all option buttons after an answer is selected
+            const optionButtons = optionsContainer.querySelectorAll('.option-button');
+            optionButtons.forEach(btn => btn.disabled = true);
+
+            if (selectedAnswerIndex === correctAnswerIndex) {
+                score += 10;
+                selectedButton.classList.add('correct');
+                feedbackContainer.innerHTML = `<p class="font-semibold feedback-correct">¡Correcto!</p><p>${currentQuestion.feedback}</p>`;
+                feedbackContainer.classList.add('bg-green-50', 'border', 'border-green-200');
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Highlight the correct answer
+                optionButtons[correctAnswerIndex].classList.add('correct');
+                feedbackContainer.innerHTML = `<p class="font-semibold feedback-incorrect">Incorrecto.</p><p>${currentQuestion.feedback}</p>`;
+                feedbackContainer.classList.add('bg-red-50', 'border', 'border-red-200');
+            }
+            
+            updateScoreDisplay();
+            nextButton.disabled = false;
+            nextButton.focus(); // For better keyboard navigation
+        }
+
+        function updateScoreDisplay() {
+            currentScoreDisplay.textContent = `Puntuación: ${score}`;
+        }
+
+        function updateProgress() {
+            const progressPercentage = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            questionCounter.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            questionScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            finalScoreDisplay.textContent = `${score} / ${shuffledQuestions.length * 10}`;
+            
+            let feedbackMessage = "";
+            const percentage = (score / (shuffledQuestions.length * 10)) * 100;
+
+            if (percentage >= 90) {
+                feedbackMessage = "¡Excelente! Tienes un dominio sobresaliente de estas teorías.";
+            } else if (percentage >= 70) {
+                feedbackMessage = "¡Muy bien! Has demostrado un buen conocimiento de los conceptos clave.";
+            } else if (percentage >= 50) {
+                feedbackMessage = "¡Buen intento! Hay algunos conceptos que podrías repasar para fortalecer tu comprensión.";
+            } else {
+                feedbackMessage = "Sigue estudiando. Repasar el material te ayudará a comprender mejor estas importantes teorías del desarrollo.";
+            }
+            finalFeedbackDisplay.textContent = feedbackMessage;
+        }
+
+        // --- Event Listeners ---
+        startButton.addEventListener('click', startQuiz);
+        nextButton.addEventListener('click', nextQuestion);
+        restartButton.addEventListener('click', startQuiz);
+
+        // --- Initial Setup ---
+        // (No initial setup needed beyond event listeners, quiz starts on button click)
+    </script>
+</body>
+</html>

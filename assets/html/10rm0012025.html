@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo RM 001/2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .question-container {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .option-label {
+            display: block;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .option-label:hover {
+            background-color: #f7fafc;
+        }
+        .option-label.selected {
+            background-color: #ebf8ff;
+            border-color: #90cdf4;
+        }
+        .option-label.correct {
+            background-color: #c6f6d5;
+            border-color: #68d391;
+        }
+        .option-label.incorrect {
+            background-color: #fed7d7;
+            border-color: #fc8181;
+        }
+        .feedback {
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+        }
+        .feedback.correct {
+            background-color: #e6fffa;
+            color: #2c7a7b;
+            border: 1px solid #b2f5ea;
+        }
+        .feedback.incorrect {
+            background-color: #fff5f5;
+            color: #c53030;
+            border: 1px solid #fed7d7;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+    <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-sky-700 mb-4">Cuestionario Interactivo: Resolución Ministerial 001/2025</h1>
+            <p class="mb-6 text-slate-600">Pon a prueba tus conocimientos sobre la RM 001/2025. Cada pregunta tiene un valor de 0.7 puntos. ¡Mucha suerte!</p>
+            <button id="start-btn" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <div id="question-screen" class="hidden">
+            <div id="progress-bar-container" class="w-full bg-slate-200 rounded-full h-2.5 mb-4">
+                <div id="progress-bar" class="bg-sky-500 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+            <p id="question-counter" class="text-sm text-slate-500 mb-2"></p>
+            <h2 id="question-title" class="text-lg sm:text-xl font-semibold text-sky-700 mb-1"></h2>
+            <p id="question-text" class="text-slate-700 mb-6 leading-relaxed"></p>
+            <div id="options-container" class="space-y-3"></div>
+            <button id="next-btn" class="mt-6 w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out disabled:opacity-50" disabled>
+                Siguiente Pregunta
+            </button>
+            <div id="feedback-container" class="mt-4"></div>
+        </div>
+
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-sky-700 mb-4">Resultados del Cuestionario</h1>
+            <p class="text-xl text-slate-700 mb-2">Tu puntuación final es:</p>
+            <p id="score" class="text-4xl font-bold text-sky-600 mb-4"></p>
+            <p id="final-feedback" class="text-slate-600 mb-6 p-4 bg-sky-50 rounded-lg border border-sky-200"></p>
+            <button id="restart-btn" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out">
+                Intentar de Nuevo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // TÍTULO I, CAPÍTULO II: GESTIÓN EDUCATIVA (Arts. 3-8) - 5 preguntas
+            {
+                topic: "Título I, Cap. II: Gestión Educativa",
+                text: "¿Cuál de los siguientes documentos de planificación NO se menciona explícitamente en el Artículo 3 como parte de la etapa de planificación a nivel de la unidad educativa?",
+                options: [
+                    "Plan Operativo Anual (POA)",
+                    "Proyecto Socioproductivo (PSP)",
+                    "Plan de Convivencia Pacífica y Armónica",
+                    "Plan Anual Trimestralizado (PAT)"
+                ],
+                correctAnswer: 2,
+                article: "Art. 3",
+                feedback: "El Artículo 3 menciona que la planificación se concretiza en POA, PSP, PAT y PDC. El Plan de Convivencia Pacífica y Armónica se menciona en otros artículos (ej. Art. 99) pero no como parte de esta lista específica de documentos de planificación inicial."
+            },
+            {
+                topic: "Título I, Cap. II: Gestión Educativa",
+                text: "Según el Artículo 4, parágrafo II, ¿qué instancia tiene la facultad de realizar adecuaciones al calendario gestión 2025, y qué condición fundamental deben cumplir dichas adecuaciones?",
+                options: [
+                    "Las unidades educativas, pudiendo reducir los días hábiles si es necesario.",
+                    "Las Direcciones Distritales Educativas, debiendo dar cumplimiento a los doscientos (200) días hábiles de trabajo.",
+                    "El Ministerio de Educación únicamente, sin posibilidad de adecuación regional.",
+                    "Las Juntas Escolares, siempre que se mantengan los tres trimestres."
+                ],
+                correctAnswer: 1,
+                article: "Art. 4, II",
+                feedback: "El Artículo 4, parágrafo II, establece que las direcciones departamentales de educación, a través de las direcciones distritales educativas, pueden realizar adecuaciones, pero deben cumplir los 200 días hábiles y comunicar al Viceministerio de Educación Regular."
+            },
+            {
+                topic: "Título I, Cap. II: Gestión Educativa",
+                text: "¿Qué particularidad establece el Artículo 5 para las unidades educativas con Calendario Educativo Regionalizado del Pueblo Indígena Weenhayek respecto a la entrega de Diplomas de Bachiller y Títulos de Técnico Medio?",
+                options: [
+                    "Se entregan al inicio de la gestión educativa.",
+                    "Se realizan en un acto conjunto con todas las unidades educativas del departamento.",
+                    "Se realizarán a la culminación de la gestión educativa, ajustándose a su calendario específico.",
+                    "No reciben estos documentos, sino certificaciones propias de su pueblo."
+                ],
+                correctAnswer: 2,
+                article: "Art. 5",
+                feedback: "El Artículo 5 indica que la entrega de Diplomas de Bachiller y otros reconocimientos para el Pueblo Weenhayek se realizará a la culminación de su gestión educativa particular."
+            },
+            {
+                topic: "Título I, Cap. II: Gestión Educativa",
+                text: "Conforme al Artículo 7, parágrafo I, ¿qué instituciones deben emitir un informe previo para que las direcciones departamentales de educación definan la programación del descanso pedagógico?",
+                options: [
+                    "El Ministerio de Gobierno y la Defensoría del Pueblo.",
+                    "El Ministerio de Salud y Deportes y el Servicio Nacional de Meteorología e Hidrología (SENAMHI).",
+                    "Las Direcciones Distritales y las Juntas de Padres de Familia.",
+                    "El Viceministerio de Educación Regular y el Instituto Nacional de Estadística (INE)."
+                ],
+                correctAnswer: 1,
+                article: "Art. 7, I",
+                feedback: "El Artículo 7, parágrafo I, especifica que la programación del descanso pedagógico se define previo informe del Ministerio de Salud y Deportes y del SENAMHI."
+            },
+            {
+                topic: "Título I, Cap. II: Gestión Educativa",
+                text: "El Artículo 8 sobre Feriados establece que los días feriados reconocidos en el calendario gestión 2025 corresponden a feriados oficiales nacionales y departamentales. ¿Qué sucede con los días declarados como fiestas patronales por Gobernaciones o Municipios según el Artículo 4 (Resumen de Feriados)?",
+                options: [
+                    "Se computan como días trabajados adicionales.",
+                    "Se consideran como parte del descanso pedagógico.",
+                    "No se computan como días trabajados dentro del calendario gestión 2025.",
+                    "Son opcionales y cada unidad educativa decide si los toma."
+                ],
+                correctAnswer: 2,
+                article: "Art. 4 (Resumen de Feriados) y Art. 8",
+                feedback: "Al final de la tabla de feriados en el Artículo 4, se indica que las fiestas patronales declaradas por Gobernaciones o Municipios no se computan como días trabajados. El Art. 8 se refiere a los feriados oficiales."
+            },
+            // TÍTULO I, CAPÍTULO III: REGISTRO Y ATENCIÓN DE ESTUDIANTES EN EL SISTEMA EDUCATIVO PLURINACIONAL (Arts. 9-31) - 12 preguntas
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "Para la preinscripción en unidades educativas de 'alta demanda' para la gestión 2026, según el Artículo 9, parágrafo II, ¿cuál es el segundo orden de prioridad después de la inscripción automática de hermanos/as?",
+                options: [
+                    "Hijos de maestros de la unidad educativa.",
+                    "Estudiantes con mejores promedios del año anterior.",
+                    "Quienes vivan en la zona aledaña a la unidad educativa, demostrable con facturas de servicios o contratos.",
+                    "Madres, padres o tutores cuya fuente laboral esté cerca, si aún hay espacios."
+                ],
+                correctAnswer: 2,
+                article: "Art. 9, II, b)",
+                feedback: "El Artículo 9, parágrafo II, inciso b), establece como segunda prioridad a quienes vivan en la zona aledaña, debiendo demostrarlo con documentos específicos."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "De acuerdo con el Artículo 12, inciso a), si un padre, madre o tutor no presenta el Certificado de Nacimiento o Cédula de Identidad del estudiante al momento de la inscripción, ¿qué acción debe tomar y cuál es la consecuencia si incumple el compromiso?",
+                options: [
+                    "Se le niega la inscripción inmediatamente.",
+                    "Debe presentar una carta de la Defensoría de la Niñez.",
+                    "Firmará un Acta de Compromiso para presentar el documento en 30 días; si incumple, el director denunciará a la Defensoría de la Niñez.",
+                    "Puede presentar una declaración jurada que reemplaza permanentemente dichos documentos."
+                ],
+                correctAnswer: 2,
+                article: "Art. 12, a)",
+                feedback: "El Artículo 12, inciso a), indica la firma de un Acta de Compromiso con un plazo de 30 días y la denuncia a la Defensoría en caso de incumplimiento."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "El Artículo 13, parágrafo I, establece que la inscripción de estudiantes antiguos es automática. ¿Cómo debe ser ratificada esta inscripción y cuál es el plazo límite para ello en el área rural, lugares alejados y de difícil acceso?",
+                options: [
+                    "Con la presentación de un nuevo RUDE, hasta fin de enero.",
+                    "Con la presencia física del estudiante en la primera semana de clases en todas las áreas.",
+                    "Con la presencia física del estudiante, hasta el 14 de febrero en el área rural, lugares alejados y de difícil acceso.",
+                    "Con el pago de una tasa de ratificación, antes del inicio de clases."
+                ],
+                correctAnswer: 2,
+                article: "Art. 13, I",
+                feedback: "El Artículo 13, parágrafo I, especifica la ratificación con presencia física y el plazo extendido hasta el 14 de febrero para áreas rurales y de difícil acceso."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "En el caso de estudiantes en situación de desventaja social o vulnerabilidad que no cuenten con la Libreta Escolar, según el Artículo 16, parágrafo IV, inciso b), ¿cuál es el plazo máximo impostergable para la presentación de este documento?",
+                options: [
+                    "Un (1) mes.",
+                    "Dos (2) meses.",
+                    "Tres (3) meses.",
+                    "Hasta finalizar el primer trimestre."
+                ],
+                correctAnswer: 2,
+                article: "Art. 16, IV, b)",
+                feedback: "El Artículo 16, parágrafo IV, inciso b), establece un plazo máximo impostergable de tres (3) meses para la presentación de la Libreta Escolar en estos casos."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "¿Qué condición específica, además del informe del director y visto bueno de la Dirección Distrital, se requiere para la apertura de un paralelo 'B' en una unidad educativa, según el Artículo 17, parágrafo I?",
+                options: [
+                    "Contar con un mínimo de 15 estudiantes para el paralelo B.",
+                    "Tener un total de treinta (30) estudiantes para el paralelo B.",
+                    "Tener un total de cuarenta y dos (42) estudiantes para poder abrir el paralelo B.",
+                    "Disponer de infraestructura adicional aprobada por el municipio."
+                ],
+                correctAnswer: 2,
+                article: "Art. 17, I",
+                feedback: "El Artículo 17, parágrafo I, indica que para la apertura del paralelo B se deberá tener cuarenta y dos (42) estudiantes."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "Conforme al Artículo 20, parágrafo II, ¿cuál es la cantidad máxima de estudiantes establecida para el sexto año de escolaridad de Educación Primaria Comunitaria Vocacional en el área urbana para la gestión 2025?",
+                options: [
+                    "Veinticinco (25) estudiantes.",
+                    "Treinta (30) estudiantes.",
+                    "Treinta y cinco (35) estudiantes.",
+                    "Cuarenta (40) estudiantes."
+                ],
+                correctAnswer: 2,
+                article: "Art. 20, II",
+                feedback: "El Artículo 20, parágrafo II, especifica que para sexto año de primaria, la cantidad por esta gestión será de treinta y cinco (35) estudiantes."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "Según el Artículo 24, parágrafo V, si un estudiante con discapacidad es matriculado en una unidad educativa inclusiva, ¿qué acción adicional es obligatoria en cumplimiento de la matriculación simultánea?",
+                options: [
+                    "Debe recibir apoyo exclusivo del maestro de aula.",
+                    "La familia debe contratar un tutor especializado.",
+                    "El estudiante se inscribirá en un Centro de Educación Especial para la coordinación de apoyo técnico pedagógico.",
+                    "La unidad educativa debe crear un aula especial solo para este estudiante."
+                ],
+                correctAnswer: 2,
+                article: "Art. 24, V",
+                feedback: "El Artículo 24, parágrafo V, establece la inscripción obligatoria y simultánea en un Centro de Educación Especial para la coordinación del apoyo."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "El Artículo 26, parágrafo II, describe el proceso para estudiantes con Talento Extraordinario. ¿Quién conforma el 'Equipo de Valoración de Área' y qué documento clave emite este equipo?",
+                options: [
+                    "El director de la U.E. y dos padres de familia; emiten un Certificado de Talento.",
+                    "Tres a cinco maestros o profesionales con trayectoria designados por la Dirección Distrital; emiten un Acta de Valoración.",
+                    "Psicólogos del Ministerio de Educación; emiten un Informe Psicopedagógico Especializado.",
+                    "La Comisión Técnico Pedagógica de la U.E.; emiten una Recomendación de Promoción Acelerada."
+                ],
+                correctAnswer: 1,
+                article: "Art. 26, II",
+                feedback: "El Artículo 26, parágrafo II, detalla que la Dirección Distrital conforma el Equipo de Valoración (3-5 maestros/profesionales) y este emite un Acta de Valoración."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "¿Hasta qué momento de la gestión 2025 se permiten los traslados de estudiantes según el Artículo 29, parágrafo I, y cuál es el plazo máximo para la duración del trámite de traslado y registro en el SIE?",
+                options: [
+                    "Hasta finalizar el primer trimestre; el trámite no debe exceder 3 días hábiles.",
+                    "Durante toda la gestión educativa; el trámite no debe exceder 10 días hábiles.",
+                    "Hasta el inicio del segundo trimestre; el trámite no debe exceder 5 días hábiles.",
+                    "Solo durante el periodo de inscripciones; el trámite es inmediato."
+                ],
+                correctAnswer: 2,
+                article: "Art. 29, I",
+                feedback: "El Artículo 29, parágrafo I, establece que los traslados se realizan hasta el inicio del segundo trimestre y el trámite no excederá los cinco (5) días hábiles."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "El Artículo 11, parágrafo III, inciso b), sobre la inscripción de estudiantes nuevos, menciona que se garantizará la inscripción de niñas, niños y adolescentes en ciertas situaciones. ¿Cuál de las siguientes NO es una de esas situaciones explícitamente mencionadas para esta garantía específica?",
+                options: [
+                    "Orfandad de madre o padre.",
+                    "Situación de desventaja social o vulnerabilidad.",
+                    "Hijos de funcionarios públicos trasladados.",
+                    "Vivir en la zona aledaña a la unidad educativa."
+                ],
+                correctAnswer: 2,
+                article: "Art. 11, III, b)",
+                feedback: "El Art. 11, III, b) garantiza la inscripción a quienes vivan en la zona y específicamente a NNA en orfandad o situación de desventaja/vulnerabilidad. No menciona explícitamente a hijos de funcionarios públicos en este inciso particular, aunque otros artículos podrían cubrir traslados."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "Según el Artículo 16, parágrafo IV, inciso a), en casos extremos donde un NNA no cuente con documento de identidad, ¿qué permite la Declaración Jurada de Buena Fe y hasta cuándo es provisional este registro?",
+                options: [
+                    "Reemplaza permanentemente el documento de identidad.",
+                    "Permite el registro provisional hasta que se gestione el documento, para inscripciones hasta el 2do trimestre.",
+                    "Solo es válida si está notariada y acompañada de dos testigos.",
+                    "Permite el registro solo por el primer trimestre, luego se anula la inscripción."
+                ],
+                correctAnswer: 1,
+                article: "Art. 16, IV, a)",
+                feedback: "El Art. 16, IV, a) indica que la Declaración Jurada de Buena Fe permite el registro provisional del estudiante, hasta que se gestione el documento de identidad, específicamente para inscripciones realizadas hasta el segundo trimestre."
+            },
+            {
+                topic: "Título I, Cap. III: Registro y Atención de Estudiantes",
+                text: "El Artículo 21, parágrafo III, establece una cantidad mínima de estudiantes para el funcionamiento de unidades educativas con atención Modular Multigrado en Educación Secundaria Comunitaria Productiva en lugares de difícil acceso. ¿Cuál es esta cantidad mínima?",
+                options: [
+                    "Un (1) estudiante.",
+                    "Cinco (5) estudiantes.",
+                    "Diez (10) estudiantes.",
+                    "Quince (15) estudiantes."
+                ],
+                correctAnswer: 1,
+                article: "Art. 21, III",
+                feedback: "El Artículo 21, parágrafo III, especifica que las unidades educativas con atención Modular Multigrado en Secundaria en lugares de difícil acceso podrán funcionar con un mínimo de cinco (5) estudiantes."
+            },
+            // TÍTULO I, CAPÍTULO IV: LINEAMIENTOS PARA EL DESARROLLO DE LA GESTIÓN EDUCATIVA (Arts. 32-35) - 8 preguntas
+            {
+                topic: "Título I, Cap. IV: Lineamientos para el Desarrollo de la Gestión Educativa",
+                text: "El Artículo 32, parágrafo I, inciso a), describe el Plan Operativo Anual (POA). ¿Quién es el responsable de su elaboración y quiénes deben participar en este proceso?",
+                options: [
+                    "El Consejo de Profesores, con la aprobación de la Dirección Distrital.",
+                    "El Director de la unidad educativa, con la participación de la Comunidad Educativa (incluyendo Juntas/Consejos y estudiantes).",
+                    "La Dirección Distrital, con la consulta a los directores de unidades educativas.",
+                    "Las Juntas Escolares de Padres y Madres de Familia, con la supervisión del Director."
+                ],
+                correctAnswer: 1,
+                article: "Art. 32, I, a)",
+                feedback: "El Artículo 32, parágrafo I, inciso a), establece que la elaboración del POA es responsabilidad del director de la unidad educativa, con la participación de la Comunidad Educativa."
+            },
+            {
+                topic: "Título I, Cap. IV: Lineamientos para el Desarrollo de la Gestión Educativa",
+                text: "Según el Artículo 32, parágrafo I, inciso b), ¿cuál es la duración mínima que debe tener un Proyecto Socioproductivo (PSP) y con qué frecuencia debe ser evaluado?",
+                options: [
+                    "Duración de un trimestre, evaluado mensualmente.",
+                    "Duración mínima de una gestión educativa, evaluado cada gestión educativa.",
+                    "Duración de dos gestiones educativas, evaluado al finalizar el proyecto.",
+                    "Duración flexible según la necesidad, evaluado bimestralmente."
+                ],
+                correctAnswer: 1,
+                article: "Art. 32, I, b)",
+                feedback: "El Artículo 32, parágrafo I, inciso b), indica que el PSP deberá ser evaluado cada gestión educativa y tiene una duración mínima de una gestión educativa."
+            },
+            {
+                topic: "Título I, Cap. IV: Lineamientos para el Desarrollo de la Gestión Educativa",
+                text: "Conforme al Artículo 32, parágrafo I, inciso c), ¿quién elabora el Plan Anual Trimestralizado (PAT) en Educación Inicial en Familia Comunitaria y Educación Primaria Comunitaria Vocacional, especialmente si existen paralelos?",
+                options: [
+                    "Cada maestro de forma individual, independientemente de los paralelos.",
+                    "El Director de la unidad educativa para todos los niveles.",
+                    "El maestro de cada año de escolaridad; en caso de paralelos, los maestros del año de escolaridad elaborarán un mismo PAT.",
+                    "La Comisión Técnico Pedagógica de la unidad educativa."
+                ],
+                correctAnswer: 2,
+                article: "Art. 32, I, c)",
+                feedback: "El Artículo 32, parágrafo I, inciso c), especifica que en Inicial y Primaria, el PAT es elaborado por el maestro del año de escolaridad, y si hay paralelos, elaboran un mismo PAT conjuntamente."
+            },
+            {
+                topic: "Título I, Cap. IV: Lineamientos para el Desarrollo de la Gestión Educativa",
+                text: "El Artículo 32, parágrafo II, asigna una responsabilidad a los directores de unidades educativas respecto al PSP, PAT y PDC. ¿Cuál es esta responsabilidad principal?",
+                options: [
+                    "Aprobarlos y archivarlos únicamente.",
+                    "Delegar su elaboración completa a los maestros.",
+                    "Impulsar el desarrollo del PSP, coadyuvar en el cumplimiento del PAT y acompañar la concreción curricular a partir de los PDC.",
+                    "Evaluar los PDC al final de cada bimestre sin intervención previa."
+                ],
+                correctAnswer: 2,
+                article: "Art. 32, II",
+                feedback: "El Artículo 32, parágrafo II, indica que los directores deben impulsar el PSP, coadyuvar con el PAT y acompañar la concreción de los PDC."
+            },
+            {
+                topic: "Título I, Cap. IV: Lineamientos para el Desarrollo de la Gestión Educativa",
+                text: "¿Cuál es el propósito fundamental, según el Artículo 33, de que los maestros cumplan con el desarrollo de los contenidos de los Planes y Programas?",
+                options: [
+                    "Asegurar que todos los estudiantes reciban la misma cantidad de tareas.",
+                    "Facilitar la evaluación estandarizada a nivel nacional.",
+                    "Garantizar la transitabilidad de un año a otro año de escolaridad y de un nivel a otro nivel.",
+                    "Cumplir con un requisito administrativo del Ministerio de Educación."
+                ],
+                correctAnswer: 2,
+                article: "Art. 33",
+                feedback: "El Artículo 33 establece que el cumplimiento de los contenidos de Planes y Programas es para garantizar la transitabilidad entre años y niveles."
+            },
+            {
+                topic: "Título I, Cap. IV: Lineamientos para el Desarrollo de la Gestión Educativa",
+                text: "El Artículo 34, parágrafo I, sobre la orientación didáctica, establece que toda actividad de enseñanza y aprendizaje deberá realizarse en la clase. ¿Qué característica deben tener las estrategias utilizadas?",
+                options: [
+                    "Ser principalmente expositivas y teóricas.",
+                    "Estar enfocadas en la repetición y memorización.",
+                    "Ser estrategias dinámicas que motiven a los estudiantes.",
+                    "Limitarse al uso del texto de aprendizaje oficial."
+                ],
+                correctAnswer: 2,
+                article: "Art. 34, I",
+                feedback: "El Artículo 34, parágrafo I, enfatiza que las actividades deben ir acompañadas de estrategias dinámicas que motiven a los estudiantes."
+            },
+            {
+                topic: "Título I, Cap. IV: Lineamientos para el Desarrollo de la Gestión Educativa",
+                text: "Según el Artículo 34, parágrafo II, ¿hacia qué tipo de habilidades deben estar orientadas las tareas y/o actividades de refuerzo de aprendizajes?",
+                options: [
+                    "Principalmente a la copia de textos y resumen de lecciones.",
+                    "A fortalecer habilidades de análisis, reflexión, imaginación, creatividad, pensamiento crítico y resolución de problemas.",
+                    "A la preparación exclusiva para pruebas estandarizadas.",
+                    "Al desarrollo de habilidades manuales únicamente."
+                ],
+                correctAnswer: 1,
+                article: "Art. 34, II",
+                feedback: "El Artículo 34, parágrafo II, detalla que las tareas deben orientarse a fortalecer habilidades superiores como análisis, reflexión, creatividad, pensamiento crítico, etc."
+            },
+            {
+                topic: "Título I, Cap. IV: Lineamientos para el Desarrollo de la Gestión Educativa",
+                text: "El Artículo 35 define el Cuaderno Pedagógico como un instrumento de uso obligatorio para el maestro. Además del avance de contenidos y criterios de evaluación, ¿qué otro elemento NO se menciona explícitamente como contenido imprescindible del Cuaderno Pedagógico en este artículo?",
+                options: [
+                    "Cuadros de filiación y asistencia.",
+                    "Planificaciones de aula detalladas (PDC).",
+                    "Horario y centralizadores trimestrales.",
+                    "Autoevaluaciones de los estudiantes y cuadro estadístico."
+                ],
+                correctAnswer: 1,
+                article: "Art. 35",
+                feedback: "El Artículo 35 menciona filiación, asistencia, evaluación, horario, centralizadores, autoevaluaciones y estadística. Si bien el PDC es crucial (Art. 32), este artículo específico no lo lista como parte del Cuaderno Pedagógico, sino que el cuaderno registra el *avance* y *resultados* derivados de la planificación."
+            },
+            // TÍTULO II, CAPÍTULO I: GESTIÓN CURRICULAR DEL MODELO EDUCATIVO SOCIOCOMUNITARIO PRODUCTIVO (Arts. 36-49) - 10 preguntas
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "Según el Artículo 36, parágrafo I, ¿en qué tipo de unidades educativas es obligatorio el uso de los Textos de Aprendizaje distribuidos gratuitamente por el Ministerio de Educación?",
+                options: [
+                    "Solo en unidades educativas fiscales del área rural.",
+                    "En todas las unidades educativas fiscales, privadas y de convenio.",
+                    "En unidades educativas fiscales y de convenio, exclusivamente.",
+                    "En unidades educativas privadas que así lo soliciten."
+                ],
+                correctAnswer: 2, // La RM dice "fiscales y de convenio"
+                article: "Art. 36, I",
+                feedback: "El Artículo 36, parágrafo I, especifica que los Textos de Aprendizaje gratuitos son de uso obligatorio en las unidades educativas fiscales y de convenio."
+            },
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "El Artículo 37, parágrafo II, indica que los maestros de Educación Inicial en Familia Comunitaria deben usar diversas estrategias lúdicas y creativas. ¿Hacia el desarrollo de qué capacidades, cualidades y potencialidades deben contribuir estas estrategias principalmente?",
+                options: [
+                    "Únicamente al desarrollo cognitivo y memorístico.",
+                    "Al desarrollo de la disciplina y obediencia.",
+                    "Lingüísticas, afectivas, psicomotrices, espirituales y cognitivas.",
+                    "Al aprendizaje temprano de la lectura y escritura formal."
+                ],
+                correctAnswer: 2,
+                article: "Art. 37, II",
+                feedback: "El Artículo 37, parágrafo II, señala que las estrategias deben contribuir al desarrollo integral de capacidades lingüísticas, afectivas, psicomotrices, espirituales y cognitivas."
+            },
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "Conforme al Artículo 39, parágrafo II, en Educación Primaria Comunitaria Vocacional, ¿qué habilidades se deben priorizar en el desarrollo de los estudiantes?",
+                options: [
+                    "Habilidades deportivas y artísticas exclusivamente.",
+                    "Habilidades de lectura comprensiva, escritura creativa y el pensamiento lógico matemático.",
+                    "Habilidades de liderazgo y oratoria.",
+                    "Habilidades tecnológicas y manejo de software."
+                ],
+                correctAnswer: 1,
+                article: "Art. 39, II",
+                feedback: "El Artículo 39, parágrafo II, prioriza el desarrollo de habilidades de lectura comprensiva, escritura creativa y el pensamiento lógico matemático."
+            },
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "El Artículo 42, parágrafo II, establece que la evaluación del desarrollo curricular se realizará en el marco de un reglamento específico. ¿Cuál es este reglamento?",
+                options: [
+                    "Reglamento de Faltas y Sanciones del Magisterio.",
+                    "Reglamento del Bachiller Técnico Humanístico.",
+                    "Reglamento de Evaluación del Desarrollo Curricular del Subsistema de Educación Regular.",
+                    "Reglamento de Emisión de Boletines y Libretas Escolares Electrónicas."
+                ],
+                correctAnswer: 2,
+                article: "Art. 42, II",
+                feedback: "El Artículo 42, parágrafo II, remite al 'Reglamento de Evaluación del Desarrollo Curricular del Subsistema de Educación Regular' (RM 0190/2024)."
+            },
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "Según el Artículo 43, parágrafo II, en contextos regionalizados, ¿en qué deben basarse los materiales educativos que promuevan las direcciones de U.E. y el plantel docente?",
+                options: [
+                    "En traducciones directas de textos universales.",
+                    "En las normas lingüísticas estandarizadas de la lengua (alfabetos, glosarios, gramáticas) emitidas por el IPELC y aprobadas por el Ministerio.",
+                    "Exclusivamente en la tradición oral de la comunidad.",
+                    "En materiales elaborados por editoriales privadas con enfoque regional."
+                ],
+                correctAnswer: 1,
+                article: "Art. 43, II",
+                feedback: "El Artículo 43, parágrafo II, indica que los materiales deben basarse en las normas lingüísticas estandarizadas (alfabetos, etc.) emitidas por el IPELC y aprobadas ministerialmente."
+            },
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "El Artículo 45, parágrafo I, establece una actividad para promover el pensamiento crítico reflexivo. ¿Cuál es esta actividad y con qué frecuencia debe realizarse?",
+                options: [
+                    "Debates semanales sobre temas de actualidad.",
+                    "Lectura comprensiva de diez (10) minutos en cada inicio de la jornada escolar.",
+                    "Proyectos de investigación bimestrales.",
+                    "Exposiciones individuales al final de cada trimestre."
+                ],
+                correctAnswer: 1,
+                article: "Art. 45, I",
+                feedback: "El Artículo 45, parágrafo I, especifica la organización de la lectura comprensiva de diez (10) minutos en cada inicio de la jornada escolar."
+            },
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "De acuerdo con el Artículo 46, inciso c), al abordar la intraculturalidad e interculturalidad, ¿qué deben hacer los maestros respecto a los saberes y conocimientos de los Pueblos Indígenas Originarios Campesinos y Afrobolivianos?",
+                options: [
+                    "Considerarlos como complementarios pero inferiores al conocimiento universal.",
+                    "Limitarlos a las áreas de Ciencias Sociales y Artes Plásticas.",
+                    "Reconocer, valorar e investigar dichos saberes, entendiendo que tienen el mismo valor científico que el conocimiento universal.",
+                    "Enseñarlos únicamente en la lengua originaria, sin traducirlos al castellano."
+                ],
+                correctAnswer: 2,
+                article: "Art. 46, c)",
+                feedback: "El Artículo 46, inciso c), mandata reconocer, valorar e investigar los saberes y conocimientos PIOC y Afrobolivianos, otorgándoles el mismo valor científico que el universal."
+            },
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "El Artículo 48, parágrafo III, numeral 2, inciso b), sobre Atención de Desastres y/o Emergencias, indica que si una institución educativa no es damnificada, ¿por cuánto tiempo máximo podrá ser usada como albergue temporal y qué se debe asegurar siempre?",
+                options: [
+                    "Por un máximo de 5 días, asegurando la alimentación de los albergados.",
+                    "Por un máximo de 10 días, asegurando siempre la continuidad educativa.",
+                    "Por tiempo indefinido, hasta que la emergencia cese.",
+                    "No puede ser usada como albergue bajo ninguna circunstancia."
+                ],
+                correctAnswer: 1,
+                article: "Art. 48, III, 2, b)",
+                feedback: "El Artículo 48, parágrafo III, numeral 2, inciso b), establece un máximo de diez (10) días para uso como albergue, asegurando siempre la continuidad educativa."
+            },
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "Según el Artículo 49, parágrafo II, en caso de periodo de epidemia o aumento de casos por cualquier enfermedad, ¿qué NO debe exigir la unidad educativa a los estudiantes para justificar la inasistencia escolar por tema epidemiológico?",
+                options: [
+                    "Una receta médica.",
+                    "El certificado médico.",
+                    "Un permiso firmado por los padres.",
+                    "La realización de tareas compensatorias."
+                ],
+                correctAnswer: 1,
+                article: "Art. 49, II",
+                feedback: "El Artículo 49, parágrafo II, establece que la unidad educativa NO debe exigir el certificado médico para justificar inasistencias por tema epidemiológico."
+            },
+            {
+                topic: "Título II, Cap. I: Gestión Curricular MESCP",
+                text: "El Artículo 41, parágrafo III, se refiere a la aplicación del Bachillerato Técnico Humanístico (BTH). ¿Cómo debe ser esta aplicación y qué condiciones se deben considerar?",
+                options: [
+                    "Obligatoria e inmediata en todas las unidades educativas.",
+                    "Opcional para los estudiantes y de implementación rápida.",
+                    "Gradual y progresiva, considerando las condiciones de infraestructura y equipamiento.",
+                    "Exclusiva para unidades educativas privadas con financiamiento propio."
+                ],
+                correctAnswer: 2,
+                article: "Art. 41, III",
+                feedback: "El Artículo 41, parágrafo III, indica que la aplicación del BTH será gradual y progresiva, considerando las condiciones de infraestructura y equipamiento."
+            },
+            // TÍTULO II, CAPÍTULO II: ACTIVIDADES ACADÉMICAS Y PEDAGÓGICAS (Arts. 50-56) - 5 preguntas
+            {
+                topic: "Título II, Cap. II: Actividades Académicas y Pedagógicas",
+                text: "¿Cuál de las siguientes actividades NO se menciona en el Artículo 50 como parte de las 'Actividades del Bicentenario' a desarrollarse conforme a convocatoria pública?",
+                options: [
+                    "Escuelas Abiertas del Bicentenario.",
+                    "Olimpiadas del Saber Histórico Rumbo al Bicentenario.",
+                    "Festival Nacional de Danzas Autóctonas.",
+                    "Tercer Concurso de Producción de Textos “Escribiendo cuentos desde mi comunidad”."
+                ],
+                correctAnswer: 2,
+                article: "Art. 50",
+                feedback: "El Artículo 50 menciona las Escuelas Abiertas, las Olimpiadas del Saber Histórico y el Concurso de Producción de Textos. No lista un 'Festival Nacional de Danzas Autóctonas' específicamente bajo este artículo."
+            },
+            {
+                topic: "Título II, Cap. II: Actividades Académicas y Pedagógicas",
+                text: "Según el Artículo 52, ¿quiénes deben promover la participación de los estudiantes en la 'Academia del Saber' y en qué niveles educativos se enfoca esta actividad?",
+                options: [
+                    "Los padres de familia; enfocado solo en Educación Secundaria.",
+                    "Los directores de unidades educativas, en coordinación con DDE y Viceministerio de Comunicación; enfocado en Educación Primaria Comunitaria Vocacional y Educación Secundaria Comunitaria Productiva.",
+                    "El Ministerio de Culturas; enfocado en todas las áreas artísticas.",
+                    "Las universidades públicas; enfocado en estudiantes de último año de secundaria."
+                ],
+                correctAnswer: 1,
+                article: "Art. 52",
+                feedback: "El Artículo 52 indica que los directores de U.E., en coordinación con DDE y Vic. de Comunicación, promoverán la Academia del Saber en los niveles Primaria y Secundaria."
+            },
+            {
+                topic: "Título II, Cap. II: Actividades Académicas y Pedagógicas",
+                text: "El Artículo 53 describe el 'Encuentro Plurinacional de Maestras y Maestros Educa Innova'. ¿Cuál es el carácter de participación de los maestros en este encuentro y qué tipo de experiencias hacen conocer?",
+                options: [
+                    "Obligatorio; experiencias de gestión administrativa exitosa.",
+                    "Voluntario; experiencias educativas vinculadas al uso de TIC y resultados de la práctica pedagógica.",
+                    "Remunerado; proyectos de investigación científica pura.",
+                    "Exclusivo para maestros de áreas técnicas; innovaciones en equipamiento."
+                ],
+                correctAnswer: 1,
+                article: "Art. 53",
+                feedback: "El Artículo 53 establece que el Educa Innova es de carácter voluntario y los maestros presentan experiencias con TIC y resultados de su práctica pedagógica."
+            },
+            {
+                topic: "Título II, Cap. II: Actividades Académicas y Pedagógicas",
+                text: "Para la 'Feria de Formación Productiva del Sistema Educativo Plurinacional' (Artículo 54), ¿cuántos proyectos de unidades educativas con BTH de cada departamento son registrados para evaluación y clasificación a la Fase Nacional?",
+                options: [
+                    "Un (1) proyecto, el ganador departamental.",
+                    "Los mejores tres (3) proyectos.",
+                    "Los mejores cinco (5) proyectos.",
+                    "Todos los proyectos que cumplan los requisitos básicos."
+                ],
+                correctAnswer: 1,
+                article: "Art. 54",
+                feedback: "El Artículo 54 especifica que los mejores tres (3) proyectos de cada departamento que participaron en 'Bolivia Produce' son registrados para la fase nacional de la Feria de Formación Productiva."
+            },
+            {
+                topic: "Título II, Cap. II: Actividades Académicas y Pedagógicas",
+                text: "Conforme al Artículo 56, sobre Robótica, ¿quiénes deben promover gradualmente su práctica y con qué fin principal?",
+                options: [
+                    "Empresas privadas de tecnología; con fin comercial.",
+                    "Las universidades; para la investigación avanzada.",
+                    "DDE, Direcciones Distritales y Direcciones de U.E., en coordinación con ETAs; para el uso de la tecnología en el desarrollo integral de los estudiantes.",
+                    "Los propios estudiantes de forma autodidacta; para la participación en competencias internacionales."
+                ],
+                correctAnswer: 2,
+                article: "Art. 56",
+                feedback: "El Artículo 56 indica que las DDE, Direcciones Distritales y de U.E., coordinando con ETAs, deben promover la robótica para el uso de la tecnología en el desarrollo integral estudiantil."
+            },
+            // TÍTULO II, CAPÍTULO III: GESTIÓN ADMINISTRATIVA E INSTITUCIONAL (Arts. 57-79) - 10 preguntas
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "Según el Artículo 58, inciso a), ¿cuál es la duración de la hora pedagógica establecida para Educación Inicial en Familia Comunitaria Escolarizada?",
+                options: [
+                    "Treinta (30) minutos.",
+                    "Treinta y cinco (35) minutos.",
+                    "Cuarenta (40) minutos.",
+                    "Cuarenta y cinco (45) minutos."
+                ],
+                correctAnswer: 2,
+                article: "Art. 58, a)",
+                feedback: "El Artículo 58, inciso a), establece que la hora pedagógica en Educación Inicial en Familia Comunitaria Escolarizada será de cuarenta (40) minutos."
+            },
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "El Artículo 60 establece un plazo impostergable para que los directores de unidades educativas remitan la información de los estudiantes inscritos. ¿Cuál es este plazo y a qué operativo SIE corresponde?",
+                options: [
+                    "Hasta el 28 de febrero; operativo SIE de medio año.",
+                    "Hasta el 14 de marzo; primer operativo SIE de inicio de gestión.",
+                    "Hasta el 30 de abril; operativo SIE de cierre de primer trimestre.",
+                    "Hasta el 15 de mayo; operativo SIE extraordinario."
+                ],
+                correctAnswer: 1,
+                article: "Art. 60",
+                feedback: "El Artículo 60 indica que la información debe remitirse hasta el 14 de marzo impostergablemente, correspondiente al primer operativo SIE de inicio de gestión."
+            },
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "Conforme al Artículo 62, parágrafo II, ¿quiénes deben establecer un cronograma específico para el trámite y entrega del Diploma de Bachiller, y cuándo debe otorgarse este obligatoriamente?",
+                options: [
+                    "Las unidades educativas individualmente; en cualquier momento después de la aprobación.",
+                    "Las Direcciones Departamentales y Distritales de Educación; obligatoriamente en el acto de promoción.",
+                    "El Ministerio de Educación; dentro de los 30 días posteriores al cierre de gestión.",
+                    "Las universidades, al momento de la inscripción a carreras superiores."
+                ],
+                correctAnswer: 1,
+                article: "Art. 62, II",
+                feedback: "El Artículo 62, parágrafo II, señala que las DDE y DDEE establecerán el cronograma, y el Diploma de Bachiller debe otorgarse obligatoriamente en el acto de promoción."
+            },
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "El Artículo 66, parágrafo II, trata sobre unidades educativas que comparten ambientes y mobiliario con Centros de Educación Alternativa y Especial. ¿Qué queda prohibido en estos casos respecto a los ambientes comunes?",
+                options: [
+                    "El uso compartido de baños y patios.",
+                    "El cierre de los ambientes comunes como ser baños, patios y otros.",
+                    "La realización de actividades conjuntas.",
+                    "El mantenimiento compartido de dichos ambientes."
+                ],
+                correctAnswer: 1,
+                article: "Art. 66, II",
+                feedback: "El Artículo 66, parágrafo II, prohíbe el cierre de los ambientes comunes (baños, patios, etc.) en unidades que comparten infraestructura."
+            },
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "Según el Artículo 70, parágrafo I, ¿es obligatorio el uso del uniforme en las unidades educativas fiscales, privadas y de convenio?",
+                options: [
+                    "Sí, es obligatorio en todas las unidades educativas.",
+                    "No es obligatorio, no siendo impedimento para el ingreso a clases.",
+                    "Es obligatorio solo en unidades educativas privadas.",
+                    "Es obligatorio solo para actos cívicos y desfiles."
+                ],
+                correctAnswer: 1,
+                article: "Art. 70, I",
+                feedback: "El Artículo 70, parágrafo I, establece claramente que el uso del uniforme no es obligatorio y no debe ser un impedimento para el ingreso a clases."
+            },
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "¿Qué disposición específica establece el Artículo 72 respecto a los viajes de promoción para la presente gestión?",
+                options: [
+                    "Se permiten con autorización de la Dirección Departamental.",
+                    "Se permiten solo a destinos nacionales y con fines culturales.",
+                    "Quedan terminantemente prohibidos.",
+                    "Se permiten si son financiados íntegramente por los padres."
+                ],
+                correctAnswer: 2,
+                article: "Art. 72",
+                feedback: "El Artículo 72 es categórico al indicar que los viajes de promoción quedan terminantemente prohibidos en la presente gestión."
+            },
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "El Artículo 75, parágrafo III, menciona la participación de ciertos actores en las actividades del cierre de gestión y rendición de cuentas como parte de la evaluación institucional. ¿Quiénes son estos actores?",
+                options: [
+                    "Únicamente el Director y el Consejo de Profesores.",
+                    "El Director, la Dirección Distrital y representantes del Ministerio.",
+                    "Juntas Escolares, Consejos Educativos Social Comunitarios y los gobiernos estudiantiles.",
+                    "Auditores externos contratados por el Ministerio."
+                ],
+                correctAnswer: 2,
+                article: "Art. 75, III",
+                feedback: "El Artículo 75, parágrafo III, especifica la participación de Juntas Escolares, CESC y gobiernos estudiantiles en el cierre de gestión y rendición de cuentas."
+            },
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "Conforme al Artículo 76, ¿quiénes tienen la obligación de registrar la Hoja de Concepto del personal docente y bajo qué principios deben hacerlo?",
+                options: [
+                    "Los Directores Distritales; bajo principios de antigüedad y mérito.",
+                    "Los Directores de unidades educativas; bajo los principios de equidad, ecuanimidad e imparcialidad.",
+                    "El personal de secretaría de la U.E.; bajo supervisión del director.",
+                    "La Comisión Técnico Pedagógica; bajo criterios de desempeño en aula."
+                ],
+                correctAnswer: 1,
+                article: "Art. 76",
+                feedback: "El Artículo 76 establece que los directores de unidades educativas deben registrar la Hoja de Concepto bajo los principios de equidad, ecuanimidad e imparcialidad."
+            },
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "El Artículo 79 sobre Desburocratización indica que los instructivos emanados por autoridades educativas deben ser comunicados con debida anticipación y atendidos en plazos establecidos. ¿Qué se debe evitar en este proceso?",
+                options: [
+                    "La participación de los docentes en la toma de decisiones.",
+                    "El uso de medios digitales para la comunicación.",
+                    "Informes y reportes innecesarios.",
+                    "La socialización de los instructivos con los padres de familia."
+                ],
+                correctAnswer: 2,
+                article: "Art. 79",
+                feedback: "El Artículo 79, en el marco de la desburocratización, señala que se deben evitar informes y reportes innecesarios."
+            },
+            {
+                topic: "Título II, Cap. III: Gestión Administrativa e Institucional",
+                text: "Según el Artículo 69, parágrafo III, el uso en el aula de celulares, tablets, laptops y otros medios tecnológicos por estudiantes y maestros, ¿a qué debe sujetarse?",
+                options: [
+                    "A la autorización expresa de la Dirección Distrital para cada caso.",
+                    "Al desarrollo curricular.",
+                    "A la disponibilidad de conexión a internet en la unidad educativa.",
+                    "A un horario específico fuera de las horas de explicación del maestro."
+                ],
+                correctAnswer: 1,
+                article: "Art. 69, III",
+                feedback: "El Artículo 69, parágrafo III, establece que el uso de estos medios tecnológicos en el aula debe sujetarse al desarrollo curricular."
+            },
+            // TÍTULO II, CAPÍTULO IV: PERSONAL DEL SUBSISTEMA DE EDUCACIÓN REGULAR (Arts. 80-86) - 6 preguntas
+            {
+                topic: "Título II, Cap. IV: Personal del Subsistema de Educación Regular",
+                text: "El Artículo 81, parágrafo II, recomienda priorizar la asignación del ítem para el maestro en Educación Primaria Comunitaria Vocacional. ¿Qué característica debe tener este maestro?",
+                options: [
+                    "Ser egresado de una ESFM de la capital del departamento.",
+                    "Tener especialidad en todas las áreas de primaria.",
+                    "Tener dominio de la lengua originaria del contexto.",
+                    "Contar con experiencia mínima de 10 años en el área rural."
+                ],
+                correctAnswer: 2,
+                article: "Art. 81, II",
+                feedback: "El Artículo 81, parágrafo II, recomienda priorizar la asignación del ítem para el maestro con dominio de la lengua originaria del contexto en Primaria."
+            },
+            {
+                topic: "Título II, Cap. IV: Personal del Subsistema de Educación Regular",
+                text: "Según el Artículo 81, parágrafo V, los maestros con más de cinco años de antigüedad en lugares alejados y de difícil acceso pueden ser reubicados y designados directamente. ¿Hasta qué mes deben presentar su solicitud los interesados?",
+                options: [
+                    "Hasta el mes de enero.",
+                    "Hasta el mes de junio.",
+                    "Hasta el mes de octubre.",
+                    "Hasta el mes de diciembre."
+                ],
+                correctAnswer: 2,
+                article: "Art. 81, V",
+                feedback: "El Artículo 81, parágrafo V, indica que la solicitud de reubicación para estos maestros debe presentarse hasta el mes de octubre."
+            },
+            {
+                topic: "Título II, Cap. IV: Personal del Subsistema de Educación Regular",
+                text: "Conforme al Artículo 82, parágrafo I, si un maestro, director o personal administrativo gana una compulsa pública y abandona el cargo en la presente gestión, ¿cuál es la restricción que enfrenta?",
+                options: [
+                    "No podrá compulsar por un cargo de mayor jerarquía durante dos años.",
+                    "No podrá volver a compulsar en ningún otro cargo en todo el Sistema Educativo Plurinacional en la presente gestión.",
+                    "Deberá pagar una multa equivalente a un mes de sueldo.",
+                    "Solo podrá compulsar en unidades educativas de áreas rurales."
+                ],
+                correctAnswer: 1,
+                article: "Art. 82, I",
+                feedback: "El Artículo 82, parágrafo I, establece que quien abandone un cargo ganado por compulsa no podrá volver a compulsar en ningún otro cargo en el SEP durante la presente gestión."
+            },
+            {
+                topic: "Título II, Cap. IV: Personal del Subsistema de Educación Regular",
+                text: "El Artículo 83, parágrafo I, menciona que la Unidad Especializada de Formación Continua (UNEFCO) desarrollará cursos sobre la Actualización Curricular. ¿Para quiénes están dirigidos principalmente estos cursos?",
+                options: [
+                    "Para estudiantes de último año de las ESFM.",
+                    "Para personal administrativo únicamente.",
+                    "Para maestros en función en el Subsistema de Educación Regular.",
+                    "Para padres de familia interesados en el currículo."
+                ],
+                correctAnswer: 2,
+                article: "Art. 83, I",
+                feedback: "El Artículo 83, parágrafo I, indica que los cursos de actualización curricular de UNEFCO son para maestros en función en el Subsistema de Educación Regular."
+            },
+            {
+                topic: "Título II, Cap. IV: Personal del Subsistema de Educación Regular",
+                text: "Según el Artículo 84, parágrafo II, para efectos de compulsas y calificación de méritos, ¿qué característica deben tener los certificados de cursos, seminarios y talleres para ser reconocidos?",
+                options: [
+                    "Ser emitidos por cualquier institución educativa nacional o internacional.",
+                    "Contar con un mínimo de 100 horas académicas.",
+                    "Ser de instituciones e instancias especializadas con autorización oficial del Ministerio de Educación, con sellos y firmas autorizadas.",
+                    "Estar traducidos al castellano si son de instituciones extranjeras."
+                ],
+                correctAnswer: 2,
+                article: "Art. 84, II",
+                feedback: "El Artículo 84, parágrafo II, especifica que solo se reconocerán certificados de instituciones con autorización oficial del Ministerio, con sellos y firmas autorizadas."
+            },
+            {
+                topic: "Título II, Cap. IV: Personal del Subsistema de Educación Regular",
+                text: "El Artículo 85, parágrafo I, establece que los procesos de inscripción y actualización en el Registro Docente Administrativo (RDA) son gratuitos. ¿Qué tipo de información se actualiza en el RDA según este parágrafo?",
+                options: [
+                    "Solo los datos personales y dirección de domicilio.",
+                    "Datos personales, académicos, antigüedad, categoría y otros.",
+                    "Únicamente los títulos profesionales obtenidos.",
+                    "La asistencia a cursos de capacitación no oficiales."
+                ],
+                correctAnswer: 1,
+                article: "Art. 85, I",
+                feedback: "El Artículo 85, parágrafo I, menciona que la actualización en el RDA incluye datos personales, académicos, antigüedad, categoría y otros."
+            },
+            // TÍTULO IV: POLÍTICAS SOCIALES EN EDUCACIÓN (Arts. 98-118) - 14 preguntas
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "El Artículo 98, parágrafo II, prohíbe rechazar la inscripción de estudiantes por diversas razones. ¿Cuál de las siguientes NO es una condición explícitamente mencionada en este parágrafo como motivo de no rechazo?",
+                options: [
+                    "Hijos de madres o padres solteros o divorciados.",
+                    "Pertenecer a una determinada religión.",
+                    "Tener bajo rendimiento académico en la gestión anterior.",
+                    "Progenitores privados de libertad."
+                ],
+                correctAnswer: 2,
+                article: "Art. 98, II",
+                feedback: "El Artículo 98, parágrafo II, lista varias condiciones (hijos de padres solteros, religión, padres privados de libertad, etc.) pero no menciona explícitamente el 'bajo rendimiento académico' como una de ellas en este contexto de no rechazo a la inscripción."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "Según el Artículo 99, parágrafo I, ¿quiénes deben participar en la conformación de la Comisión de Convivencia Pacífica y Armónica y en la elaboración del Plan respectivo?",
+                options: [
+                    "Solo el Director y el Consejo de Profesores.",
+                    "El Director, la Policía Boliviana y la Defensoría de la Niñez.",
+                    "Los integrantes de la comunidad educativa (autoridades, maestros, administrativos, padres, estudiantes).",
+                    "Consultores externos especializados en resolución de conflictos."
+                ],
+                correctAnswer: 2, // El Art. 99.I dice "con la participación de los integrantes de la comunidad educativa" y luego detalla que el Plan se elabora en el marco de leyes y debe incluir derechos, deberes, etc.
+                article: "Art. 99, I",
+                feedback: "El Artículo 99, parágrafo I, establece que la Comisión y el Plan de Convivencia se elaboran con la participación de los integrantes de la comunidad educativa."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "El Artículo 100, parágrafo I, indica que en el Desarrollo Curricular deben abordarse temáticas de prevención. ¿Cuál de las siguientes temáticas NO se menciona explícitamente?",
+                options: [
+                    "Consumo de drogas y bullying.",
+                    "Trata y tráfico de personas.",
+                    "Prevención de accidentes de tránsito.",
+                    "Prevención de matrimonios infantiles."
+                ],
+                correctAnswer: 2,
+                article: "Art. 100, I",
+                feedback: "El Artículo 100, parágrafo I, menciona derechos humanos, descolonización, despatriarcalización, prevención de violencia, racismo, discriminación, consumo de drogas, bullying, trata y tráfico, y prevención de matrimonios infantiles. No menciona explícitamente la prevención de accidentes de tránsito en esta lista."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "Conforme al Artículo 102, parágrafo I, si se conocen casos de violación, estupro o abuso deshonesto contra estudiantes, ¿ante qué instancia NO se menciona la obligación de denunciar el hecho de forma inmediata?",
+                options: [
+                    "Defensoría de la Niñez y Adolescencia.",
+                    "Fiscalía.",
+                    "Dirección Departamental de Educación.",
+                    "Fuerza Especial de Lucha Contra el Crimen."
+                ],
+                correctAnswer: 2,
+                article: "Art. 102, I",
+                feedback: "El Artículo 102, parágrafo I, obliga a denunciar ante la Defensoría, Fiscalía o FELCC. Si bien las DDE tienen roles (parágrafo II y III), la denuncia penal inmediata se dirige a las primeras mencionadas."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "El Artículo 103, parágrafo II, establece una consecuencia para el estudiante en casos probados de robo, hurto, agresiones, etc. ¿Cuál es esta consecuencia respecto a sus estudios?",
+                options: [
+                    "Será expulsado definitivamente del sistema educativo.",
+                    "No podrá abandonar sus estudios, siendo los padres responsables de gestionar su continuidad en otros espacios educativos.",
+                    "Será transferido obligatoriamente a un centro de rehabilitación.",
+                    "Se le suspenderá el derecho a la educación por un año."
+                ],
+                correctAnswer: 1,
+                article: "Art. 103, II",
+                feedback: "El Artículo 103, parágrafo II, indica que el estudiante no podrá abandonar sus estudios, y los padres/tutores son responsables de gestionar su continuidad en otros espacios."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "Según el Artículo 105, ¿qué se prohíbe hacer con las estudiantes embarazadas en la unidad educativa?",
+                options: [
+                    "Otorgarles licencias especiales pre y post parto.",
+                    "Brindarles apoyo psicopedagógico.",
+                    "Rechazarlas o expulsarlas.",
+                    "Adaptar su horario de clases."
+                ],
+                correctAnswer: 2,
+                article: "Art. 105",
+                feedback: "El Artículo 105 prohíbe explícitamente rechazar o expulsar a las estudiantes embarazadas, garantizando su continuidad educativa."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "El Artículo 106 establece un límite de edad para que estudiantes en situación de desventaja social o vulnerabilidad sean incorporados al Subsistema de Educación Regular. ¿Cuál es esta edad y la fecha de corte?",
+                options: [
+                    "Menor a 18 años al 31 de diciembre de 2025.",
+                    "Menor a 16 años al inicio de la gestión escolar.",
+                    "Menor a 15 años al 30 de junio de 2025.",
+                    "No hay límite de edad para estos casos."
+                ],
+                correctAnswer: 2,
+                article: "Art. 106",
+                feedback: "El Artículo 106 especifica que deben tener una edad menor a 15 años al 30 de junio de 2025 para ser incorporados bajo estas condiciones."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "Conforme al Artículo 109, inciso d), ¿quiénes deben realizar seguimiento a los Centros de Apoyo Integral Pedagógico - Aulas Hospitalarias (CAIP-AH)?",
+                options: [
+                    "Únicamente el personal médico del hospital.",
+                    "Las organizaciones de padres de familia de la U.E. de origen.",
+                    "Las DDE, a través de las Subdirecciones de Educación Regular, DDEE y Direcciones de U.E.",
+                    "Voluntarios de organizaciones no gubernamentales."
+                ],
+                correctAnswer: 2,
+                article: "Art. 109, d)",
+                feedback: "El Artículo 109, inciso d), asigna la responsabilidad del seguimiento de los CAIP-AH a las DDE (vía Subdirecciones de Ed. Regular), DDEE y Direcciones de U.E."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "El Artículo 113, parágrafo I, sobre Alimentación Complementaria Escolar, indica que los alimentos distribuidos deben ser saludables y culturalmente apropiados. ¿En cumplimiento de qué ley principal se enmarca esta disposición?",
+                options: [
+                    "Ley Contra el Racismo y toda forma de Discriminación.",
+                    "Ley de Alimentación Escolar en el Marco de la Soberanía Alimentaria y la Economía Plural.",
+                    "Código Niña, Niño y Adolescente.",
+                    "Ley de Gestión de Riesgos."
+                ],
+                correctAnswer: 1,
+                article: "Art. 113, I",
+                feedback: "El Artículo 113, parágrafo I, menciona explícitamente el cumplimiento de la Ley N° 622 de Alimentación Escolar en el Marco de la Soberanía Alimentaria y la Economía Plural."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "Según el Artículo 114, parágrafo II, ¿qué tipo de productos está terminantemente prohibido expender en los quioscos escolares?",
+                options: [
+                    "Frutas de temporada.",
+                    "Productos importados sin registro sanitario del SENASAG.",
+                    "Alimentos preparados en el día por los porteros.",
+                    "Bebidas lácteas nacionales."
+                ],
+                correctAnswer: 1,
+                article: "Art. 114, II",
+                feedback: "El Artículo 114, parágrafo II, prohíbe terminantemente el expendio de productos importados sin registro sanitario del SENASAG."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "El Artículo 115, parágrafo I, se refiere a la conformación de organizaciones estudiantiles. ¿En el marco de qué reglamento se deben constituir los Consejos de Estudiantes y Gobiernos Estudiantiles?",
+                options: [
+                    "Reglamento de Faltas y Sanciones del Magisterio.",
+                    "Reglamento de Evaluación del Desarrollo Curricular.",
+                    "Reglamento de Gobiernos Estudiantiles del Subsistema de Educación Regular.",
+                    "Reglamento de Uso de Uniformes Escolares."
+                ],
+                correctAnswer: 2,
+                article: "Art. 115, I",
+                feedback: "El Artículo 115, parágrafo I, especifica que la conformación de estas organizaciones se rige por el Reglamento de Gobiernos Estudiantiles (RM 0185/2024)."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "Conforme al Artículo 116, parágrafo II, ¿en qué circunstancias se prohíbe el ingreso de madres, padres, tutores y personas ajenas a las unidades educativas en horas de clase?",
+                options: [
+                    "Siempre está prohibido, sin excepciones.",
+                    "Salvo previa autorización del director y en situaciones plenamente justificadas.",
+                    "Solo se permite durante los recreos.",
+                    "Se permite si vienen a dejar material escolar a sus hijos."
+                ],
+                correctAnswer: 1,
+                article: "Art. 116, II",
+                feedback: "El Artículo 116, parágrafo II, prohíbe el ingreso en horas de clase, salvo previa autorización del director y en situaciones justificadas."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "El Artículo 117 establece una prohibición categórica respecto a la participación de estudiantes en ciertas actividades. ¿Cuál es esta prohibición?",
+                options: [
+                    "Participar en actividades deportivas intercolegiales.",
+                    "Ser obligados o utilizados por directores, maestros o padres para participar en movilizaciones de protesta, reclamos o actos políticos.",
+                    "Formar parte de los gobiernos estudiantiles.",
+                    "Asistir a ferias educativas fuera de la unidad educativa."
+                ],
+                correctAnswer: 1,
+                article: "Art. 117",
+                feedback: "El Artículo 117 prohíbe terminantemente que se obligue o utilice a estudiantes en movilizaciones de protesta, reclamos, actos políticos, etc."
+            },
+            {
+                topic: "Título IV: Políticas Sociales en Educación",
+                text: "Según el Artículo 118, parágrafo II, las direcciones de unidades educativas fiscales y de convenio deben gestionar obligatoriamente la instalación de cámaras de vigilancia. ¿Ante quién deben realizar esta gestión y en cumplimiento de qué ley?",
+                options: [
+                    "Ante el Ministerio de Educación; en cumplimiento de la Ley de Educación Avelino Siñani.",
+                    "Ante empresas de seguridad privada; en cumplimiento de sus propios reglamentos internos.",
+                    "Ante los Gobiernos Autónomos Municipales; en cumplimiento a la Ley del Sistema Nacional de Seguridad Ciudadana.",
+                    "Ante las Juntas de Padres de Familia para financiamiento; en cumplimiento de acuerdos internos."
+                ],
+                correctAnswer: 2,
+                article: "Art. 118, II",
+                feedback: "El Artículo 118, parágrafo II, indica que la gestión de cámaras de vigilancia se hace ante los Gobiernos Autónomos Municipales, en cumplimiento de la Ley N° 264 del Sistema Nacional de Seguridad Ciudadana."
+            }
+        ];
+
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const questionTitleEl = document.getElementById('question-title');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const scoreEl = document.getElementById('score');
+        const finalFeedbackEl = document.getElementById('final-feedback');
+        const progressBar = document.getElementById('progress-bar');
+        const questionCounterEl = document.getElementById('question-counter');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOptionElement = null;
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', loadNextQuestion);
+        restartBtn.addEventListener('click', restartQuiz);
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            resultsScreen.classList.add('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            // Opcional: Barajar las preguntas cada vez que se inicia
+            // shuffleArray(questions); 
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            resetState();
+            if (currentQuestionIndex < questions.length) {
+                const question = questions[currentQuestionIndex];
+                questionTitleEl.textContent = question.topic;
+                questionTextEl.textContent = `Pregunta ${currentQuestionIndex + 1}: ${question.text}`;
+                questionCounterEl.textContent = `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`;
+
+                let optionsWithIndices = question.options.map((option, index) => ({ text: option, originalIndex: index }));
+                shuffleArray(optionsWithIndices);
+
+                optionsContainer.innerHTML = '';
+                optionsWithIndices.forEach(optionObj => {
+                    const optionElement = document.createElement('label');
+                    optionElement.classList.add('option-label', 'block', 'cursor-pointer', 'p-3', 'border', 'rounded-md', 'hover:bg-slate-50', 'transition-colors');
+                    
+                    const radioInput = document.createElement('input');
+                    radioInput.type = 'radio';
+                    radioInput.name = 'option';
+                    radioInput.value = optionObj.originalIndex;
+                    radioInput.classList.add('mr-2', 'accent-sky-500');
+                    
+                    optionElement.appendChild(radioInput);
+                    optionElement.append(optionObj.text);
+                    
+                    optionElement.addEventListener('click', () => {
+                        if (nextBtn.disabled) { 
+                            if (selectedOptionElement) {
+                                selectedOptionElement.classList.remove('selected', 'bg-sky-100', 'border-sky-400');
+                            }
+                            selectedOptionElement = optionElement;
+                            optionElement.classList.add('selected', 'bg-sky-100', 'border-sky-400');
+                            radioInput.checked = true;
+                            checkAnswer(parseInt(radioInput.value), optionElement);
+                        }
+                    });
+                    optionsContainer.appendChild(optionElement);
+                });
+                updateProgressBar();
+            } else {
+                showResults();
+            }
+        }
+
+        function resetState() {
+            nextBtn.disabled = true;
+            feedbackContainer.innerHTML = '';
+            feedbackContainer.className = 'feedback mt-4';
+            selectedOptionElement = null;
+            if (optionsContainer.firstChild) {
+                 Array.from(optionsContainer.children).forEach(child => {
+                    child.classList.remove('correct', 'incorrect', 'selected', 'bg-sky-100', 'border-sky-400', 'pointer-events-none');
+                    child.querySelector('input').disabled = false;
+                });
+            }
+        }
+
+        function checkAnswer(selectedIndex, selectedLabel) {
+            const question = questions[currentQuestionIndex];
+            const isCorrect = selectedIndex === question.correctAnswer;
+            
+            Array.from(optionsContainer.children).forEach(child => {
+                child.classList.add('pointer-events-none');
+                child.querySelector('input').disabled = true;
+            });
+
+            if (isCorrect) {
+                score += 0.7;
+                selectedLabel.classList.remove('selected', 'bg-sky-100', 'border-sky-400');
+                selectedLabel.classList.add('correct', 'bg-green-100', 'border-green-400', 'text-green-700');
+                feedbackContainer.innerHTML = `<p class="font-semibold">¡Correcto!</p><p>${question.feedback} (Ref: ${question.article})</p>`;
+                feedbackContainer.classList.add('correct', 'bg-green-50', 'border', 'border-green-300', 'text-green-700');
+            } else {
+                selectedLabel.classList.remove('selected', 'bg-sky-100', 'border-sky-400');
+                selectedLabel.classList.add('incorrect', 'bg-red-100', 'border-red-400', 'text-red-700');
+                feedbackContainer.innerHTML = `<p class="font-semibold">Incorrecto.</p><p>${question.feedback} (Ref: ${question.article})</p>`;
+                feedbackContainer.classList.add('incorrect', 'bg-red-50', 'border', 'border-red-300', 'text-red-700');
+
+                const correctOptionOriginalIndex = question.correctAnswer;
+                const correctLabel = Array.from(optionsContainer.children).find(label => parseInt(label.querySelector('input').value) === correctOptionOriginalIndex);
+                if (correctLabel) {
+                    correctLabel.classList.add('correct', 'bg-green-100', 'border-green-400', 'text-green-700');
+                }
+            }
+            nextBtn.disabled = false;
+             if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.textContent = 'Ver Resultados';
+            }
+        }
+        
+        function loadNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgressBar() {
+            const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        function showResults() {
+            questionScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            
+            const finalScore = parseFloat(score.toFixed(2)); 
+            scoreEl.textContent = `${finalScore} / ${parseFloat((questions.length * 0.7).toFixed(2))}`;
+
+            let feedbackMessage = "";
+            const percentage = (finalScore / (questions.length * 0.7)) * 100;
+
+            if (percentage >= 80) {
+                feedbackMessage = "¡Excelente! Tienes un conocimiento sobresaliente de la RM 001/2025. Tu dedicación es admirable.";
+                finalFeedbackEl.className = 'text-slate-600 mb-6 p-4 bg-green-50 rounded-lg border border-green-300';
+            } else if (percentage >= 60) {
+                feedbackMessage = "¡Buen trabajo! Demuestras un buen entendimiento de la normativa. Sigue profundizando en los detalles.";
+                finalFeedbackEl.className = 'text-slate-600 mb-6 p-4 bg-sky-50 rounded-lg border border-sky-300';
+            } else if (percentage >= 40) {
+                feedbackMessage = "Necesitas mejorar. Hay varios aspectos de la RM 001/2025 que requieren más estudio. ¡No te desanimes y repasa los puntos clave!";
+                finalFeedbackEl.className = 'text-slate-600 mb-6 p-4 bg-yellow-50 rounded-lg border border-yellow-300';
+            } else {
+                feedbackMessage = "Es fundamental que revises a fondo la RM 001/2025. Concéntrate en los artículos y sus implicancias. ¡Tú puedes mejorar!";
+                finalFeedbackEl.className = 'text-slate-600 mb-6 p-4 bg-red-50 rounded-lg border border-red-300';
+            }
+            finalFeedbackEl.textContent = feedbackMessage;
+        }
+
+        function restartQuiz() {
+            resultsScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            nextBtn.textContent = 'Siguiente Pregunta, cread';
+            progressBar.style.width = '0%';
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Currículo Base SEP 2023</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .score-display {
+            background-color: #4299e1; /* Blue */
+            color: white;
+            padding: 8px 15px;
+            border-radius: 9999px; /* Pill shape */
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748; /* Dark gray */
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .options-container button {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            background-color: #edf2f7; /* Light gray */
+            border: 1px solid #cbd5e0;
+            border-radius: 0.75rem; /* Rounded corners for options */
+            text-align: left;
+            font-size: 1rem;
+            color: #4a5568; /* Medium gray */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .options-container button:hover:not(.selected):not(.correct):not(.incorrect) {
+            background-color: #e2e8f0;
+            border-color: #a0aec0;
+        }
+        .options-container button.selected {
+            background-color: #bee3f8; /* Light blue selected */
+            border-color: #63b3ed;
+            color: #2c5282;
+            font-weight: 600;
+        }
+        .options-container button.correct {
+            background-color: #c6f6d5; /* Green for correct */
+            border-color: #48bb78;
+            color: #22543d;
+            font-weight: 700;
+        }
+        .options-container button.incorrect {
+            background-color: #fed7d7; /* Red for incorrect */
+            border-color: #f56565;
+            color: #9b2c2c;
+            font-weight: 700;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 0.75rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .feedback.correct {
+            background-color: #e6fffa; /* Light green */
+            color: #2d3748;
+            border: 1px solid #38b2ac;
+        }
+        .feedback.incorrect {
+            background-color: #fff5f5; /* Light red */
+            color: #2d3748;
+            border: 1px solid #e53e3e;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 15px;
+        }
+        .button-group button {
+            padding: 12px 25px;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            flex-grow: 1;
+        }
+        .button-group button:active {
+            transform: translateY(1px);
+        }
+        #submit-btn {
+            background-color: #4299e1; /* Blue */
+            color: white;
+            border: none;
+        }
+        #submit-btn:hover:not(:disabled) {
+            background-color: #3182ce;
+        }
+        #next-btn {
+            background-color: #a0aec0; /* Gray */
+            color: white;
+            border: none;
+        }
+        #next-btn:hover:not(:disabled) {
+            background-color: #718096;
+        }
+        #restart-btn {
+            background-color: #ecc94b; /* Yellow */
+            color: #2d3748;
+            border: none;
+        }
+        #restart-btn:hover:not(:disabled) {
+            background-color: #d69e2e;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .final-results {
+            text-align: center;
+            padding: 30px;
+            background-color: #e6fffa;
+            border-radius: 1.5rem;
+            border: 1px solid #38b2ac;
+            color: #2d3748;
+        }
+        .final-results h2 {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        .final-results p {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .credits {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #718096;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1 class="text-2xl font-bold text-gray-800">Cuestionario del Currículo Base</h1>
+            <div class="score-display">Puntuación: <span id="score">0</span></div>
+        </div>
+
+        <div id="quiz-content">
+            <div class="question-text" id="question-text"></div>
+            <div class="options-container" id="options-container"></div>
+            <div class="feedback" id="feedback"></div>
+            <div class="button-group">
+                <button id="submit-btn">Enviar Respuesta</button>
+                <button id="next-btn" disabled>Siguiente Pregunta</button>
+            </div>
+        </div>
+
+        <div id="final-results" class="final-results hidden">
+            <h2>¡Cuestionario Completado!</h2>
+            <p>Tu puntuación final es: <span id="final-score" class="font-bold text-blue-700 text-3xl"></span></p>
+            <p id="general-feedback" class="mt-4 text-lg"></p>
+            <button id="restart-btn" class="mt-6 px-8 py-3 bg-yellow-500 text-gray-800 rounded-xl font-bold hover:bg-yellow-600">Reiniciar Cuestionario</button>
+        </div>
+
+        <div class="credits">
+            PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál de las siguientes afirmaciones NO es una de las razones principales para la actualización curricular en el Sistema Educativo Plurinacional, según el documento?",
+                options: [
+                    "La necesidad de reducir el número de asignaturas para aligerar la carga académica de los estudiantes.",
+                    "El avance continuo de la ciencia y el desarrollo de las disciplinas académicas.",
+                    "La emergencia de nuevas problemáticas y sensibilidades en la sociedad boliviana.",
+                    "La evolución de las estrategias pedagógicas y la búsqueda de mayor calidad educativa."
+                ],
+                answer: "La necesidad de reducir el número de asignaturas para aligerar la carga académica de los estudiantes.",
+                page: 9,
+                feedback: "El documento menciona el avance de la ciencia, nuevas problemáticas, evolución pedagógica y búsqueda de calidad como razones para la actualización curricular, pero no la reducción de asignaturas como una de las principales."
+            },
+            {
+                question: "Según la Ley N° 070, ¿cuál de los siguientes hitos NO es una característica principal de la educación intracultural, intercultural y plurilingüe potenciada por esta ley?",
+                options: [
+                    "La promoción de la revitalización de las culturas de las Naciones y Pueblos Originarios Campesinos y Afrobolivianos.",
+                    "La implementación de currículos regionalizados propios que responden a la identidad y cosmovisión de cada nación y pueblo.",
+                    "La creación del Instituto Plurinacional del Estudio de Lenguas y Culturas (IPELC) para normalizar y promover lenguas originarias.",
+                    "La adopción de una visión de educación bilingüe que prioriza la castellanización como eje central de la integración nacional."
+                ],
+                answer: "La adopción de una visión de educación bilingüe que prioriza la castellanización como eje central de la integración nacional.",
+                page: 30,
+                feedback: "La Ley N° 070 supera la propuesta de una educación intercultural bilingüe y enfatiza la revitalización de lenguas originarias y currículos regionalizados, no la castellanización como eje central."
+            },
+            {
+                question: "¿Qué característica fundamental de la educación en las culturas indígena originarias de tierras bajas se destaca en el documento, en contraste con las de tierras altas?",
+                options: [
+                    "Su enfoque en la escritura textil y el uso de kipus para la transmisión del conocimiento.",
+                    "El desarrollo de procesos educativos acordes al entorno y actividades como la pesca, caza y recolección.",
+                    "La constitución de yachaywasis como espacios específicos para la enseñanza de idiomas y ritualidad.",
+                    "La centralidad del manejo vertical de pisos ecológicos en sus procesos de aprendizaje."
+                ],
+                answer: "El desarrollo de procesos educativos acordes al entorno y actividades como la pesca, caza y recolección.",
+                page: 11,
+                feedback: "Las culturas de tierras bajas desarrollaron procesos educativos ligados a la pesca, caza y recolección, mientras que la escritura textil, kipus y yachaywasis se asocian a las culturas de tierras altas (incario)."
+            },
+            {
+                question: "En la época colonial, ¿cuál de las siguientes modalidades educativas para los pueblos indígena originarios fue la menos efectiva o no se arraigó como esperaban sus promotores?",
+                options: [
+                    "La misión evangelizadora de la Iglesia Católica a través de la catequización de adultos.",
+                    "La educación a través de un tutor, maestro o cura en el marco de la encomienda.",
+                    "La reproducción de la identidad y sus sentidos más importantes a través de la educación del propio pueblo indígena originario.",
+                    "La enseñanza del catecismo y un rudimentario castellano para 'colonizar las almas' después de las insurgencias indígenas."
+                ],
+                answer: "La enseñanza del catecismo y un rudimentario castellano para 'colonizar las almas' después de las insurgencias indígenas.",
+                page: 14,
+                feedback: "El documento señala que la forma que pretendía masificar la cultura colonial mediante el catecismo y castellano rudimentario 'tampoco se arraigó o extendió como hubieran querido sus promotores, debido a la resistencia de las comunidades indígenas'."
+            },
+            {
+                question: "La Ley N° 1565 de Reforma Educativa (1994) adoptó como base psicopedagógica el enfoque constructivista. ¿Cuál fue una de las críticas principales a este enfoque en el contexto boliviano, según el documento?",
+                options: [
+                    "Promovió excesivamente el colectivismo y la desvalorización del esfuerzo individual.",
+                    "Estaba descontextualizado del medio y la realidad educativa, imponiendo una orientación individualista y globalizadora.",
+                    "No logró incorporar los principios de interculturalidad y bilingüismo en su currículo.",
+                    "Se centró demasiado en la formación técnica, descuidando la formación humanística."
+                ],
+                answer: "Estaba descontextualizado del medio y la realidad educativa, imponiendo una orientación individualista y globalizadora.",
+                page: 25,
+                feedback: "La crítica principal fue que el enfoque constructivista de la Ley 1565 estaba 'descontextualizado del medio y la realidad educativa, imponiendo una orientación individualista, humanística, modernizadora y globalizadora'."
+            },
+            {
+                question: "Uno de los principios fundamentales de la experiencia de la Escuela Ayllu de Warisata fue 'Adecuar el calendario escolar a las actividades agrícolas y pecuarias'. ¿Qué otro principio NO se menciona explícitamente como fundamental de Warisata en el texto?",
+                options: [
+                    "Reconstituir los valores comunitarios del ayllu promoviendo una escuela productiva.",
+                    "La escuela del trabajo productivo, social y creador de riqueza para el beneficio de la comunidad.",
+                    "La priorización de la enseñanza de lenguas extranjeras para la apertura al conocimiento universal.",
+                    "Practicar la ayuda mutua y cooperativa, consolidando la participación comunitaria a través del parlamento amauta."
+                ],
+                answer: "La priorización de la enseñanza de lenguas extranjeras para la apertura al conocimiento universal.",
+                page: 21,
+                feedback: "El texto no menciona la priorización de lenguas extranjeras como un principio fundamental de Warisata; en cambio, enfatiza la reconstitución de valores comunitarios, el trabajo productivo y la ayuda mutua."
+            },
+            {
+                question: "El Modelo Educativo Sociocomunitario Productivo (MESCP) responde a la problemática de la 'dependencia económica'. ¿Cuál de las siguientes acciones NO se propone como parte de la solución a esta problemática desde la educación?",
+                options: [
+                    "Ampliar la formación técnica hacia una formación tecnológica productiva con identidad propia.",
+                    "Articular la educación a políticas económicas concretas que apunten a la transformación de la matriz productiva.",
+                    "Reforzar la condición subordinada al mercado internacional mediante la generación de mano de obra barata.",
+                    "Desarrollar una conciencia de soberanía científica y tecnológica, evitando ser solo consumidores de tecnología."
+                ],
+                answer: "Reforzar la condición subordinada al mercado internacional mediante la generación de mano de obra barata.",
+                page: 35-36,
+                feedback: "La dependencia económica se caracteriza precisamente por la generación de mano de obra barata y la subordinación al mercado internacional, por lo que reforzar esto no sería una solución, sino parte del problema."
+            },
+            {
+                question: "Según el fundamento psicopedagógico del Currículo Base, el aprendizaje comunitario se concreta en cuatro criterios de orientación metodológica. ¿Cuál de los siguientes NO es uno de ellos?",
+                options: [
+                    "Una educación en la práctica que se expresa en la experiencia, saberes previos y experimentación.",
+                    "Una construcción teórica que reflexione, elabore y sistematice contenidos pertinentes.",
+                    "Un proceso de memorización y repetición para asegurar la retención de datos y hechos.",
+                    "La producción que integra la práctica, la teoría y la valoración en actividades y productos terminados."
+                ],
+                answer: "Un proceso de memorización y repetición para asegurar la retención de datos y hechos.",
+                page: 49-50,
+                feedback: "Los cuatro criterios son: educación en la práctica, construcción teórica, proceso valorador y producción. La memorización y repetición no son parte de esta concepción."
+            },
+            {
+                question: "El principio de 'Educación despatriarcalizadora' en el currículo implica la ruptura de roles de género y la lucha contra la discriminación y violencia. ¿Qué se entiende por patriarcado en este contexto?",
+                options: [
+                    "Un sistema de organización social donde las mujeres tienen el poder dominante.",
+                    "Una construcción sociocultural e histórica del ejercicio de poder de los hombres sobre las mujeres.",
+                    "Un modelo económico que promueve la igualdad de género en el ámbito laboral.",
+                    "Un movimiento social que busca la reivindicación de los derechos masculinos."
+                ],
+                answer: "Una construcción sociocultural e histórica del ejercicio de poder de los hombres sobre las mujeres.",
+                page: 51,
+                feedback: "El documento define el patriarcado como 'una construcción sociocultural e histórica del ejercicio de poder de los hombres sobre las mujeres, que se manifiesta en la esfera pública y privada'."
+            },
+            {
+                question: "El Currículo Base se fundamenta en el 'pluralismo epistemológico'. ¿Qué implica esto en relación con la ciencia moderna y otros tipos de conocimiento?",
+                options: [
+                    "El predominio unilateral del conocimiento científico moderno sobre cualquier otra forma de saber.",
+                    "La negación de la validez del conocimiento científico en favor de las sabidurías ancestrales.",
+                    "La articulación y complementariedad, sin jerarquías, de distintos tipos de saberes, conocimientos, sabiduría y ciencia.",
+                    "La consideración de la ciencia como la única solución a todos los problemas de la humanidad."
+                ],
+                answer: "La articulación y complementariedad, sin jerarquías, de distintos tipos de saberes, conocimientos, sabiduría y ciencia.",
+                page: 47-48,
+                feedback: "El pluralismo epistemológico implica la articulación y complementariedad sin jerarquías de distintos tipos de saberes, conocimientos, sabiduría y ciencia, propios y de otros pueblos y culturas."
+            },
+            {
+                question: "¿Cuál de las siguientes afirmaciones sobre el 'Bono Juancito Pinto' es INCORRECTA según el documento?",
+                options: [
+                    "Fue implementado a partir del año 2006 para reducir la tasa de abandono escolar.",
+                    "Consiste en un subsidio de 200 bolivianos para estudiantes de unidades y centros educativos fiscales.",
+                    "Inicialmente se otorgó a estudiantes de nivel inicial y primeros años de primaria, expandiéndose gradualmente.",
+                    "Se aplica exclusivamente a estudiantes de unidades educativas privadas para fomentar la educación de calidad."
+                ],
+                answer: "Se aplica exclusivamente a estudiantes de unidades educativas privadas para fomentar la educación de calidad.",
+                page: 32,
+                feedback: "El Bono Juancito Pinto se otorga a estudiantes de unidades y centros educativos fiscales, no privados."
+            },
+            {
+                question: "El Subsistema de Educación Regular comprende tres niveles de formación. ¿Cuál de las siguientes opciones presenta el orden correcto y completo de estos niveles, incluyendo sus etapas si aplica?",
+                options: [
+                    "Educación Inicial en Familia Comunitaria (no escolarizada y escolarizada), Educación Primaria Comunitaria Vocacional, Educación Secundaria Comunitaria Productiva.",
+                    "Educación Inicial, Educación Primaria, Educación Secundaria.",
+                    "Educación en Familia, Educación Comunitaria, Educación Productiva.",
+                    "Educación Inicial Escolarizada, Educación Primaria Vocacional, Educación Técnica Humanística."
+                ],
+                answer: "Educación Inicial en Familia Comunitaria (no escolarizada y escolarizada), Educación Primaria Comunitaria Vocacional, Educación Secundaria Comunitaria Productiva.",
+                page: 59,
+                feedback: "El Subsistema de Educación Regular se organiza en Educación Inicial en Familia Comunitaria (con sus dos etapas), Educación Primaria Comunitaria Vocacional y Educación Secundaria Comunitaria Productiva."
+            },
+            {
+                question: "Según el documento, ¿cuál fue uno de los principales motivos por los que el sector del magisterio tomó distancia de la implementación de la Ley N° 1565 de Reforma Educativa?",
+                options: [
+                    "La ley no contemplaba la creación de nuevas Escuelas Normales.",
+                    "El proceso de construcción de la ley no tomó en cuenta las demandas y propuestas de diferentes sectores y organizaciones sociales.",
+                    "La ley promovía un modelo educativo demasiado centralizado y burocrático.",
+                    "El financiamiento del Banco Mundial fue insuficiente para su implementación."
+                ],
+                answer: "El proceso de construcción de la ley no tomó en cuenta las demandas y propuestas de diferentes sectores y organizaciones sociales.",
+                page: 25,
+                feedback: "El documento afirma que 'el ETARE no tomó en cuenta las demandas y propuestas de diferentes sectores y organizaciones sociales que vinieron reclamando durante décadas una reforma a la educación. Este fue uno de los principales motivos por los que el sector del magisterio tomó distancia'."
+            },
+            {
+                question: "La 'transitabilidad' en el Sistema Educativo Plurinacional se refiere a la posibilidad de transitar entre años de escolaridad, nivel o subsistemas. ¿Qué garantiza académicamente esta transitabilidad?",
+                options: [
+                    "La aprobación de exámenes de suficiencia en cada nivel.",
+                    "La secuencialidad e integralidad entre los planes y programas de estudio y perfiles de salida.",
+                    "La homologación de títulos por parte de universidades extranjeras.",
+                    "La realización de un servicio social obligatorio al finalizar cada etapa educativa."
+                ],
+                answer: "La secuencialidad e integralidad entre los planes y programas de estudio y perfiles de salida.",
+                page: 81,
+                feedback: "Académicamente, la transitabilidad está garantizada por 'la secuencialidad e integralidad entre los planes y programas de estudio y perfiles de salida que vinculan el año de escolaridad, nivel y/o subsistema'."
+            },
+            {
+                question: "¿Cuál es la principal diferencia entre un 'campo de saberes y conocimientos' y la forma 'disciplinar' de organizar los conocimientos, según el documento?",
+                options: [
+                    "Los campos orientan el conocimiento a la eficiencia inmediata, mientras que las disciplinas lo orientan a la vida.",
+                    "Los campos son recortes de la realidad objetiva, mientras que las disciplinas son constructos teóricos.",
+                    "Los campos buscan concentrar y articular saberes de manera interrelacionada y complementaria en función de la vida, mientras que las disciplinas orientan a la eficiencia inmediata.",
+                    "Las disciplinas son categorías que agrupan áreas de saberes, mientras que los campos son elementos curriculares concretos."
+                ],
+                answer: "Los campos buscan concentrar y articular saberes de manera interrelacionada y complementaria en función de la vida, mientras que las disciplinas orientan a la eficiencia inmediata.",
+                page: 81,
+                feedback: "El documento establece que un campo 'orienta el conocimiento a la vida, mientras que las disciplinas orientan los conocimientos a la eficiencia inmediata, desequilibrando la vida'."
+            },
+            {
+                question: "En la dimensión del 'Decidir' de los objetivos holísticos, ¿qué se busca educar en el estudiante?",
+                options: [
+                    "La capacidad de memorizar y reproducir información de manera autónoma.",
+                    "La voluntad del ser en comunidad con autodeterminación y pensamiento crítico.",
+                    "La aplicación de saberes y conocimientos en la práctica productiva individual.",
+                    "El desarrollo de habilidades cognitivas y destrezas manuales."
+                ],
+                answer: "La voluntad del ser en comunidad con autodeterminación y pensamiento crítico.",
+                page: 81,
+                feedback: "En la dimensión del Decidir, se educa 'en la voluntad del ser en comunidad con autodeterminación y pensamiento crítico, dialogando y consensuando la planificación y ejecución de acciones con impacto social orientados a transformar su realidad'."
+            },
+            {
+                question: "¿Qué papel juega el 'Proyecto Socioproductivo (PSP)' en la concreción curricular, según el Modelo Educativo Sociocomunitario Productivo (MESCP)?",
+                options: [
+                    "Es un documento teórico que establece los objetivos generales del currículo sin aplicación práctica inmediata.",
+                    "Es una estrategia metodológica que articula la educación con la vida comunitaria y permite planificar el desarrollo curricular a partir de necesidades del contexto.",
+                    "Es un plan de evaluación individual del estudiante al final de cada ciclo educativo.",
+                    "Es un programa de financiamiento para proyectos de investigación científica avanzada en las unidades educativas."
+                ],
+                answer: "Es una estrategia metodológica que articula la educación con la vida comunitaria y permite planificar el desarrollo curricular a partir de necesidades del contexto.",
+                page: 86,
+                feedback: "El PSP es una estrategia metodológica que 'articula la educación con la vida comunitaria... a partir de las necesidades, problemáticas y/o potencialidades socioproductivas del contexto local y regional'."
+            },
+            {
+                question: "Según el documento, ¿cuál de los siguientes NO es un objetivo del Subsistema de Educación Superior de Formación Profesional?",
+                options: [
+                    "Formar profesionales con compromiso social y conciencia crítica al servicio del pueblo.",
+                    "Desarrollar investigación, ciencia, tecnología e innovación para responder a las necesidades del Estado Plurinacional.",
+                    "Garantizar el acceso democrático al conocimiento, con sentido crítico y reflexivo.",
+                    "Priorizar la formación de mano de obra barata para el mercado laboral internacional."
+                ],
+                answer: "Priorizar la formación de mano de obra barata para el mercado laboral internacional.",
+                page: 73,
+                feedback: "La formación de mano de obra barata es una característica de la dependencia económica que el MESCP busca superar, no un objetivo de la educación superior."
+            },
+            {
+                question: "En el contexto de la 'Gestión Educativa' bajo el MESCP, ¿cuál es el cambio diametral en la visión del 'funcionario público'?",
+                options: [
+                    "Se convierte en un 'administrador' que prioriza las normas burocráticas sobre la comunidad.",
+                    "Su sentido es el 'servicio a la comunidad', y lo curricular se constituye en lo central de la institución.",
+                    "Se enfoca en la replicación de modelos educativos extranjeros sin adaptación local.",
+                    "Su función principal es la de supervisar y sancionar a los maestros por incumplimiento."
+                ],
+                answer: "Su sentido es el 'servicio a la comunidad', y lo curricular se constituye en lo central de la institución.",
+                page: 94,
+                feedback: "El MESCP cambia la visión del funcionario público a 'servidor público', cuyo sentido es el servicio a la comunidad, y donde lo curricular es central."
+            },
+            {
+                question: "¿Qué principio del currículo del SEP busca fortalecer la afirmación identitaria de las naciones y pueblos indígenas de Bolivia y promover la liberación de las formas perversas del capitalismo?",
+                options: [
+                    "Educación despatriarcalizadora.",
+                    "Educación comunitaria, democrática, participativa y de consensos.",
+                    "Educación descolonizadora, liberadora, revolucionaria, antiimperialista y transformadora.",
+                    "Educación integral y holística."
+                ],
+                answer: "Educación descolonizadora, liberadora, revolucionaria, antiimperialista y transformadora.",
+                page: 51,
+                feedback: "La educación descolonizadora busca fortalecer la afirmación identitaria de las naciones y pueblos indígenas y promover la liberación de las formas perversas del capitalismo."
+            },
+            {
+                question: "Según el documento, ¿cuál de las siguientes es una característica de la 'Educación Especial' en situaciones de emergencia (económicas, sociales, políticas, desastres naturales u otras)?",
+                options: [
+                    "Se suspenden todos los procesos educativos hasta que la situación se normalice.",
+                    "Se implementan modalidades educativas presencial, semipresencial y a distancia.",
+                    "Se prioriza la atención solo a estudiantes con talento extraordinario.",
+                    "Se redirigen los fondos de la educación especial a otras áreas de emergencia."
+                ],
+                answer: "Se implementan modalidades educativas presencial, semipresencial y a distancia.",
+                page: 70,
+                feedback: "En situaciones de emergencia, la Educación Especial 'implementa modalidades educativas presencial, semipresencial y a distancia, promoviendo la permanencia y conclusión de procesos educativos'."
+            },
+            {
+                question: "¿Cuál es el principal propósito del 'Currículo Armonizado'?",
+                options: [
+                    "Integrar los contenidos curriculares del Currículo Base y el Currículo Regionalizado de cada Nación y Pueblo Indígena Originario Campesino y Afroboliviano.",
+                    "Establecer un currículo único y universal para todas las regiones de Bolivia.",
+                    "Priorizar los conocimientos occidentales sobre los saberes ancestrales.",
+                    "Eliminar la necesidad de planificación curricular a nivel local."
+                ],
+                answer: "Integrar los contenidos curriculares del Currículo Base y el Currículo Regionalizado de cada Nación y Pueblo Indígena Originario Campesino y Afroboliviano.",
+                page: 87,
+                feedback: "El currículo armonizado 'integra los contenidos curriculares del Currículo Base y el Currículo Regionalizado de cada Nación y Pueblo Indígena Originario Campesino y Afroboliviano'."
+            },
+            {
+                question: "En el contexto de la educación en el siglo XX, ¿quién fue el pedagogo belga contratado para proyectar las bases fundamentales de un modelo de educación en Bolivia, y qué institución se creó bajo su dirección en Sucre?",
+                options: [
+                    "Franz Tamayo y el Instituto Normal Rural Superior.",
+                    "Elizardo Pérez y la Escuela Ayllu de Warisata.",
+                    "Georges Rouma y la primera Escuela Normal de profesores preceptores de la República.",
+                    "Daniel Sánchez Bustamante y la Escuela de Preceptores Indígenas Supukachi."
+                ],
+                answer: "Georges Rouma y la primera Escuela Normal de profesores preceptores de la República.",
+                page: 17,
+                feedback: "Georges Rouma fue el pedagogo belga y bajo su dirección se creó la primera Escuela Normal de profesores preceptores de la República en Sucre."
+            },
+            {
+                question: "¿Cuál de los siguientes principios pedagógicos NO fue implementado por Georges Rouma en la primera Escuela Normal de Sucre?",
+                options: [
+                    "Educación laica.",
+                    "Coeducación.",
+                    "Educación basada exclusivamente en la memorización de datos históricos.",
+                    "Educación científica e integral."
+                ],
+                answer: "Educación basada exclusivamente en la memorización de datos históricos.",
+                page: 17,
+                feedback: "Rouma implementó principios como la educación laica, coeducación, política educativa, educación práctica, científica, activa, integral y estética, no una basada exclusivamente en la memorización."
+            },
+            {
+                question: "El 'Primer Congreso Nacional Indígena' de 1945 reivindicó varias demandas. ¿Cuál de las siguientes NO fue una conclusión de este congreso?",
+                options: [
+                    "La supresión de servicios gratuitos (pongo y mittani).",
+                    "El tema de la tierra y la organización de la policía rural.",
+                    "La exigencia de la creación de universidades indígenas en cada departamento.",
+                    "La necesidad de que el indio aprenda a defenderse por sí solo y a no dejarse explotar."
+                ],
+                answer: "La exigencia de la creación de universidades indígenas en cada departamento.",
+                page: 23,
+                feedback: "Las conclusiones del congreso incluyeron la supresión de servicios gratuitos, el tema de la tierra, la policía rural y la auto-defensa del indígena, pero no la exigencia de universidades indígenas."
+            },
+            {
+                question: "Según la Ley N° 070, ¿qué se logró con la implementación de los Programas de Profesionalización de Maestros Interinos (PPMI) y de Especialización y Actualización de Maestro/as de Secundaria (PEAMS)?",
+                options: [
+                    "La erradicación total del analfabetismo en Bolivia.",
+                    "La profesionalización de la totalidad de los maestros en el Sistema Educativo Plurinacional que antes no tenían formación docente.",
+                    "La creación de nuevas carreras universitarias para maestros interinos.",
+                    "La reducción de la tasa de abandono escolar a nivel secundario."
+                ],
+                answer: "La profesionalización de la totalidad de los maestros en el Sistema Educativo Plurinacional que antes no tenían formación docente.",
+                page: 32,
+                feedback: "Estos programas lograron 'que la totalidad de los maestros en el Sistema Educativo Plurinacional ha recibido formación para desempeñarse como tal', erradicando el interinato."
+            },
+            {
+                question: "El fundamento filosófico del currículo se basa en el 'Vivir Bien'. ¿Qué implica esto en la relación del ser humano con la Madre Tierra y el Cosmos?",
+                options: [
+                    "Una relación de dominio y explotación de la naturaleza para el progreso humano.",
+                    "Una búsqueda de armonía y complementariedad, donde el ser humano se piensa y siente como parte de la naturaleza.",
+                    "Un respeto racional y calculado hacia el medio ambiente, similar al desarrollo sustentable.",
+                    "La priorización del conocimiento científico como único medio para comprender la vida."
+                ],
+                answer: "Una búsqueda de armonía y complementariedad, donde el ser humano se piensa y siente como parte de la naturaleza.",
+                page: 45-46,
+                feedback: "El Vivir Bien implica una búsqueda de armonía y complementariedad con la Madre Tierra, donde el ser humano se piensa y siente como parte de la naturaleza y el Cosmos, superando un respeto meramente racional."
+            },
+            {
+                question: "En el contexto de la 'pluralidad de la realidad boliviana', ¿cuál de los siguientes NO se considera uno de los tres niveles que la constituyen, según el documento?",
+                options: [
+                    "La coexistencia de Naciones y Pueblos Indígena Originario Campesinos y Afrobolivianos.",
+                    "La diversidad de regiones y realidades socioeconómicas (urbano/rural).",
+                    "La diversidad de partidos políticos y sus ideologías.",
+                    "La diversidad identitaria y organizativa (organizaciones territoriales e identidades locales)."
+                ],
+                answer: "La diversidad de partidos políticos y sus ideologías.",
+                page: 48-49,
+                feedback: "Los tres niveles de pluralidad son: coexistencia de NyPIOCyA, diversidad de regiones y realidades socioeconómicas, y diversidad identitaria y organizativa. Los partidos políticos no se mencionan como un nivel constitutivo de esta pluralidad."
+            },
+            {
+                question: "¿Cuál es el objetivo principal del 'Eje Articulador Educación para la Producción'?",
+                options: [
+                    "Fomentar la competencia individual en el mercado laboral.",
+                    "Vincular los aprendizajes con las vocaciones y potencialidades productivas de las regiones para transformar la matriz productiva.",
+                    "Promover la importación de tecnologías extranjeras sin adaptación local.",
+                    "Centrarse exclusivamente en la producción de bienes intangibles."
+                ],
+                answer: "Vincular los aprendizajes con las vocaciones y potencialidades productivas de las regiones para transformar la matriz productiva.",
+                page: 84,
+                feedback: "La educación para la producción 'se constituye en un elemento integrador y dinamizador de saberes y conocimientos, que vinculan los aprendizajes con las vocaciones y potencialidades productivas de las distintas regiones. De este modo, se promueve la generación, recuperación, uso y aplicación de tecnologías propias y de la diversidad cultural. La meta final es transformar la matriz productiva y con ello la sociedad'."
+            },
+            {
+                question: "La 'Educación Inicial en Familia Comunitaria no escolarizada' tiene una duración específica. ¿Cuántos años comprende esta etapa?",
+                options: [
+                    "1 año.",
+                    "2 años.",
+                    "3 años.",
+                    "4 años."
+                ],
+                answer: "3 años.",
+                page: 60,
+                feedback: "La primera etapa no escolarizada de Educación Inicial en Familia Comunitaria 'Tiene 3 años de duración'."
+            },
+            {
+                question: "¿Qué tipo de evaluación se describe como un proceso mediante el cual las y los estudiantes se evalúan a sí mismos en relación a capacidades, cualidades y habilidades construidas, con alto valor formativo?",
+                options: [
+                    "Evaluación de aprendizajes.",
+                    "Evaluación comunitaria-participativa.",
+                    "Autoevaluación.",
+                    "Pruebas estandarizadas comparativas."
+                ],
+                answer: "Autoevaluación.",
+                page: 90,
+                feedback: "La autoevaluación es el proceso donde 'las y los estudiantes se evalúan a sí mismos en relación a capacidades, cualidades y habilidades construidas durante los procesos educativos. Tiene alto valor formativo'."
+            },
+            {
+                question: "Según el documento, ¿cuál fue la principal crítica del II Congreso Pedagógico Nacional (1979) hacia la política educativa de la dictadura?",
+                options: [
+                    "Criticó la falta de infraestructura escolar.",
+                    "Criticó la política educativa de la dictadura y reivindicó el código de 1955.",
+                    "Exigió la privatización de la educación pública.",
+                    "Pidió la eliminación de la educación rural."
+                ],
+                answer: "Criticó la política educativa de la dictadura y reivindicó el código de 1955.",
+                page: 24,
+                feedback: "El II Congreso Pedagógico Nacional de 1979 'criticó la política educativa de la dictadura y reivindicó el código de 1955'."
+            },
+            {
+                question: "¿Qué se entiende por 'Educación Permanente No Escolarizada' (EDUPER) dentro del Subsistema de Educación Alternativa y Especial?",
+                options: [
+                    "La formación académica formal para adultos que no concluyeron la educación regular.",
+                    "Procesos formativos no escolarizados, integrales, que desarrollan la conciencia crítica en respuesta a necesidades de organizaciones, comunidades, familias y personas.",
+                    "Programas de capacitación técnica exclusivamente para el sector empresarial.",
+                    "La educación a distancia para estudiantes universitarios."
+                ],
+                answer: "Procesos formativos no escolarizados, integrales, que desarrollan la conciencia crítica en respuesta a necesidades de organizaciones, comunidades, familias y personas.",
+                page: 67,
+                feedback: "La Educación Permanente 'es definida como aquella “destinada a toda la población, donde se promueven procesos formativos no escolarizados, integrales, y desarrollan la conciencia crítica en respuesta a las necesidades, expectativas e intereses de las organizaciones, comunidades, familias y personas, en su formación socio-comunitaria, productiva y política”'."
+            },
+            {
+                question: "¿Cuál es la principal diferencia que establece Franz Tamayo entre 'instrucción' y 'educación' en su obra 'Creación de la Pedagogía Nacional'?",
+                options: [
+                    "La instrucción se enfoca en la formación del carácter nacional, mientras que la educación provee conocimientos y técnicas útiles.",
+                    "La instrucción provee conocimientos y técnicas útiles, pero no llega a la vida social y moral de un pueblo, mientras que la educación forma el carácter nacional.",
+                    "Ambos términos son sinónimos y se refieren al mismo proceso formativo.",
+                    "La instrucción es para las élites y la educación para las masas."
+                ],
+                answer: "La instrucción provee conocimientos y técnicas útiles, pero no llega a la vida social y moral de un pueblo, mientras que la educación forma el carácter nacional.",
+                page: 18,
+                feedback: "Tamayo 'establece la distinción entre instrucción y educación, en cuanto que aquella provee de los conocimientos y técnicas útiles, pero no llega a la vida social y moral de un pueblo, no toca a sus costumbres que son la esencia misma de su existencia. Finalmente, la instrucción, educa el carácter; y la educación, forma el carácter nacional'."
+            },
+            {
+                question: "¿Cuál fue una de las principales consecuencias de la 'Guerra del Pacífico' (1878-1885) en la educación escolar boliviana?",
+                options: [
+                    "El aumento significativo de la inversión en infraestructura educativa.",
+                    "El cierre de escuelas municipales y colegios oficiales debido a la redirección de fondos a la guerra.",
+                    "La implementación de un nuevo plan de estudios con énfasis en las ciencias exactas.",
+                    "La creación de la primera Escuela Normal de maestros."
+                ],
+                answer: "El cierre de escuelas municipales y colegios oficiales debido a la redirección de fondos a la guerra.",
+                page: 16,
+                feedback: "Durante la Guerra del Pacífico, 'los fondos destinados a la instrucción pública pasaron a engrosar las finanzas de la guerra, provocando así el cierre de las escuelas municipales y los colegios oficiales'."
+            },
+            {
+                question: "En el contexto de la 'Educación para personas con talento extraordinario', ¿cuándo se considera que un estudiante presenta 'talento específico'?",
+                options: [
+                    "Cuando demuestra un desempeño diferenciado positivo en todas las áreas de aprendizaje.",
+                    "Cuando presenta limitaciones significativas en el desarrollo de habilidades intelectuales.",
+                    "Cuando demuestra un desempeño diferenciado y positivo en un campo o área del conocimiento o actividad humana.",
+                    "Cuando tiene dificultades generales de aprendizaje no provocadas por factores intelectuales."
+                ],
+                answer: "Cuando demuestra un desempeño diferenciado y positivo en un campo o área del conocimiento o actividad humana.",
+                page: 75,
+                feedback: "El talento específico se considera 'cuando la o el estudiante demuestra un desempeño diferenciado y positivo de capacidades potencialidades y habilidades transformadoras y productivas en un campo o área del conocimiento o actividad humana'."
+            },
+            {
+                question: "¿Qué organismo multilateral tuvo una 'mirada vigilante' y una 'intromisión' significativa en la construcción de la Ley N° 1565 de Reforma Educativa, al punto de decidir que el Ministerio de Planeamiento y Coordinación fuera la instancia responsable?",
+                options: [
+                    "La Organización de las Naciones Unidas para la Educación, la Ciencia y la Cultura (UNESCO).",
+                    "El Fondo Monetario Internacional (FMI).",
+                    "El Banco Mundial.",
+                    "El Banco Interamericano de Desarrollo (BID)."
+                ],
+                answer: "El Banco Mundial.",
+                page: 25,
+                feedback: "El documento indica que la construcción de la Ley 1565 'fue conformado bajo la mirada vigilante del Banco Mundial, organismo multilateral que cuidó celosamente cada una de las etapas de construcción de esta ley'."
+            },
+            {
+                question: "El 'Currículo Base' del Sistema Educativo Plurinacional tiene dos características esenciales. ¿Cuáles son?",
+                options: [
+                    "Es flexible y adaptable.",
+                    "Es único e intercultural.",
+                    "Es regionalizado y diversificado.",
+                    "Es teórico y práctico."
+                ],
+                answer: "Es único e intercultural.",
+                page: 85,
+                feedback: "El Currículo Base 'tiene dos características esenciales: es único e intercultural'."
+            },
+            {
+                question: "¿Cuál de las siguientes afirmaciones sobre la 'Formación de Maestras y Maestros' en el Subsistema de Educación Superior de Formación Profesional es INCORRECTA?",
+                options: [
+                    "Es única en cuanto a jerarquía profesional y calidad pedagógica.",
+                    "Es fiscal y gratuita, siendo una responsabilidad financiera del Estado.",
+                    "Se jerarquiza a nivel de técnico superior, con énfasis en la práctica.",
+                    "Es investigativa para el rescate y producción de saberes y conocimientos de las NyPIOs."
+                ],
+                answer: "Se jerarquiza a nivel de técnico superior, con énfasis en la práctica.",
+                page: 74,
+                feedback: "La formación docente 'se jerarquiza a nivel licenciatura', no técnico superior."
+            },
+            {
+                question: "Según Paulo Freire, ¿qué se convierte en un elemento esencial del proceso educativo como práctica de libertad en la educación sociocomunitaria productiva?",
+                options: [
+                    "La memorización de contenidos.",
+                    "El diálogo.",
+                    "La imposición de conocimientos.",
+                    "La competencia individual."
+                ],
+                answer: "El diálogo.",
+                page: 45,
+                feedback: "Para la educación sociocomunitaria productiva 'el diálogo se convierte en un elemento esencial del proceso educativo como práctica de libertad'."
+            },
+            {
+                question: "¿Cuál de los siguientes instrumentos de evaluación NO es sugerido en el documento para obtener información sobre el logro de objetivos y perfiles de salida?",
+                options: [
+                    "Pruebas de operaciones prácticas.",
+                    "Cuestionarios.",
+                    "Exámenes orales improvisados sin criterios claros.",
+                    "Portafolio de evidencias."
+                ],
+                answer: "Exámenes orales improvisados sin criterios claros.",
+                page: 92-93,
+                feedback: "El documento sugiere instrumentos como pruebas prácticas, cuestionarios, carpetas de seguimiento, rúbricas, etc., pero no exámenes improvisados sin criterios claros. La evaluación es planificada y sistemática."
+            },
+            {
+                question: "La 'Educación Primaria Comunitaria Vocacional' está orientada a la formación integral basada en el desarrollo de cuatro dimensiones. ¿Cuál de las siguientes opciones las nombra correctamente?",
+                options: [
+                    "Pensar, Sentir, Actuar, Evaluar.",
+                    "Ser, Saber, Hacer, Decidir.",
+                    "Conocer, Comprender, Aplicar, Crear.",
+                    "Observar, Analizar, Sintetizar, Proponer."
+                ],
+                answer: "Ser, Saber, Hacer, Decidir.",
+                page: 62,
+                feedback: "Este nivel educativo se basa en la promoción del desarrollo de las cuatro dimensiones de la persona: Ser, Saber, Hacer y Decidir."
+            },
+            {
+                question: "El 'Modelo Educativo Sociocomunitario Productivo (MESCP)' se sustenta jurídicamente en varios documentos. ¿Cuál de las siguientes opciones NO es uno de ellos?",
+                options: [
+                    "La Constitución Política del Estado Plurinacional de Bolivia.",
+                    "El Plan Nacional de Desarrollo.",
+                    "La Ley N° 070 de Educación 'Avelino Siñani - Elizardo Pérez'.",
+                    "La Ley N° 1565 de Reforma Educativa."
+                ],
+                answer: "La Ley N° 1565 de Reforma Educativa.",
+                page: 28,
+                feedback: "El MESCP se sustenta en la CPE, el Plan Nacional de Desarrollo y la Ley N° 070. La Ley N° 1565 es el modelo anterior que el MESCP busca superar."
+            },
+            {
+                question: "¿Cuál es el propósito de la 'Educación Productiva Territorial' en el currículo del SEP?",
+                options: [
+                    "Fomentar la migración de la población rural a las ciudades.",
+                    "Articular las instituciones educativas con las actividades económicas de la comunidad para transformar la matriz productiva.",
+                    "Promover la dependencia de los recursos naturales extranjeros.",
+                    "Centrarse únicamente en la formación teórica sin aplicación práctica."
+                ],
+                answer: "Articular las instituciones educativas con las actividades económicas de la comunidad para transformar la matriz productiva.",
+                page: 55-56,
+                feedback: "La educación productiva territorial 'articula a las instituciones educativas con las actividades económicas de la comunidad' y está 'orientada a la transformación de la matriz productiva'."
+            },
+            {
+                question: "La 'Educación Despatriarcalizadora' busca coadyuvar a develar, deconstruir y desmontar el patriarcado. ¿Qué implica esto en relación con los roles de género?",
+                options: [
+                    "La reafirmación de los roles de género tradicionales.",
+                    "La ruptura de los roles de género y la lucha contra la discriminación y la violencia.",
+                    "La promoción de la segregación por género en las aulas.",
+                    "El establecimiento de un solo rol de género dominante."
+                ],
+                answer: "La ruptura de los roles de género y la lucha contra la discriminación y la violencia.",
+                page: 52,
+                feedback: "La educación despatriarcalizadora 'implica la ruptura de los roles de género, la lucha contra la discriminación y la violencia'."
+            },
+            {
+                question: "¿Cuál de los siguientes es un objetivo de la 'Educación Secundaria Comunitaria Productiva'?",
+                options: [
+                    "Consolidar la formación técnica humanística con valores sociocomunitarios orientada a la transformación de la matriz productiva.",
+                    "Priorizar la formación académica teórica sobre la práctica productiva.",
+                    "Preparar a los estudiantes exclusivamente para el ingreso a universidades extranjeras.",
+                    "Desarrollar habilidades básicas de lectura y escritura únicamente."
+                ],
+                answer: "Consolidar la formación técnica humanística con valores sociocomunitarios orientada a la transformación de la matriz productiva.",
+                page: 63,
+                feedback: "Un objetivo clave es 'Consolidar la formación técnica humanística con valores sociocomunitarios orientada a la transformación de la matriz productiva y a asegurar la soberanía alimentaria'."
+            },
+            {
+                question: "En el contexto de la 'Gestión Educativa' del MESCP, ¿cuál de las siguientes características NO se le atribuye?",
+                options: [
+                    "Es comunitaria-participativa.",
+                    "Es dialógica.",
+                    "Es burocrática y anclada en normas rígidas.",
+                    "Es pedagógica-andragógica científica."
+                ],
+                answer: "Es burocrática y anclada en normas rígidas.",
+                page: 94-95,
+                feedback: "El MESCP se contrapone a la visión burocrática y busca una gestión desburocratizada, no anclada en normas rígidas."
+            },
+            {
+                question: "¿Qué se entiende por 'Educación Inclusiva' en la Ley N° 070?",
+                options: [
+                    "La atención exclusiva a estudiantes con talento extraordinario.",
+                    "Una política esencial que reconoce la diversidad de grupos poblacionales y personas, buscando brindar respuestas educativas oportunas e igualitarias.",
+                    "La segregación de estudiantes con discapacidad en centros especializados.",
+                    "La eliminación de las lenguas originarias en el sistema educativo."
+                ],
+                answer: "Una política esencial que reconoce la diversidad de grupos poblacionales y personas, buscando brindar respuestas educativas oportunas e igualitarias.",
+                page: 56,
+                feedback: "La educación inclusiva 'reconoce la diversidad de grupos poblacionales y personas que habitan el país y también de una posición ética y política contra las distintas manifestaciones de desigualdad, exclusión y discriminación'."
+            },
+            {
+                question: "El 'Currículo Regionalizado' considera características particulares del contexto. ¿Cuál de los siguientes aspectos NO se menciona como parte de estas características?",
+                options: [
+                    "Sociocultural.",
+                    "Lingüístico.",
+                    "Productivo.",
+                    "La adhesión a modelos educativos extranjeros sin adaptación."
+                ],
+                answer: "La adhesión a modelos educativos extranjeros sin adaptación.",
+                page: 85,
+                feedback: "El currículo regionalizado considera las características socioculturales, lingüísticas y productivas. La adhesión a modelos extranjeros sin adaptación es lo que el MESCP busca superar."
+            },
+            {
+                question: "¿Cuál fue una de las principales demandas del 'Primer Congreso Nacional Indígena' de 1945, relacionada con el servicio personal?",
+                options: [
+                    "La exigencia de salarios justos para los pongos y mittanis.",
+                    "La supresión de servicios gratuitos como el pongo y la mittani.",
+                    "La regulación del trabajo infantil en las haciendas.",
+                    "El reconocimiento de los patrones como figuras de autoridad educativa."
+                ],
+                answer: "La supresión de servicios gratuitos como el pongo y la mittani.",
+                page: 23,
+                feedback: "Entre las conclusiones del congreso se encuentra: 'El hombre no puede servir nunca de pongo y las mujeres jamás de mittani, aunque el patrón quiera pagar en plata o en oro, es una gran vergüenza hacer esos servicios. Los patrones que se sirvan ellos mismos'."
+            },
+            {
+                question: "Según el documento, ¿qué característica del sistema de evaluación del SEP se refiere a que se realiza durante los procesos educativos de forma cíclica (inicio, durante y final)?",
+                options: [
+                    "Es integral y holística.",
+                    "Es permanente.",
+                    "Es procesual.",
+                    "Es dialógica."
+                ],
+                answer: "Es permanente.",
+                page: 91,
+                feedback: "Es 'permanente porque se realiza durante los procesos educativos de forma cíclica en sus distintos momentos: al inicio, durante y al final'."
+            },
+            {
+                question: "¿Qué se entiende por 'heteroglosia' en el contexto del plurilingüismo en el currículo del SEP?",
+                options: [
+                    "La coexistencia de múltiples lenguas en igualdad de condiciones.",
+                    "La situación sociolingüística en la que una lengua se superpone a otras en contextos formales y cotidianos.",
+                    "El aprendizaje simultáneo de varias lenguas extranjeras.",
+                    "La traducción literal de textos de una lengua a otra."
+                ],
+                answer: "La situación sociolingüística en la que una lengua se superpone a otras en contextos formales y cotidianos.",
+                page: 54,
+                feedback: "El documento define heteroglosia como 'Situación sociolingüística en la que una lengua se superpone a otras lenguas en cuanto a uso en contextos formales y cotidianos'."
+            },
+            {
+                question: "¿Cuál es el principal objetivo del 'Programa: Educación para la Convivencia con la Madre Tierra' dentro de la Educación Permanente No Escolarizada?",
+                options: [
+                    "Promover la explotación de los recursos naturales para el desarrollo económico.",
+                    "Fomentar la conciencia socioambiental en defensa de los derechos de la Madre Tierra y fortalecer todas las formas de vida.",
+                    "Estudiar la geología y la formación de la Tierra.",
+                    "Desarrollar tecnologías para controlar el clima."
+                ],
+                answer: "Fomentar la conciencia socioambiental en defensa de los derechos de la Madre Tierra y fortalecer todas las formas de vida.",
+                page: 68,
+                feedback: "El objetivo es 'Promover capacidades de convivencia armónica y de movilización social... para el desarrollo de la conciencia socio ambiental en defensa de los derechos de la Madre Tierra, fortaleciendo todas las formas de vida'."
+            },
+            {
+                question: "La 'Educación Integral y Holística' enfatiza la interrelación de los saberes y conocimientos con el desarrollo de las dimensiones del ser, saber, hacer y decidir. ¿Qué busca evitar el enfoque holístico al comprender los procesos educativos como un todo?",
+                options: [
+                    "La participación comunitaria en la educación.",
+                    "La tendencia a educar desde lo fragmentario.",
+                    "La aplicación práctica de los conocimientos.",
+                    "El desarrollo de la conciencia y la espiritualidad."
+                ],
+                answer: "La tendencia a educar desde lo fragmentario.",
+                page: 55,
+                feedback: "El enfoque holístico 'alude al desarrollo de las cuatro dimensiones de manera simultánea e interrelacionada en una comprensión de los procesos educativos como un todo, para evitar la tendencia a educar desde lo fragmentario'."
+            },
+            {
+                question: "¿Cuál de las siguientes es una de las 'dos pandemias' que agudizaron la necesidad de actualizar la currícula, según la Presentación del documento?",
+                options: [
+                    "La pandemia de la gripe aviar y la crisis económica global.",
+                    "La pandemia sanitaria del COVID-19 y la 'pandemia política' de la interrupción constitucional de 2019.",
+                    "La pandemia de la deserción escolar y la falta de financiamiento educativo.",
+                    "La pandemia de la desnutrición infantil y la escasez de maestros."
+                ],
+                answer: "La pandemia sanitaria del COVID-19 y la 'pandemia política' de la interrupción constitucional de 2019.",
+                page: 9,
+                feedback: "El documento señala 'las dos pandemias. Por un lado, la pandemia sanitaria del COVID 19, y el consiguiente confinamiento... Por otro lado, la “pandemia política”, suscitada con la interrupción constitucional del año 2019'."
+            },
+            {
+                question: "¿Qué tipo de discapacidad se define como aquella donde la persona presenta limitaciones significativas en el desarrollo de habilidades intelectuales y lingüísticas, conductas sociales y adaptativas?",
+                options: [
+                    "Visual.",
+                    "Auditiva.",
+                    "Intelectual.",
+                    "Físico-motora."
+                ],
+                answer: "Intelectual.",
+                page: 71,
+                feedback: "La discapacidad Intelectual se refiere a 'personas que presentan limitaciones significativas en el desarrollo de las habilidades intelectuales y lingüísticas, conductas sociales y adaptativas'."
+            },
+            {
+                question: "La 'Evaluación comunitaria-participativa' convoca la participación de maestras, maestros, gestores educativos y la comunidad en general. ¿Cuál es su propósito principal?",
+                options: [
+                    "Determinar la calificación individual de cada estudiante.",
+                    "Valorar el desarrollo de los procesos educativos y la gestión institucional, identificando debilidades y fortalezas para fomentar la calidad educativa.",
+                    "Realizar pruebas estandarizadas comparativas a nivel nacional.",
+                    "Excluir a los padres de familia del proceso de evaluación."
+                ],
+                answer: "Valorar el desarrollo de los procesos educativos y la gestión institucional, identificando debilidades y fortalezas para fomentar la calidad educativa.",
+                page: 90,
+                feedback: "La evaluación comunitaria-participativa tiene como propósito 'valorar el desarrollo de los procesos educativos, así como la gestión en la institución, identificando debilidades y fortalezas que les permita fomentar la calidad educativa'."
+            },
+            {
+                question: "¿Cuál de los siguientes es un objetivo de la 'Educación Inicial en Familia Comunitaria Escolarizada'?",
+                options: [
+                    "Promover el desarrollo armónico de la personalidad de las y los niños, a través del desarrollo de valores sociocomunitarios de cooperación, identidad, espiritualidad y socioafectivo.",
+                    "Enseñar a los niños a leer y escribir antes de los 4 años.",
+                    "Preparar a los niños para el ingreso directo a la universidad.",
+                    "Fomentar la competencia individual entre los niños desde temprana edad."
+                ],
+                answer: "Promover el desarrollo armónico de la personalidad de las y los niños, a través del desarrollo de valores sociocomunitarios de cooperación, identidad, espiritualidad y socioafectivo.",
+                page: 61,
+                feedback: "Un objetivo es 'Promover el desarrollo armónico de la personalidad de las y los niños, a través del desarrollo de valores sociocomunitarios de cooperación, identidad, espiritualidad y socioafectivo'."
+            },
+            {
+                question: "En la época Republicana del siglo XIX, ¿cuál fue la tendencia que influyó en las políticas educativas, manteniendo la 'blanquitud' como una condición política y social clave?",
+                options: [
+                    "La promoción de la educación intercultural y plurilingüe.",
+                    "La tendencia de preservar la 'blanquitud' como una condición política y social clave.",
+                    "La universalización de la educación para todas las poblaciones, incluyendo indígenas y mujeres.",
+                    "La descentralización total de la administración educativa a las comunidades indígenas."
+                ],
+                answer: "La tendencia de preservar la 'blanquitud' como una condición política y social clave.",
+                page: 15,
+                feedback: "El documento menciona que la característica de la herencia colonial 'influyó en una alineación que se mantuvo constante por bastante tiempo, a saber, la tendencia de preservar la “blanquitud” como una condición política y social clave en la nueva República'."
+            },
+            {
+                question: "¿Qué se entiende por 'Currículo Diversificado'?",
+                options: [
+                    "El currículo único y obligatorio para todo el Sistema Educativo Plurinacional.",
+                    "El resultado de la construcción de maestras y maestros, que recoge aspectos particulares y específicos del contexto cultural, sociolingüístico, productivo y poblacional.",
+                    "El currículo diseñado exclusivamente por expertos internacionales.",
+                    "El plan de estudios que solo incluye saberes y conocimientos universales."
+                ],
+                answer: "El resultado de la construcción de maestras y maestros, que recoge aspectos particulares y específicos del contexto cultural, sociolingüístico, productivo y poblacional.",
+                page: 85,
+                feedback: "El Currículo Diversificado 'Es el resultado de la construcción de maestras y maestros, recoge aspectos particulares y específicos del contexto cultural, sociolingüístico, productivo y poblacional'."
+            }
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let answeredCorrectly = false;
+
+        const questionTextElement = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackElement = document.getElementById('feedback');
+        const submitBtn = document.getElementById('submit-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreDisplay = document.getElementById('score');
+        const finalResultsContainer = document.getElementById('final-results');
+        const quizContentContainer = document.getElementById('quiz-content');
+        const finalScoreElement = document.getElementById('final-score');
+        const generalFeedbackElement = document.getElementById('general-feedback');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                questionTextElement.textContent = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+                optionsContainer.innerHTML = '';
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'feedback'; // Reset feedback class
+                selectedOption = null;
+                answeredCorrectly = false;
+                submitBtn.disabled = true;
+                nextBtn.disabled = true;
+
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.onclick = () => selectOption(button, option);
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                showFinalResults();
+            }
+        }
+
+        function selectOption(button, option) {
+            // Remove 'selected' class from previously selected option
+            if (selectedOption) {
+                selectedOption.classList.remove('selected');
+            }
+            // Add 'selected' class to the new selected option
+            button.classList.add('selected');
+            selectedOption = button;
+            submitBtn.disabled = false; // Enable submit button once an option is selected
+        }
+
+        function checkAnswer() {
+            if (!selectedOption) {
+                return; // No option selected
+            }
+
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const userAnswer = selectedOption.textContent;
+            const correctAnswer = currentQuestion.answer;
+
+            // Disable all options after submission
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                } else if (button.textContent === userAnswer) {
+                    button.classList.add('incorrect');
+                }
+            });
+
+            if (userAnswer === correctAnswer) {
+                score += 2.5;
+                scoreDisplay.textContent = score;
+                feedbackElement.textContent = `¡Correcto! ${currentQuestion.feedback} (Página ${currentQuestion.page})`;
+                feedbackElement.classList.add('correct');
+                answeredCorrectly = true;
+            } else {
+                feedbackElement.textContent = `Incorrecto. La respuesta correcta era: "${correctAnswer}". ${currentQuestion.feedback} (Página ${currentQuestion.page})`;
+                feedbackElement.classList.add('incorrect');
+                answeredCorrectly = false;
+            }
+
+            submitBtn.disabled = true; // Disable submit after checking
+            nextBtn.disabled = false; // Enable next button
+        }
+
+        function showFinalResults() {
+            quizContentContainer.classList.add('hidden');
+            finalResultsContainer.classList.remove('hidden');
+            finalScoreElement.textContent = `${score.toFixed(1)} / 100 puntos`;
+
+            let generalFeedback = '';
+            if (score >= 90) {
+                generalFeedback = "¡Excelente trabajo! Demuestras un dominio excepcional del Currículo Base del Sistema Educativo Plurinacional. ¡Estás muy bien preparado/a!";
+            } else if (score >= 70) {
+                generalFeedback = "¡Muy bien! Tienes un sólido conocimiento del Currículo Base. Repasa las áreas donde tuviste dificultades para perfeccionar tu preparación.";
+            } else if (score >= 50) {
+                generalFeedback = "Tu conocimiento del Currículo Base es aceptable, pero hay áreas clave que necesitan más atención. Te sugiero un repaso profundo de los fundamentos y principios.";
+            } else {
+                generalFeedback = "Necesitas reforzar significativamente tu estudio del Currículo Base. Te recomiendo revisar el documento en su totalidad y enfocarte en las ideas centrales para mejorar tu comprensión.";
+            }
+            generalFeedbackElement.textContent = generalFeedback;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplay.textContent = 0;
+            shuffledQuestions = shuffleArray([...questions]); // Reshuffle for new quiz
+            finalResultsContainer.classList.add('hidden');
+            quizContentContainer.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // Event Listeners
+        submitBtn.addEventListener('click', checkAnswer);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            loadQuestion();
+        });
+        restartBtn.addEventListener('click', restartQuiz);
+
+        // Initial load
+        restartQuiz(); // Call restart to initialize and shuffle questions
+    </script>
+</body>
+</html>

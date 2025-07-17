@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Química</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+        .question-section {
+            margin-bottom: 25px;
+        }
+        .question-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .option-button {
+            background-color: #e0f2f7;
+            color: #2a6f8b;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 2px solid #b3e0f2;
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: left;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        .option-button:hover {
+            background-color: #c0e3eb;
+            border-color: #8cd1e0;
+        }
+        .option-button.selected {
+            background-color: #a7d9ee;
+            border-color: #61c2e0;
+            font-weight: bold;
+        }
+        .option-button.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+            font-weight: bold;
+        }
+        .option-button.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+            font-weight: bold;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .nav-button, .submit-button, .restart-button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+        .nav-button:hover, .submit-button:hover, .restart-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .nav-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .feedback-section {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .feedback-correct {
+            background-color: #e6ffe6;
+            border: 1px solid #28a745;
+            color: #155724;
+        }
+        .feedback-incorrect {
+            background-color: #ffe6e6;
+            border: 1px solid #dc3545;
+            color: #721c24;
+        }
+        .final-results {
+            margin-top: 20px;
+            font-size: 1.6rem;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        .final-feedback {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: #34495e;
+            line-height: 1.5;
+        }
+        .credits {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 20px;
+            width: 100%;
+            text-align: right;
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+        }
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 20px;
+            }
+            .question-section h2 {
+                font-size: 1.3rem;
+            }
+            .option-button {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+            .nav-button, .submit-button, .restart-button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            .credits {
+                text-align: center;
+                position: static;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="quiz-start" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Cuestionario sobre la Enseñanza de la Química</h1>
+            <p class="text-lg text-gray-700 mb-8">Este cuestionario consta de 25 preguntas de opción múltiple, cada una con un valor de 4 puntos. Al finalizar, verás tu puntuación total y una retroalimentación general.</p>
+            <button id="start-quiz-button" class="submit-button">Comenzar Cuestionario</button>
+        </div>
+
+        <div id="quiz-content" class="hidden">
+            <div class="question-section">
+                <h2 id="question-text"></h2>
+                <div id="options-container" class="options-grid">
+                    <!-- Opciones se cargarán aquí -->
+                </div>
+                <div id="feedback-section" class="feedback-section hidden"></div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button id="prev-button" class="nav-button" disabled><i class="fas fa-arrow-left mr-2"></i> Anterior</button>
+                <button id="next-button" class="nav-button">Siguiente <i class="fas fa-arrow-right ml-2"></i></button>
+                <button id="submit-quiz-button" class="submit-button hidden">Finalizar Cuestionario</button>
+            </div>
+            <div class="credits">Desarrollado por Victor Crespo</div>
+        </div>
+
+        <div id="quiz-results" class="hidden">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Resultados del Cuestionario</h1>
+            <p class="final-results">Tu puntuación total: <span id="score"></span> / 100 puntos</p>
+            <div class="final-feedback" id="final-feedback-text"></div>
+            <button id="restart-quiz-button" class="restart-button mt-8">Reiniciar Cuestionario</button>
+            <div class="credits">Desarrollado por Victor Crespo</div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el enfoque principal de la secuencia didáctica basada en 'La Basura que Comemos'?",
+                options: [
+                    { text: "Estudiar la química de los materiales de construcción.", correct: false },
+                    { text: "Relacionar conceptos científicos y tecnológicos con el contexto sociocultural de los alimentos.", correct: true },
+                    { text: "Analizar la historia de la gastronomía a nivel mundial.", correct: false },
+                    { text: "Enfocarse únicamente en la memorización de fórmulas químicas.", correct: false }
+                ],
+                feedback: "La secuencia didáctica busca que los estudiantes relacionen conceptos científicos y tecnológicos con su contexto sociocultural para la toma de decisiones. (Página 9)",
+                page: 9
+            },
+            {
+                question: "¿Cuál es el carácter de la investigación mencionada en el documento?",
+                options: [
+                    { text: "Cuantitativo, con encuestas masivas.", correct: false },
+                    { text: "Mixto, combinando encuestas y experimentos controlados.", correct: false },
+                    { text: "Cualitativo, con un estudio micro etnográfico del grupo participante.", correct: true },
+                    { text: "Experimental, con un grupo de control y un grupo experimental.", correct: false }
+                ],
+                feedback: "El trabajo de investigación es de carácter cualitativo, con un estudio micro etnográfico del grupo participante. (Página 9)",
+                page: 9
+            },
+            {
+                question: "¿Qué afecta el tratamiento de conceptos en las asignaturas de ciencia en los colegios, según Solbes, Monserrat, Furió (2007)?",
+                options: [
+                    { text: "Favorece el interés por el aprendizaje.", correct: false },
+                    { text: "Mejora los contenidos procedimentales.", correct: false },
+                    { text: "Afecta los contenidos procedimentales y propicia el desinterés por el aprendizaje.", correct: true },
+                    { text: "Incrementa la participación de los estudiantes en el aula.", correct: false }
+                ],
+                feedback: "Según Solbes, Monserrat, Furió (2007), el tratamiento de conceptos afecta los contenidos procedimentales y propicia el desinterés por el aprendizaje. (Página 10)",
+                page: 10
+            },
+            {
+                question: "¿Cuál es la pregunta orientadora de la investigación propuesta en el documento?",
+                options: [
+                    { text: "¿Cómo mejorar la calificación de los estudiantes en química?", correct: false },
+                    { text: "¿Qué devela el discurso de los estudiantes del Colegio Gimnasio los Alerces al participar en una secuencia didáctica de enseñanza de la química basada en la 'basura que comemos'?", correct: true },
+                    { text: "¿Cuál es el impacto de los medios de comunicación en la alimentación de los jóvenes?", correct: false },
+                    { text: "¿Cómo influye el enfoque CTSA en el rendimiento académico?", correct: false }
+                ],
+                feedback: "La pregunta orientadora es: ¿Qué devela el discurso de los estudiantes del Colegio Gimnasio los Alerces (privado) al participar en una secuencia didáctica de enseñanza de la química basada en la 'basura que comemos'? (Página 10)",
+                page: 10
+            },
+            {
+                question: "¿Cuál es uno de los objetivos específicos de la investigación?",
+                options: [
+                    { text: "Aumentar el número de estudiantes en clases de química.", correct: false },
+                    { text: "Diseñar e implementar una secuencia didáctica con enfoque CTSA sobre la comida chatarra.", correct: true },
+                    { text: "Publicar artículos científicos en revistas especializadas.", correct: false },
+                    { text: "Crear un nuevo plan de estudios de química para la educación media.", correct: false }
+                ],
+                feedback: "Uno de los objetivos específicos es diseñar e implementar una secuencia didáctica con enfoque CTSA sobre la comida chatarra que posibilite o fomente la divulgación científica. (Página 11)",
+                page: 11
+            },
+            {
+                question: "¿Por qué es importante realizar este trabajo según la justificación del documento?",
+                options: [
+                    { text: "Para aumentar las horas de clase de química.", correct: false },
+                    { text: "Para que los estudiantes manifiesten argumentos al explicar un fenómeno o concepto utilizando la divulgación científica y reconozcan su relación con la vida cotidiana.", correct: true },
+                    { text: "Para que los estudiantes memoricen más fórmulas químicas.", correct: false },
+                    { text: "Para que los docentes prioricen los contenidos conceptuales.", correct: false }
+                ],
+                feedback: "La importancia radica en que los estudiantes manifiesten los argumentos necesarios al querer explicar un fenómeno o un concepto utilizando la divulgación científica y que reconozcan cómo está relacionada con la vida cotidiana. (Página 12)",
+                page: 12
+            },
+            {
+                question: "¿Qué busca el trabajo de investigación de Betancourt, C. (2019) 'La Obesidad En El Contexto CTSA, Estrategia Didáctica Para Favorecer Hábitos De Vida Saludable'?",
+                options: [
+                    { text: "Analizar el impacto de la actividad física en la obesidad.", correct: false },
+                    { text: "Promover los buenos hábitos alimenticios teniendo en cuenta aspectos como el autocuidado y el conocimiento para llevar una vida saludable.", correct: true },
+                    { text: "Desarrollar nuevas técnicas quirúrgicas para el tratamiento de la obesidad.", correct: false },
+                    { text: "Estudiar la genética de la obesidad en poblaciones específicas.", correct: false }
+                ],
+                feedback: "El trabajo de Betancourt (2019) busca promover los buenos hábitos alimenticios teniendo en cuenta aspectos como el autocuidado y el conocimiento para llevar una vida saludable. (Página 14)",
+                page: 14
+            },
+            {
+                question: "¿Cuál es el objetivo del libro 'El nuevo cocinero científico' (Golombek, D. & Schwarzbaum P. 2012)?",
+                options: [
+                    { text: "Enseñar recetas de alta cocina.", correct: false },
+                    { text: "Asociar la cocina con la ciencia y el entretenimiento.", correct: true },
+                    { text: "Documentar la historia de la cocina molecular.", correct: false },
+                    { text: "Proporcionar una guía para chefs profesionales.", correct: false }
+                ],
+                feedback: "El objetivo del libro 'El nuevo cocinero científico' es asociar la cocina con la ciencia, una meta que se han fijado las diferentes carreras de gastronomía en los últimos años. (Página 15)",
+                page: 15
+            },
+            {
+                question: "¿Qué busca prevenir el libro 'La basura que comemos' (Del Rio, E. 2000)?",
+                options: [
+                    { text: "El desperdicio de alimentos en el hogar.", correct: false },
+                    { text: "Lo peligroso que puede llegar a ser comer en la calle, en los restaurantes e incluso en la propia casa debido a los procesos a los que se someten los alimentos.", correct: true },
+                    { text: "La contaminación ambiental generada por los residuos de alimentos.", correct: false },
+                    { text: "El consumo excesivo de comida casera.", correct: false }
+                ],
+                feedback: "La intención del libro 'La basura que comemos' es prevenir al lector de lo peligroso que puede llegar a ser comer en la calle, en los restaurantes e incluso en la propia casa. (Página 15)",
+                page: 15
+            },
+            {
+                question: "¿Por qué nace la divulgación científica?",
+                options: [
+                    { text: "Para generar nuevas teorías científicas.", correct: false },
+                    { text: "Para ofrecer información útil y necesaria que permita a las personas adquirir una opinión sólida y tomar decisiones sobre situaciones cotidianas donde la Ciencia y la Tecnología están involucradas.", correct: true },
+                    { text: "Para educar a futuros científicos.", correct: false },
+                    { text: "Para promover el uso de tecnología avanzada en la vida diaria.", correct: false }
+                ],
+                feedback: "La divulgación científica nace a través de la necesidad de ofrecer información útil y necesaria para que las personas puedan adquirir una opinión sólida y de esta manera tomar una decisión acerca de las situaciones cotidianas o no cotidianas donde están involucradas la Ciencia y la Tecnología. (Página 16)",
+                page: 16
+            },
+            {
+                question: "¿Cuál es una de las funciones más importantes de la divulgación científica según Arellano (2017)?",
+                options: [
+                    { text: "Generar conflictos entre la ciencia y la sociedad.", correct: false },
+                    { text: "Crear un conocimiento perdurable en su público y aspirar a la comprensión de los contenidos enseñados.", correct: true },
+                    { text: "Limitar el acceso a la información científica solo a expertos.", correct: false },
+                    { text: "Fomentar el debate político sobre temas científicos.", correct: false }
+                ],
+                feedback: "Arellano (2017) menciona que la divulgación científica busca generar un conocimiento perdurable en su público y aspirar a lograr la comprensión de los contenidos enseñados. (Página 16)",
+                page: 16
+            },
+            {
+                question: "¿Qué se busca promover en los estudiantes a través del enfoque CTSA, además del aprendizaje de un concepto específico en Química?",
+                options: [
+                    { text: "La memorización de la tabla periódica.", correct: false },
+                    { text: "El desarrollo de intereses y actitudes favorables hacia la ciencia.", correct: true },
+                    { text: "La competencia en exámenes estandarizados.", correct: false },
+                    { text: "La especialización temprana en un campo de la ciencia.", correct: false }
+                ],
+                feedback: "El enfoque CTSA propende por el desarrollo de intereses y actitudes favorables hacia la ciencia. (Página 18)",
+                page: 18
+            },
+            {
+                question: "¿Qué tipo de metodología se utiliza en la investigación, según el documento?",
+                options: [
+                    { text: "Experimental con grupos de control.", correct: false },
+                    { text: "Cuantitativa con análisis estadísticos avanzados.", correct: false },
+                    { text: "Cualitativa, con un método micro etnográfico.", correct: true },
+                    { text: "Mixta, priorizando la recolección de datos numéricos.", correct: false }
+                ],
+                feedback: "El proyecto de investigación se desarrolla bajo una metodología cualitativa, utilizando un método micro etnográfico. (Página 22)",
+                page: 22
+            },
+            {
+                question: "¿Cuál fue el rango de edades de los estudiantes participantes en la investigación?",
+                options: [
+                    { text: "10 a 12 años.", correct: false },
+                    { text: "13 a 15 años.", correct: false },
+                    { text: "16 a 18 años.", correct: true },
+                    { text: "19 a 22 años.", correct: false }
+                ],
+                feedback: "La población participante oscila entre las edades de los 16 a 18 años. (Página 22)",
+                page: 22
+            },
+            {
+                question: "¿Qué alimento es el más consumido por los estudiantes al desayuno según los resultados del Ítem 1 de la encuesta?",
+                options: [
+                    { text: "Fruta.", correct: false },
+                    { text: "Cereal.", correct: false },
+                    { text: "Huevo, seguido del pan y acompañado de chocolate o café.", correct: true },
+                    { text: "Gaseosas.", correct: false }
+                ],
+                feedback: "El huevo es uno de los alimentos que más consumen los estudiantes al desayuno, seguido del pan y acompañado en la gran mayoría de las veces con chocolate o café. (Página 27)",
+                page: 27
+            },
+            {
+                question: "¿Por qué los estudiantes consumen los alimentos mencionados en el desayuno, según el Ítem 2?",
+                options: [
+                    { text: "Por recomendación médica.", correct: false },
+                    { text: "Por cuestiones de facilidad en la preparación, rapidez y sabor o gusto.", correct: true },
+                    { text: "Por su alto valor nutricional, independientemente de la preparación.", correct: false },
+                    { text: "Por ser los únicos alimentos disponibles en casa.", correct: false }
+                ],
+                feedback: "Los estudiantes consumen lo mencionado por cuestiones de facilidad en la preparación, por la rapidez con la que se logra cocinar y por el sabor o el gusto que las personas sienten por este alimento. (Página 27)",
+                page: 27
+            },
+            {
+                question: "¿Qué concepto es el más utilizado por los estudiantes para justificar por qué ciertas opciones deberían ser parte de un desayuno ideal (Ítem 4)?",
+                options: [
+                    { text: "Precio.", correct: false },
+                    { text: "Nutrientes (por su aporte nutritivo y energético).", correct: true },
+                    { text: "Tradición cultural.", correct: false },
+                    { text: "Disponibilidad en el mercado.", correct: false }
+                ],
+                feedback: "Los conceptos más utilizados por los estudiantes son 'nutrientes', por el aporte nutritivo y energético necesario que posiblemente brinden estos alimentos. (Página 28)",
+                page: 28
+            },
+            {
+                question: "¿Qué creen los estudiantes que forman parte de la constitución de los alimentos que consumimos a diario (Ítem 5)?",
+                options: [
+                    { text: "Principalmente azúcares y grasas.", correct: false },
+                    { text: "Solo ingredientes artificiales.", correct: false },
+                    { text: "Vitaminas, seguido de proteínas.", correct: true },
+                    { text: "Exclusivamente agua y minerales.", correct: false }
+                ],
+                feedback: "Las vitaminas hacen parte de la constitución de los alimentos, seguido de las proteínas según los encuestados. (Página 29)",
+                page: 29
+            },
+            {
+                question: "¿Por qué los estudiantes prefieren el jugo natural sobre el artificial (Ítem 6)?",
+                options: [
+                    { text: "Por su precio más bajo.", correct: false },
+                    { text: "Porque es más saludable, por su sabor, y por ser de fruta natural sin químicos ni colorantes.", correct: true },
+                    { text: "Por la conveniencia de su empaque.", correct: false },
+                    { text: "Porque el jugo artificial no está disponible.", correct: false }
+                ],
+                feedback: "Los estudiantes prefieren el jugo natural porque es más saludable, por su sabor, porque es de fruta natural, porque no contiene químicos ni colorantes. (Página 30)",
+                page: 30
+            },
+            {
+                question: "¿Qué tipo de alimentos procesados reconocen los estudiantes que carecen de valor nutritivo (Pregunta 2, primera parte de la secuencia de enseñanza)?",
+                options: [
+                    { text: "Vegetales congelados.", correct: false },
+                    { text: "Frutas enlatadas.", correct: false },
+                    { text: "Muchos de los alimentos procesados que consumen a diario.", correct: true },
+                    { text: "Productos lácteos fermentados.", correct: false }
+                ],
+                feedback: "Gran parte de los estudiantes logra reconocer que muchos de los alimentos procesados que consumen a diario carecen del valor nutritivo. (Página 35)",
+                page: 35
+            },
+            {
+                question: "¿Qué indican los estudiantes que se utiliza en los alimentos procesados para prolongar su vida útil (Pregunta 2, primera parte de la secuencia de enseñanza)?",
+                options: [
+                    { text: "Vitaminas y minerales extra.", correct: false },
+                    { text: "Conservantes.", correct: true },
+                    { text: "Menos azúcar.", correct: false },
+                    { text: "Mayor cantidad de fibra natural.", correct: false }
+                ],
+                feedback: "Los estudiantes mencionan que se utilizan conservantes para prolongar la vida útil de los alimentos procesados. (Página 35)",
+                page: 35
+            },
+            {
+                question: "¿Qué admiten la mayoría de los estudiantes sobre los aditivos en los alimentos al inicio de la segunda parte de la secuencia?",
+                options: [
+                    { text: "Que conocen perfectamente su composición química.", correct: false },
+                    { text: "Que tienen conocimiento sobre sus beneficios para la salud.", correct: false },
+                    { text: "El desconocimiento de la presencia de los aditivos y sus posibles daños a la salud.", correct: true },
+                    { text: "Que siempre revisan las etiquetas de los productos.", correct: false }
+                ],
+                feedback: "La mayoría de los estudiantes admiten el desconocimiento de la presencia de los aditivos en los alimentos que consumen, de los posibles daños a la salud al consumirlos tantas veces. (Página 36)",
+                page: 36
+            },
+            {
+                question: "¿Qué sustancia presente en el repollo morado funciona como un indicador de pH natural?",
+                options: [
+                    { text: "Clorofila.", correct: false },
+                    { text: "Antocianina (específicamente Cianina).", correct: true },
+                    { text: "Carotenoides.", correct: false },
+                    { text: "Flavonoides.", correct: false }
+                ],
+                feedback: "El repollo morado posee Cianina (un tipo de Antocianina) que es un excelente indicador natural de pH. (Página 63)",
+                page: 63
+            },
+            {
+                question: "¿Qué ocurre con el jugo de repollo morado (indicador) al entrar en contacto con una sustancia ácida?",
+                options: [
+                    { text: "Adquiere un color verde o amarillo.", correct: false },
+                    { text: "Permanece sin cambios de color.", correct: false },
+                    { text: "Adquiere un color rojo o rosado.", correct: true },
+                    { text: "Se vuelve transparente.", correct: false }
+                ],
+                feedback: "El extracto de repollo morado adquirirá un color rojo o rosado en un medio ácido. (Página 63)",
+                page: 63
+            },
+            {
+                question: "¿Cuál es la causa principal de la acidez estomacal, según el documento?",
+                options: [
+                    { text: "El consumo excesivo de agua.", correct: false },
+                    { text: "Un esfínter esofágico inferior que no se abre o cierra correctamente, permitiendo que el ácido del estómago regrese al esófago.", correct: true },
+                    { text: "Una dieta rica en vegetales.", correct: false },
+                    { text: "La falta de ejercicio físico.", correct: false }
+                ],
+                feedback: "La causa principal es el esfínter esofágico inferior, que no se abre ni se cierra correctamente, permitiendo que el ácido del estómago regrese al esófago. (Página 67)",
+                page: 67
+            },
+            {
+                question: "¿Qué le sucede a la enzima 'Lactasa' en el sistema digestivo con el paso de los años?",
+                options: [
+                    { text: "Aumenta su producción, mejorando la digestión de lactosa.", correct: false },
+                    { text: "Se mantiene constante, sin cambios.", correct: false },
+                    { text: "Disminuye, lo que puede llevar a la intolerancia a la lactosa.", correct: true },
+                    { text: "Se transforma en otra enzima diferente.", correct: false }
+                ],
+                feedback: "La capacidad de asimilación de la lactosa se va perdiendo por la disminución de la enzima 'Lactasa'. (Página 24, también explicado en página 76).",
+                page: 24,
+            },
+            {
+                question: "¿Cuál es el propósito del experimento casero de elaboración de kumis?",
+                options: [
+                    { text: "Medir la cantidad de grasa en la leche.", correct: false },
+                    { text: "Identificar la presencia de la proteína principal de la leche y conocer su utilidad para la fabricación de otros productos.", correct: true },
+                    { text: "Determinar el punto de ebullición de la leche.", correct: false },
+                    { text: "Estudiar el efecto de la temperatura en la leche.", correct: false }
+                ],
+                feedback: "El objetivo es identificar la presencia de la proteína principal de la leche y conocer la utilidad de la leche para la fabricación de otros productos por medio de un experimento casero (elaboración de kumis). (Página 70)",
+                page: 70
+            },
+            {
+                question: "¿Qué ocurre si se consumen grandes cantidades de lactosa en ausencia de lactasa?",
+                options: [
+                    { text: "Se absorbe más rápidamente en el intestino delgado.", correct: false },
+                    { text: "El azúcar pasa al colon intacto y puede ser fermentado por bacterias, produciendo gases y diarrea.", correct: true },
+                    { text: "Se convierte directamente en glucosa sin problemas.", correct: false },
+                    { text: "No produce ningún efecto en el organismo.", correct: false }
+                ],
+                feedback: "Si se consumen cantidades altas de lactosa en ausencia de lactasa, el azúcar pasa a través del intestino delgado sin ser absorbido y alcanza el colon intacto. Ahí algunas bacterias fermentan lactosa para producir dióxido de carbono y causan dolor. Además, la presencia de azúcar en el colon también puede provocar diarrea. (Página 76-77)",
+                page: 76
+            },
+            {
+                question: "¿Qué problema de salud asocian los estudiantes al consumo de alimentos ricos en azúcares, aditivos y conservantes?",
+                options: [
+                    { text: "Problemas de visión.", correct: false },
+                    { text: "Acidez estomacal.", correct: true },
+                    { text: "Dolores de cabeza crónicos.", correct: false },
+                    { text: "Problemas de circulación sanguínea.", correct: false }
+                ],
+                feedback: "Como se visualiza, los estudiantes argumentan el problema generado por el consumo de alimentos ricos en azúcares, aditivos, conservantes, que constituyen temáticas para ser abordadas con enfoque CTSA. (Página 40)",
+                page: 40
+            },
+            {
+                question: "¿Por qué los estudiantes mencionan que la comida es 'chatarra'?",
+                options: [
+                    { text: "Porque se cocina muy rápido.", correct: false },
+                    { text: "Porque utilizan alimentos procesados y conservantes que prolongan su vida útil, y tienen químicos que ocasionan daño al organismo.", correct: true },
+                    { text: "Porque es producida en grandes cantidades.", correct: false },
+                    { text: "Porque tiene un sabor desagradable.", correct: false }
+                ],
+                feedback: "Mencionan que la comida es chatarra porque se utilizan en los alimentos procesados que por los medios de comunicación masiva son conocidos por saludables, sin embargo, reconocen que se utilizan conservantes para prolongar la vida útil de los mismos. Mencionan que dichas sustancias tienen químicos que ocasionan daño al organismo. (Página 35)",
+                page: 35
+            },
+            {
+                question: "¿Qué papel juega la publicidad de alimentos en el consumo, según el documento?",
+                options: [
+                    { text: "Ayuda a los consumidores a elegir opciones saludables.", correct: false },
+                    { text: "Oculta información sobre los riesgos y hace que los alimentos se vean nutritivos.", correct: true },
+                    { text: "Fomenta la producción local de alimentos.", correct: false },
+                    { text: "No tiene ninguna influencia significativa.", correct: false }
+                ],
+                feedback: "Los estudiantes mencionan el rol que juega la publicidad con la presentación de estos alimentos, haciéndolos ver como nutritivos y ocultando los riesgos sobre su consumo. (Página 36)",
+                page: 36
+            },
+            {
+                question: "¿Qué es el Glutamato Monosódico (E621) según el catálogo de aditivos?",
+                options: [
+                    { text: "Un colorante sintético con toxicidad baja.", correct: false },
+                    { text: "Un aminoácido no esencial, adictivo, que hace que lo que comemos sea sabroso. (Toxicidad alta)", correct: true },
+                    { text: "Un conservante natural sin efectos adversos.", correct: false },
+                    { text: "Un antioxidante sintético recomendado para niños.", correct: false }
+                ],
+                feedback: "El Glutamato Monosódico (E621) es un aminoácido no esencial. Su uso sintético suele ser adictivo, considerada como la nicotina de alimentación, nos hace sentir que lo que comemos es sabroso, deseable y placentero. Toxicidad: alta. (Página 79)",
+                page: 79
+            },
+            {
+                question: "¿Qué tipo de aditivo es el Benzoato de Sodio (E211) y cuáles son sus efectos?",
+                options: [
+                    { text: "Espesante y gelificante sin efectos secundarios.", correct: false },
+                    { text: "Conservante sintético que en altas cantidades puede mezclarse con Ácido Ascórbico y formar Benceno, un hidrocarburo cancerígeno. Puede producir asma y reacciones alérgicas. (Toxicidad alta)", correct: true },
+                    { text: "Acidulante natural o sintético que previene la diabetes.", correct: false },
+                    { text: "Colorante natural que ayuda a desintoxicar el organismo.", correct: false }
+                ],
+                feedback: "El Benzoato de Sodio (E211) es un conservante sintético. En altas cantidades puede mezclarse con Ácido Ascórbico y formar Benceno, un hidrocarburo cancerígeno. En pequeñas cantidades puede producir asma y reacciones alérgicas. Toxicidad: alta. (Página 79)",
+                page: 79
+            },
+            {
+                question: "¿Qué efectos puede causar la Tartrazina (E102)?",
+                options: [
+                    { text: "Mejora la digestión y la absorción de nutrientes.", correct: false },
+                    { text: "Puede causar hiperactividad en niños, afectando su atención y productividad. En altas cantidades puede causar insomnio. (Toxicidad alta)", correct: true },
+                    { text: "Ayuda a la desintoxicación del cuerpo.", correct: false },
+                    { text: "No produce ningún efecto secundario perjudicial.", correct: false }
+                ],
+                feedback: "La Tartrazina (E102) en dosis pequeñas puede causar hiperactividad en los niños, afectando su atención y su productividad. En altas cantidades puede causar insomnio. Toxicidad: alta. (Página 80)",
+                page: 80
+            },
+            {
+                question: "¿Cuál es la principal conclusión sobre el abordaje de la comida chatarra con enfoque CTSA?",
+                options: [
+                    { text: "Es una temática irrelevante para la educación química.", correct: false },
+                    { text: "Constituye una temática controversial, contextualizada y acorde a las necesidades de la población para formar ciudadanía responsable y participativa, relacionando lo cotidiano con la ciencia y la tecnología.", correct: true },
+                    { text: "Debe ser abordada solo por nutricionistas, no por docentes de química.", correct: false },
+                    { text: "Fomenta únicamente la memorización de datos nutricionales.", correct: false }
+                ],
+                feedback: "El abordaje de la comida chatarra con enfoque CTSA, constituye una temática controversial, contextualizada y acorde a las necesidades de la población, es uno de los recursos didácticos para formar ciudadanía responsable y participativa, además de brindar al profesor investigador una oportunidad para modelar una planeación práctica que promueve la divulgación científica acerca de este tema, donde los estudiantes logran relacionar algo tan cotidiano como el desayuno con la ciencia y la tecnología, sus implicaciones sociales, económicas, ético morales, costo beneficio y de riesgo a la salud y al ambiente. (Página 36)",
+                page: 36
+            },
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let shuffledQuestions = [];
+
+        const quizStart = document.getElementById('quiz-start');
+        const startQuizButton = document.getElementById('start-quiz-button');
+        const quizContent = document.getElementById('quiz-content');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackSection = document.getElementById('feedback-section');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const submitQuizButton = document.getElementById('submit-quiz-button');
+        const quizResults = document.getElementById('quiz-results');
+        const scoreSpan = document.getElementById('score');
+        const finalFeedbackText = document.getElementById('final-feedback-text');
+        const restartQuizButton = document.getElementById('restart-quiz-button');
+
+        startQuizButton.addEventListener('click', startQuiz);
+        prevButton.addEventListener('click', showPreviousQuestion);
+        nextButton.addEventListener('click', showNextQuestion);
+        submitQuizButton.addEventListener('click', submitQuiz);
+        restartQuizButton.addEventListener('click', restartQuiz);
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            quizStart.classList.add('hidden');
+            quizContent.classList.remove('hidden');
+            shuffledQuestions = shuffleArray([...questions]); // Shuffle questions
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = new Array(shuffledQuestions.length).fill(null);
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            questionText.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}: ${questionData.question}`;
+            optionsContainer.innerHTML = '';
+            feedbackSection.classList.add('hidden');
+            feedbackSection.textContent = '';
+
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.textContent = option.text;
+                button.dataset.index = index;
+                button.onclick = () => selectOption(index);
+
+                if (userAnswers[currentQuestionIndex] !== null && userAnswers[currentQuestionIndex].selectedIndex === index) {
+                    button.classList.add('selected');
+                }
+                optionsContainer.appendChild(button);
+            });
+
+            updateNavigationButtons();
+            if (userAnswers[currentQuestionIndex] !== null) {
+                displayFeedback(userAnswers[currentQuestionIndex].selectedIndex, questionData.options[userAnswers[currentQuestionIndex].selectedIndex].correct, questionData.feedback);
+            }
+        }
+
+        function selectOption(selectedIndex) {
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const isCorrect = questionData.options[selectedIndex].correct;
+
+            userAnswers[currentQuestionIndex] = {
+                selectedIndex: selectedIndex,
+                isCorrect: isCorrect
+            };
+
+            // Remove previous selections and feedback
+            Array.from(optionsContainer.children).forEach(button => {
+                button.classList.remove('selected', 'correct', 'incorrect');
+                button.disabled = true; // Disable all buttons after selection
+            });
+
+            // Apply selected class and correct/incorrect feedback
+            const selectedButton = optionsContainer.children[selectedIndex];
+            selectedButton.classList.add('selected');
+            if (isCorrect) {
+                selectedButton.classList.add('correct');
+            } else {
+                selectedButton.classList.add('incorrect');
+            }
+
+            displayFeedback(selectedIndex, isCorrect, questionData.feedback);
+        }
+
+        function displayFeedback(selectedIndex, isCorrect, feedbackText) {
+            feedbackSection.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackSection.classList.remove('feedback-incorrect');
+                feedbackSection.classList.add('feedback-correct');
+                feedbackSection.innerHTML = `<i class="fas fa-check-circle mr-2"></i> ¡Correcto! ${feedbackText}`;
+            } else {
+                const questionData = shuffledQuestions[currentQuestionIndex];
+                const correctOptionText = questionData.options.find(opt => opt.correct).text;
+                feedbackSection.classList.remove('feedback-correct');
+                feedbackSection.classList.add('feedback-incorrect');
+                feedbackSection.innerHTML = `<i class="fas fa-times-circle mr-2"></i> Incorrecto. La respuesta correcta era: "${correctOptionText}". ${feedbackText}`;
+            }
+        }
+
+
+        function updateNavigationButtons() {
+            prevButton.disabled = currentQuestionIndex === 0;
+            nextButton.disabled = currentQuestionIndex === shuffledQuestions.length - 1;
+
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                nextButton.classList.add('hidden');
+                submitQuizButton.classList.remove('hidden');
+            } else {
+                nextButton.classList.remove('hidden');
+                submitQuizButton.classList.add('hidden');
+            }
+        }
+
+        function showPreviousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function showNextQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            score = 0;
+            userAnswers.forEach(answer => {
+                if (answer && answer.isCorrect) {
+                    score += 4; // Each question is worth 4 points
+                }
+            });
+
+            quizContent.classList.add('hidden');
+            quizResults.classList.remove('hidden');
+            scoreSpan.textContent = score;
+
+            let feedback = '';
+            if (score === 100) {
+                feedback = "¡Felicidades! Tienes un excelente dominio del tema. Has respondido todas las preguntas correctamente.";
+            } else if (score >= 80) {
+                feedback = "¡Muy bien! Has demostrado un gran conocimiento. Sigue repasando para perfeccionar.";
+            } else if (score >= 60) {
+                feedback = "Buen intento. Has captado las ideas principales, pero te sugiero revisar las páginas del PDF para reforzar algunos conceptos.";
+            } else {
+                feedback = "Necesitas un poco más de práctica. Te recomiendo leer el documento completo nuevamente y prestar atención a las ideas clave.";
+            }
+            finalFeedbackText.textContent = feedback;
+        }
+
+        function restartQuiz() {
+            quizResults.classList.add('hidden');
+            quizStart.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = new Array(questions.length).fill(null);
+            shuffledQuestions = [];
+        }
+    </script>
+</body>
+</html>

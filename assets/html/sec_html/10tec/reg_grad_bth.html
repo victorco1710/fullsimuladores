@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario - Reglamento de Graduación BTH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .question-card {
+            background-color: #e0f2f7;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.5s ease-out;
+        }
+        .question-text {
+            font-size: 1.15em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        .options-container label {
+            display: block;
+            background-color: #fdfdfd;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #dcdcdc;
+        }
+        .options-container label:hover {
+            background-color: #e6f7ff;
+            border-color: #90cdf4;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.1);
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #28a745;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #dc3545;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:hover:not(:disabled) {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        .nav-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        #results-screen {
+            text-align: center;
+            padding: 30px;
+            background-color: #e6ffe6;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        #score {
+            font-size: 2.5em;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        #final-feedback {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .credits {
+            text-align: right;
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center mb-8 text-blue-800">Cuestionario: Reglamento de Graduación BTH</h1>
+        <div id="quiz-container">
+            <!-- Preguntas se cargarán aquí -->
+        </div>
+        <div class="navigation-buttons">
+            <button id="prev-btn" class="nav-button" disabled>Anterior</button>
+            <button id="next-btn" class="nav-button">Siguiente</button>
+            <button id="submit-btn" class="nav-button hidden">Finalizar Cuestionario</button>
+        </div>
+        <div class="credits">
+            Desarrollado por Victor Crespo
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el objeto principal del Reglamento de Graduación del Bachillerato Técnico Humanístico?",
+                options: [
+                    "Regular el proceso de inscripción escolar.",
+                    "Establecer los requisitos para la educación primaria.",
+                    "Regular el proceso de graduación para la obtención del Título de Técnico Medio.",
+                    "Definir el currículo de educación superior."
+                ],
+                answer: "Regular el proceso de graduación para la obtención del Título de Técnico Medio.",
+                feedback: "El reglamento busca regular el proceso de graduación para el Título de Técnico Medio en el Bachillerato Técnico Humanístico.",
+                page: "Página 4"
+            },
+            {
+                question: "¿En qué tipo de unidades educativas es de aplicación obligatoria este Reglamento?",
+                options: [
+                    "Solo en unidades educativas privadas.",
+                    "Solo en unidades educativas fiscales.",
+                    "En todas las Unidades Educativas Técnico Humanísticas Plenas fiscales, privadas y de convenio del Subsistema de Educación Regular.",
+                    "Únicamente en centros de educación alternativa."
+                ],
+                answer: "En todas las Unidades Educativas Técnico Humanísticas Plenas fiscales, privadas y de convenio del Subsistema de Educación Regular.",
+                feedback: "La aplicación es obligatoria en todas las Unidades Educativas Técnico Humanísticas Plenas de los tres tipos de gestión.",
+                page: "Página 4"
+            },
+            {
+                question: "¿Qué es el 'Proceso de graduación' según el Reglamento?",
+                options: [
+                    "Una ceremonia de fin de año.",
+                    "El conjunto de procedimientos para obtener el Título de Técnico Medio, incluyendo requisitos, elaboración de trabajo de grado y defensa.",
+                    "Solo la elaboración del trabajo de grado.",
+                    "El examen final de todas las asignaturas."
+                ],
+                answer: "El conjunto de procedimientos para obtener el Título de Técnico Medio, incluyendo requisitos, elaboración de trabajo de grado y defensa.",
+                feedback: "El proceso de graduación es un conjunto completo de procedimientos.",
+                page: "Página 4"
+            },
+            {
+                question: "¿Qué comprende el 'Trabajo de grado'?",
+                options: [
+                    "Solo una parte teórica.",
+                    "Un proyecto o tarea académica elaborada de forma sistemática con una parte escrita y otra práctica, ambas defendidas ante un Tribunal.",
+                    "Solo la presentación oral de un tema.",
+                    "Un informe sobre actividades extracurriculares."
+                ],
+                answer: "Un proyecto o tarea académica elaborada de forma sistemática con una parte escrita y otra práctica, ambas defendidas ante un Tribunal.",
+                feedback: "El trabajo de grado incluye tanto una parte escrita como una práctica que deben ser defendidas.",
+                page: "Página 4"
+            },
+            {
+                question: "¿Qué define el 'Perfil del trabajo de grado'?",
+                options: [
+                    "La biografía del estudiante.",
+                    "El avance preliminar del trabajo de grado que define objetivo, pertinencia, viabilidad, cronograma y estimación de costos.",
+                    "Solo el título del trabajo.",
+                    "Un resumen de los resultados finales."
+                ],
+                answer: "El avance preliminar del trabajo de grado que define objetivo, pertinencia, viabilidad, cronograma y estimación de costos.",
+                feedback: "El perfil es un avance preliminar clave para la planificación del trabajo de grado.",
+                page: "Página 4"
+            },
+            {
+                question: "¿Qué es la 'Defensa de grado'?",
+                options: [
+                    "Un debate entre estudiantes.",
+                    "La instancia de presentación del trabajo de grado donde los estudiantes exponen y defienden su trabajo ante un Tribunal.",
+                    "La revisión del trabajo por parte del maestro tutor.",
+                    "Un examen escrito sobre la carrera."
+                ],
+                answer: "La instancia de presentación del trabajo de grado donde los estudiantes exponen y defienden su trabajo ante un Tribunal.",
+                feedback: "La defensa de grado es la exposición y defensa formal del trabajo ante un tribunal.",
+                page: "Página 4"
+            },
+            {
+                question: "¿Qué grado académico obtiene el estudiante al concluir su formación y aprobar la defensa de grado?",
+                options: [
+                    "Licenciado.",
+                    "Técnico Superior.",
+                    "Técnico Medio.",
+                    "Bachiller Académico."
+                ],
+                answer: "Técnico Medio.",
+                feedback: "La aprobación de la defensa de grado conduce a la obtención del Título de Técnico Medio.",
+                page: "Página 4"
+            },
+            {
+                question: "¿Cuál es la función del 'Maestro tutor'?",
+                options: [
+                    "Evaluar la defensa de grado.",
+                    "Ser el guía metodológico en la elaboración del documento escrito del trabajo de grado.",
+                    "Realizar la ejecución práctica del trabajo de grado.",
+                    "Definir las temáticas de los trabajos de grado."
+                ],
+                answer: "Ser el guía metodológico en la elaboración del documento escrito del trabajo de grado.",
+                feedback: "El maestro tutor se encarga de la guía metodológica de la parte escrita.",
+                page: "Página 4"
+            },
+            {
+                question: "¿Quién es el 'Maestro de Técnica Tecnológica Especializada'?",
+                options: [
+                    "El director de la unidad educativa.",
+                    "El maestro que regenta una carrera Técnica Tecnológica Especializada y ejerce de guía en la ejecución o elaboración práctica del trabajo de grado.",
+                    "Un miembro del tribunal de defensa.",
+                    "Un asesor legal."
+                ],
+                answer: "El maestro que regenta una carrera Técnica Tecnológica Especializada y ejerce de guía en la ejecución o elaboración práctica del trabajo de grado.",
+                feedback: "Este maestro guía la parte práctica del trabajo de grado.",
+                page: "Página 4-5"
+            },
+            {
+                question: "¿Cómo está constituido el 'Tribunal de Defensa de Grado'?",
+                options: [
+                    "Por un solo miembro.",
+                    "Por el director de la unidad educativa y dos maestros.",
+                    "Por tres miembros: Presidente, Secretario y Vocal.",
+                    "Por el estudiante, el tutor y un vocal."
+                ],
+                answer: "Por tres miembros: Presidente, Secretario y Vocal.",
+                feedback: "El tribunal de defensa se compone de tres miembros específicos.",
+                page: "Página 5"
+            },
+            {
+                question: "¿Cuáles son las tres etapas del proceso de graduación en el Bachillerato Técnico Humanístico?",
+                options: [
+                    "Inscripción, Evaluación, Certificación.",
+                    "Elección de la modalidad, Desarrollo del trabajo, Defensa de grado.",
+                    "Investigación, Redacción, Presentación.",
+                    "Selección de carrera, Práctica, Tesis."
+                ],
+                answer: "Elección de la modalidad, Desarrollo del trabajo, Defensa de grado.",
+                feedback: "Estas tres etapas son fundamentales y secuenciales en el proceso de graduación.",
+                page: "Página 5"
+            },
+            {
+                question: "¿La aprobación de la defensa de grado es obligatoria para la obtención del Título de Técnico Medio?",
+                options: [
+                    "No, es opcional.",
+                    "Sí, es obligatoria.",
+                    "Solo si el estudiante desea una distinción especial.",
+                    "Depende de la carrera."
+                ],
+                answer: "Sí, es obligatoria.",
+                feedback: "Es un requisito indispensable para obtener el Título de Técnico Medio.",
+                page: "Página 5"
+            },
+            {
+                question: "¿Cuántas instancias máximas tienen los estudiantes para la aprobación de la defensa de grado?",
+                options: [
+                    "Una instancia.",
+                    "Dos instancias.",
+                    "Tres instancias.",
+                    "Cuatro instancias."
+                ],
+                answer: "Tres instancias.",
+                feedback: "Los estudiantes tienen un máximo de tres oportunidades para aprobar la defensa de grado.",
+                page: "Página 6"
+            },
+            {
+                question: "¿La reprobación de la defensa de grado incide en la obtención del Diploma de Bachiller?",
+                options: [
+                    "Sí, directamente.",
+                    "No, la reprobación no incide en la obtención del Diploma de Bachiller si aprueban todas las áreas de saberes y conocimientos.",
+                    "Solo si la calificación es muy baja.",
+                    "Depende de la decisión del director."
+                ],
+                answer: "No, la reprobación no incide en la obtención del Diploma de Bachiller si aprueban todas las áreas de saberes y conocimientos.",
+                feedback: "El Diploma de Bachiller se obtiene al aprobar todas las áreas de saberes y conocimientos, independientemente del resultado de la defensa de grado.",
+                page: "Página 6"
+            },
+            {
+                question: "¿Cuándo eligen los estudiantes una modalidad de graduación?",
+                options: [
+                    "Al inicio del 4to año de escolaridad.",
+                    "Al finalizar el desarrollo curricular del Tercer Trimestre del 5to año de escolaridad.",
+                    "Al finalizar el 6to año de escolaridad.",
+                    "Durante el Primer Trimestre del 6to año."
+                ],
+                answer: "Al finalizar el desarrollo curricular del Tercer Trimestre del 5to año de escolaridad.",
+                feedback: "La elección se realiza al final del 5to año para preparar el trabajo en el 6to año.",
+                page: "Página 6"
+            },
+            {
+                question: "¿Con qué debe tener relación la modalidad de graduación elegida por los estudiantes?",
+                options: [
+                    "Con sus intereses personales únicamente.",
+                    "Con el 'Perfil Profesional' y el 'Campo de Acción Laboral' de las carreras Técnica Tecnológica Especializadas.",
+                    "Con las preferencias de sus maestros.",
+                    "Con la carrera de sus padres."
+                ],
+                answer: "Con el 'Perfil Profesional' y el 'Campo de Acción Laboral' de las carreras Técnica Tecnológica Especializadas.",
+                feedback: "Es crucial que la modalidad esté alineada con el perfil y campo laboral de la carrera técnica.",
+                page: "Página 7"
+            },
+            {
+                question: "¿Quiénes son responsables de orientar a los estudiantes en la elección de las modalidades de graduación?",
+                options: [
+                    "Los padres de familia.",
+                    "Los directores de las unidades educativas.",
+                    "Los maestros de Técnica Tecnológica Especializada.",
+                    "Los estudiantes de cursos superiores."
+                ],
+                answer: "Los maestros de Técnica Tecnológica Especializada.",
+                feedback: "Son los especialistas en el área quienes deben orientar a los estudiantes.",
+                page: "Página 7"
+            },
+            {
+                question: "¿Hasta cuándo pueden los estudiantes cambiar de modalidad de graduación de manera excepcional?",
+                options: [
+                    "Hasta el final del 6to año.",
+                    "Hasta un mes antes de la conclusión del Segundo Trimestre del 6to año de escolaridad, previa justificación documentada.",
+                    "En cualquier momento del proceso.",
+                    "Solo al inicio del 5to año."
+                ],
+                answer: "Hasta un mes antes de la conclusión del Segundo Trimestre del 6to año de escolaridad, previa justificación documentada.",
+                feedback: "Existe un plazo específico y requiere justificación documentada.",
+                page: "Página 7"
+            },
+            {
+                question: "¿Cómo se pueden conformar los equipos para el desarrollo del trabajo de grado?",
+                options: [
+                    "Solo individualmente.",
+                    "Individual o en equipos de dos o tres estudiantes.",
+                    "Solo en equipos de tres estudiantes.",
+                    "En equipos de más de tres estudiantes."
+                ],
+                answer: "Individual o en equipos de dos o tres estudiantes.",
+                feedback: "El reglamento permite tanto el trabajo individual como en equipos pequeños.",
+                page: "Página 7"
+            },
+            {
+                question: "¿Cuándo inicia el desarrollo del trabajo de grado?",
+                options: [
+                    "Al inicio del 5to año de escolaridad.",
+                    "En el primer mes del Primer Trimestre del 6to año de escolaridad.",
+                    "Después de la defensa de grado.",
+                    "Cuando el estudiante lo desee."
+                ],
+                answer: "En el primer mes del Primer Trimestre del 6to año de escolaridad.",
+                feedback: "El trabajo de grado comienza al inicio del último año escolar.",
+                page: "Página 8"
+            },
+            {
+                question: "¿Quiénes designan a los maestros tutores?",
+                options: [
+                    "Los propios estudiantes.",
+                    "La Dirección de la Unidad Educativa Técnico Humanística Plena en coordinación con la Comisión Técnico Pedagógica.",
+                    "Los maestros de Técnica Tecnológica Especializada.",
+                    "Los padres de familia."
+                ],
+                answer: "La Dirección de la Unidad Educativa Técnico Humanística Plena en coordinación con la Comisión Técnico Pedagógica.",
+                feedback: "La designación es una responsabilidad conjunta de la dirección y la comisión pedagógica.",
+                page: "Página 8"
+            },
+            {
+                question: "¿Cuál de las siguientes NO es una modalidad de graduación del Bachillerato Técnico Humanístico según el reglamento?",
+                options: [
+                    "Proyecto de Emprendimiento Productivo (PEP).",
+                    "Proyecto de Investigación Pura (PIP).",
+                    "Práctica Laboral Comunitaria (PLC).",
+                    "Proyecto de Presentación Artística (PPA)."
+                ],
+                answer: "Proyecto de Investigación Pura (PIP).",
+                feedback: "Las modalidades son PEP, PI, PLC, PSSC y PPA. El Proyecto de Investigación Pura no se menciona como modalidad de graduación.",
+                page: "Página 9"
+            },
+            {
+                question: "¿Qué es el Proyecto de Emprendimiento Productivo (PEP)?",
+                options: [
+                    "Un proyecto de investigación teórica.",
+                    "Una iniciativa de concreción de proyecto que consiste en la oferta de productos o servicios para aprovechar oportunidades del mercado.",
+                    "Un servicio social comunitario.",
+                    "Una presentación artística."
+                ],
+                answer: "Una iniciativa de concreción de proyecto que consiste en la oferta de productos o servicios para aprovechar oportunidades del mercado.",
+                feedback: "El PEP se enfoca en la creación de productos o servicios con impacto económico.",
+                page: "Página 9"
+            },
+            {
+                question: "¿Qué caracteriza al Proyecto de Innovación (PI)?",
+                options: [
+                    "Realizar actividades con impacto social.",
+                    "Intervención guiada en procesos de producción.",
+                    "El planteamiento de soluciones innovadoras a problemas o necesidades del contexto, desarrollando una estructura o metodología para nuevos productos/servicios.",
+                    "Producción artística y puesta en escena."
+                ],
+                answer: "El planteamiento de soluciones innovadoras a problemas o necesidades del contexto, desarrollando una estructura o metodología para nuevos productos/servicios.",
+                feedback: "El PI se centra en la creación y mejora a través de la innovación.",
+                page: "Página 9"
+            },
+            {
+                question: "¿Cuál es la carga horaria mínima para la Práctica Laboral Comunitaria (PLC)?",
+                options: [
+                    "30 horas académicas.",
+                    "45 horas académicas.",
+                    "60 horas académicas o más.",
+                    "100 horas académicas."
+                ],
+                answer: "60 horas académicas o más.",
+                feedback: "La PLC debe tener una duración mínima de 60 horas académicas, realizadas en el último trimestre de 6to año de escolaridad.",
+                page: "Página 10"
+            },
+            {
+                question: "¿Qué es el Proyecto de Servicio Social Comunitario (PSSC)?",
+                options: [
+                    "Un proyecto de creación de arte.",
+                    "Una interacción social planificada donde los estudiantes ponen en práctica habilidades para abordar situaciones de intervención social y generar impacto positivo.",
+                    "Un plan de negocios.",
+                    "Un ensayo sobre un tema humanístico."
+                ],
+                answer: "Una interacción social planificada donde los estudiantes ponen en práctica habilidades para abordar situaciones de intervención social y generar impacto positivo.",
+                feedback: "El PSSC busca generar un impacto social significativo a través de acciones comunitarias.",
+                page: "Página 10"
+            },
+            {
+                question: "¿Qué debe presentar el Proyecto de Presentación Artística (PPA) en la defensa de grado?",
+                options: [
+                    "Solo el documento escrito.",
+                    "Un documento escrito y la correspondiente puesta en escena.",
+                    "Un prototipo del producto.",
+                    "Un informe de las horas trabajadas."
+                ],
+                answer: "Un documento escrito y la correspondiente puesta en escena.",
+                feedback: "El PPA requiere tanto el sustento teórico como la manifestación artística práctica.",
+                page: "Página 11"
+            },
+            {
+                question: "¿Qué porcentaje de la evaluación corresponde a la parte práctica en la defensa de grado?",
+                options: [
+                    "30%.",
+                    "50%.",
+                    "70%.",
+                    "100%."
+                ],
+                answer: "70%.",
+                feedback: "El reglamento asigna un mayor peso a las habilidades y destrezas prácticas (70%) en la evaluación.",
+                page: "Página 16"
+            },
+            {
+                question: "¿Cuál es la calificación cuantitativa para la 'Aprobación con excelencia en la defensa de grado'?",
+                options: [
+                    "51 a 70 puntos.",
+                    "71 a 97 puntos.",
+                    "98 a 100 puntos.",
+                    "Cualquier puntaje superior a 51."
+                ],
+                answer: "98 a 100 puntos.",
+                feedback: "La excelencia se logra con una calificación muy alta, entre 98 y 100 puntos.",
+                page: "Página 17"
+            },
+            {
+                question: "¿Quién es el responsable de emitir el 'Certificado de Excelencia en la Defensa de Grado del Bachillerato Técnico Humanístico'?",
+                options: [
+                    "El director de la unidad educativa.",
+                    "El maestro tutor.",
+                    "La Dirección Departamental de Educación.",
+                    "El Ministerio de Educación."
+                ],
+                answer: "La Dirección Departamental de Educación.",
+                feedback: "La emisión del certificado de excelencia es responsabilidad de la Dirección Departamental de Educación.",
+                page: "Página 18"
+            },
+            {
+                question: "¿Cuánto tiempo tienen los estudiantes para realizar la defensa de grado si es un trabajo individual?",
+                options: [
+                    "10 minutos.",
+                    "15 minutos.",
+                    "20 minutos.",
+                    "30 minutos."
+                ],
+                answer: "20 minutos.",
+                feedback: "Para trabajos individuales, el tiempo asignado es de 20 minutos.",
+                page: "Página 16"
+            },
+            {
+                question: "¿Cuál es el tiempo asignado para la etapa de preguntas y respuestas para trabajos de equipos de 2 estudiantes?",
+                options: [
+                    "8 minutos.",
+                    "12 minutos.",
+                    "15 minutos.",
+                    "20 minutos."
+                ],
+                answer: "12 minutos.",
+                feedback: "Los equipos de dos estudiantes tienen 12 minutos para la ronda de preguntas y respuestas.",
+                page: "Página 16"
+            },
+            {
+                question: "¿Cuándo se programará la segunda instancia de la defensa de grado?",
+                options: [
+                    "Inmediatamente después de la primera.",
+                    "En los siguientes 8 días calendario posterior al desarrollo de la primera instancia.",
+                    "Un mes después de la primera instancia.",
+                    "Al final del año escolar."
+                ],
+                answer: "En los siguientes 8 días calendario posterior al desarrollo de la primera instancia.",
+                feedback: "Existe un plazo específico de 8 días para la segunda instancia.",
+                page: "Página 17"
+            },
+            {
+                question: "¿Qué sucede si un estudiante aprueba la defensa de grado pero queda retenido en el 6to año de escolaridad?",
+                options: [
+                    "Obtendrá el Título de Técnico Medio en esa gestión.",
+                    "No obtendrá el Título de Técnico Medio en esa gestión educativa.",
+                    "Se le otorgará un certificado de participación.",
+                    "Deberá repetir solo la defensa de grado."
+                ],
+                answer: "No obtendrá el Título de Técnico Medio en esa gestión educativa.",
+                feedback: "La retención en el año escolar anula la obtención del Título de Técnico Medio en esa gestión, a pesar de haber aprobado la defensa.",
+                page: "Página 6"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let shuffledQuestions = [];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // Función para mezclar las preguntas
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Inicializar cuestionario
+        function initializeQuiz() {
+            shuffledQuestions = shuffleArray([...questions]); // Copiar y mezclar
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < 0 || currentQuestionIndex >= shuffledQuestions.length) {
+                return;
+            }
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            quizContainer.innerHTML = `
+                <div class="question-card" id="question-${currentQuestionIndex}">
+                    <div class="question-text">Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}: ${q.question}</div>
+                    <div class="options-container mt-4">
+                        ${q.options.map((option, i) => `
+                            <label>
+                                <input type="radio" name="question-${currentQuestionIndex}" value="${option}" ${userAnswers[currentQuestionIndex] === option ? 'checked' : ''}>
+                                ${option}
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${currentQuestionIndex}" class="feedback mt-4 hidden"></div>
+                    <div class="credits mt-4">Desarrollado por Victor Crespo</div>
+                </div>
+            `;
+
+            // Añadir event listener para guardar la respuesta
+            const radios = document.querySelectorAll(`input[name="question-${currentQuestionIndex}"]`);
+            radios.forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    userAnswers[currentQuestionIndex] = event.target.value;
+                    showFeedback(q, event.target.value);
+                });
+            });
+
+            // Actualizar estado de botones de navegación
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === shuffledQuestions.length - 1 && userAnswers[currentQuestionIndex] === null;
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+
+            // Mostrar feedback si ya fue respondida
+            if (userAnswers[currentQuestionIndex] !== null) {
+                showFeedback(q, userAnswers[currentQuestionIndex]);
+            }
+        }
+
+        function showFeedback(q, selectedOption) {
+            const feedbackDiv = document.getElementById(`feedback-${currentQuestionIndex}`);
+            feedbackDiv.classList.remove('hidden');
+
+            if (selectedOption === q.answer) {
+                feedbackDiv.classList.remove('incorrect');
+                feedbackDiv.classList.add('correct');
+                feedbackDiv.innerHTML = `¡Correcto! ${q.feedback} (Respuesta en: ${q.page})`;
+            } else {
+                feedbackDiv.classList.remove('correct');
+                feedbackDiv.classList.add('incorrect');
+                feedbackDiv.innerHTML = `Incorrecto. La respuesta correcta es: <strong>${q.answer}</strong>. ${q.feedback} (Respuesta en: ${q.page})`;
+            }
+            // Deshabilitar opciones después de la primera respuesta para ver feedback
+            const radios = document.querySelectorAll(`input[name="question-${currentQuestionIndex}"]`);
+            radios.forEach(radio => radio.disabled = true);
+        }
+
+        function calculateScore() {
+            score = 0;
+            shuffledQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score += 4;
+                }
+            });
+            displayResults();
+        }
+
+        function displayResults() {
+            let finalFeedbackText = "";
+            if (score >= 90) {
+                finalFeedbackText = "¡Excelente trabajo! Has demostrado un conocimiento profundo del reglamento.";
+            } else if (score >= 70) {
+                finalFeedbackText = "¡Buen esfuerzo! Tienes un buen entendimiento, pero hay áreas para mejorar.";
+            } else if (score >= 50) {
+                finalFeedbackText = "Necesitas repasar algunos conceptos clave. ¡Sigue estudiando!";
+            } else {
+                finalFeedbackText = "Es importante que revises el reglamento en detalle para mejorar tu conocimiento.";
+            }
+
+            quizContainer.innerHTML = `
+                <div id="results-screen" class="rounded-xl shadow-lg">
+                    <h2 class="text-3xl font-bold mb-4 text-blue-700">Cuestionario Finalizado</h2>
+                    <p class="text-xl mb-2">Tu puntuación total es:</p>
+                    <p id="score" class="font-extrabold">${score} / 100 puntos</p>
+                    <p id="final-feedback" class="text-gray-700">${finalFeedbackText}</p>
+                    <button onclick="location.reload()" class="nav-button mt-6">Volver a Intentar</button>
+                    <div class="credits mt-4">Desarrollado por Victor Crespo</div>
+                </div>
+            `;
+            prevBtn.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            // Permitir avanzar solo si la pregunta actual ha sido respondida
+            if (userAnswers[currentQuestionIndex] !== null && currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else if (userAnswers[currentQuestionIndex] === null) {
+                alert("Por favor, selecciona una opción antes de continuar.");
+            }
+        });
+
+        submitBtn.addEventListener('click', () => {
+            // Verificar si la última pregunta ha sido respondida antes de finalizar
+            if (userAnswers[currentQuestionIndex] !== null) {
+                calculateScore();
+            } else {
+                alert("Por favor, selecciona una opción en la última pregunta antes de finalizar.");
+            }
+        });
+
+        initializeQuiz();
+    </script>
+</body>
+</html>

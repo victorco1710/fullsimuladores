@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo de Dibujo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .option-btn {
+            transition: all 0.3s ease;
+        }
+        .correct {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+            border-color: #16a34a !important; /* green-600 */
+        }
+        .incorrect {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #dc2626 !important; /* red-600 */
+        }
+        .feedback {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .feedback.show {
+            max-height: 300px; /* Adjust as needed */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="quiz-container p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Cuestionario: El Gran Libro del Dibujo</h1>
+            <p class="text-md text-gray-600 mt-2">Pon a prueba tus conocimientos sobre las técnicas y materiales del dibujo.</p>
+        </header>
+
+        <div id="quiz-area" class="bg-white p-6 rounded-lg shadow-lg">
+            <!-- El contenido del cuestionario se insertará aquí -->
+        </div>
+
+        <div id="result-area" class="hidden text-center bg-white p-8 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-4">Puntuación Final</h2>
+            <p id="score" class="text-5xl font-bold mb-4"></p>
+            <p id="feedback-general" class="text-lg mb-6"></p>
+            <button onclick="restartQuiz()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                Intentar de Nuevo
+            </button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. &copy; Victor</p>
+    </footer>
+
+    <script>
+        // --- BASE DE DATOS DE PREGUNTAS ---
+        const allQuestions = [
+            {
+                question: "¿Cuáles son los tres elementos básicos y necesarios para dibujar mencionados al inicio del libro?",
+                options: [
+                    "Lápiz, papel y goma de borrar.",
+                    "Carboncillo, tinta y pluma.",
+                    "Acuarelas, pincel y lienzo.",
+                    "Caballete, paleta y óleo."
+                ],
+                answer: 0,
+                feedback: "Para realizar el mejor de los dibujos sólo es necesario lápiz y papel (y una goma de borrar).",
+                page: 50
+            },
+            {
+                question: "Según el libro, ¿cuál es la dirección ideal para la luz exterior en un estudio de dibujo?",
+                options: [
+                    "Desde la derecha.",
+                    "Desde arriba (cenital).",
+                    "Desde el lado izquierdo.",
+                    "Desde el frente."
+                ],
+                answer: 2,
+                feedback: "La luz debe venir del lado izquierdo para no crear sombras con la mano al dibujar (para diestros).",
+                page: 52
+            },
+            {
+                question: "¿Para qué se utiliza el spray fijador en aerosol?",
+                options: [
+                    "Para limpiar los pinceles.",
+                    "Para fijar dibujos a lápiz, carbón o sanguina y evitar que se corran.",
+                    "Para dar brillo a las acuarelas.",
+                    "Para diluir la tinta china."
+                ],
+                answer: 1,
+                feedback: "El fijador crea una capa protectora sobre dibujos realizados con medios secos como el lápiz, carboncillo o sanguina.",
+                page: 54
+            },
+            {
+                question: "¿Qué tipo de papel es el más indicado para dibujar a pluma por su grano casi imperceptible?",
+                options: [
+                    "Papel de grano grueso.",
+                    "Papel verjurado Ingres.",
+                    "Papel Canson de colores.",
+                    "Papel satinado."
+                ],
+                answer: 3,
+                feedback: "Los papeles satinados, al ser muy lisos, permiten que la pluma se deslice con suavidad, creando trazos nítidos.",
+                page: 55
+            },
+            {
+                question: "Una característica especial del papel Canson 'mi-teintes' es que:",
+                options: [
+                    "Es exclusivamente para óleo.",
+                    "Tiene un grano más grueso por una cara y medio por el revés.",
+                    "Solo se fabrica en color blanco.",
+                    "Es resistente al agua."
+                ],
+                answer: 1,
+                feedback: "Esta doble textura ofrece al artista la posibilidad de elegir el grano que mejor se adapte a su técnica o al efecto deseado.",
+                page: 55
+            },
+            {
+                question: "¿Por qué es necesario tensar el papel antes de pintar a la aguada o a la acuarela?",
+                options: [
+                    "Para que los colores se vean más brillantes.",
+                    "Para evitar la formación de arrugas y ondulaciones por la humedad.",
+                    "Para que el papel se seque más rápido.",
+                    "Para poder borrar con más facilidad."
+                ],
+                answer: 1,
+                feedback: "Al humedecer el papel, este se expande. Tensarlo permite que, al secarse, vuelva a su estado plano y sin arrugas.",
+                page: 60
+            },
+            {
+                question: "¿Quién patentó la mina de lápiz moderna, combinando grafito con arcilla?",
+                options: [
+                    "Leonardo da Vinci.",
+                    "Vincent van Gogh.",
+                    "Nicolas Jacques Conté.",
+                    "Pablo Picasso."
+                ],
+                answer: 2,
+                feedback: "El químico francés Nicolas Jacques Conté inventó el lápiz moderno en 1795 como respuesta a la escasez de grafito puro.",
+                page: 62
+            },
+            {
+                question: "En la gradación de los lápices, ¿qué significa la letra 'B'?",
+                options: [
+                    "Duro (Hard).",
+                    "Blando o negro (Black).",
+                    "Brillante (Bright).",
+                    "Básico (Basic)."
+                ],
+                answer: 1,
+                feedback: "La 'B' indica que la mina es blanda (blanda) y produce trazos más oscuros e intensos. La 'H' indica dureza (hard).",
+                page: 62
+            },
+            {
+                question: "¿Qué es el carboncillo en su origen?",
+                options: [
+                    "Una mezcla de arcilla y grafito.",
+                    "Un tipo de cera pigmentada.",
+                    "Una rama carbonizada de sauce o de vid.",
+                    "Polvo de carbón prensado con aceite."
+                ],
+                answer: 2,
+                feedback: "El carboncillo tradicional se obtiene carbonizando lentamente ramitas de sauce o vid, lo que le da su textura característica.",
+                page: 70
+            },
+            {
+                question: "¿Cuál es una de las principales desventajas o 'defectos' del carboncillo?",
+                options: [
+                    "Su falta de intensidad.",
+                    "Su precio elevado.",
+                    "Su inestabilidad y la dificultad para borrarlo completamente.",
+                    "Solo se puede usar en papel blanco."
+                ],
+                answer: 2,
+                feedback: "El carboncillo es un medio polvoriento y poco adherente, por lo que se mancha con facilidad y es difícil de borrar sin dejar rastro.",
+                page: 72
+            },
+            {
+                question: "La técnica de dibujo que utiliza principalmente blanco, negro y un tono rojizo se asocia con el uso de:",
+                options: [
+                    "Lápices de colores y acuarelas.",
+                    "Rotuladores y tinta.",
+                    "Óleo y acrílico.",
+                    "Carboncillo, creta blanca y sanguina."
+                ],
+                answer: 3,
+                feedback: "Esta combinación clásica, conocida como 'dibujo a tres colores', era muy popular en el Renacimiento y el Barroco.",
+                page: 76
+            },
+            {
+                question: "¿Qué es la 'aguada'?",
+                options: [
+                    "Una técnica de raspado sobre papel.",
+                    "Un dibujo realizado con pincel, agua y uno o dos colores.",
+                    "Un tipo de lápiz graso.",
+                    "Un método para mezclar pasteles."
+                ],
+                answer: 1,
+                feedback: "La aguada es una técnica de pintura que utiliza colores muy diluidos en agua, similar a la acuarela pero generalmente monocromática.",
+                page: 96
+            },
+            {
+                question: "En perspectiva, ¿cómo se llama el punto imaginario donde convergen todas las líneas paralelas que se alejan del observador?",
+                options: [
+                    "Punto de encuentro.",
+                    "Punto de fuga.",
+                    "Línea de horizonte.",
+                    "Punto cenital."
+                ],
+                answer: 1,
+                feedback: "El punto de fuga es un elemento clave en el dibujo en perspectiva para crear la ilusión de profundidad y distancia.",
+                page: 110
+            },
+            {
+                question: "¿Qué son los difuminos?",
+                options: [
+                    "Gomas de borrar especiales para carboncillo.",
+                    "Lápices muy blandos para sombrear.",
+                    "Un rollo de papel esponjoso y prensado para frotar y degradar trazos.",
+                    "Pinceles de pelo de marta."
+                ],
+                answer: 2,
+                feedback: "Los difuminos son herramientas cilíndricas de papel que se usan para suavizar y mezclar trazos de lápiz, carbón o pastel.",
+                page: 64
+            },
+            {
+                question: "¿Cuál es la forma más práctica de coger el lápiz para trazar grisados y degradados amplios?",
+                options: [
+                    "Como si se escribiera, con los dedos cerca de la punta.",
+                    "Con la palma de la mano hacia dentro, sujetándolo entre los dedos.",
+                    "Con la mano cerrada en un puño.",
+                    "Con las dos manos."
+                ],
+                answer: 1,
+                feedback: "Sostener el lápiz con la palma hacia dentro (o por debajo) permite usar el lado de la mina para crear trazos anchos y suaves.",
+                page: 64
+            },
+            {
+                question: "El concepto de 'escorzo' en dibujo se refiere a:",
+                options: [
+                    "El uso de colores muy vivos.",
+                    "La representación de un objeto o cuerpo en una posición oblicua o perpendicular al espectador, acortando su longitud visual.",
+                    "Un boceto rápido y sin detalles.",
+                    "La técnica de dibujar solo con líneas."
+                ],
+                answer: 1,
+                feedback: "El escorzo es un recurso de la perspectiva para representar la profundidad de forma realista y convincente.",
+                page: 168
+            },
+            {
+                question: "¿Qué escultor de la antigua Grecia estableció el primer 'canon' de la figura humana?",
+                options: [
+                    "Fidias.",
+                    "Praxíteles.",
+                    "Mirón.",
+                    "Policeto."
+                ],
+                answer: 3,
+                feedback: "Policeto, en el siglo V a.C., estableció un sistema de proporciones ideales para el cuerpo humano, que ha influido en el arte durante siglos.",
+                page: 142
+            },
+            {
+                question: "Según el canon clásico, ¿cuál es la altura ideal de la figura humana, medida en cabezas?",
+                options: [
+                    "Seis cabezas de alto.",
+                    "Diez cabezas de alto.",
+                    "Ocho cabezas de alto.",
+                    "Siete cabezas y media de alto."
+                ],
+                answer: 2,
+                feedback: "El canon establecido por los artistas del Renacimiento, revisando el clásico, proponía una altura ideal de ocho cabezas para el cuerpo masculino.",
+                page: 143
+            },
+            {
+                question: "¿Cuáles son los tres colores primarios según la teoría explicada por Van Gogh?",
+                options: [
+                    "Rojo, verde y azul.",
+                    "Naranja, violeta y verde.",
+                    "Amarillo, púrpura (magenta) y azul cian.",
+                    "Blanco, negro y gris."
+                ],
+                answer: 2,
+                feedback: "Estos tres colores (amarillo, magenta y cian) son primarios porque no se pueden obtener de la mezcla de otros colores.",
+                page: 80
+            },
+            {
+                question: "En la teoría del color, ¿qué es un color complementario?",
+                options: [
+                    "Un color que se parece mucho a otro.",
+                    "El color que se forma al mezclar dos primarios (un secundario).",
+                    "El color que se sitúa opuesto a otro en el círculo cromático.",
+                    "Un tono más claro del mismo color."
+                ],
+                answer: 2,
+                feedback: "Al colocar dos colores complementarios juntos (como rojo y verde), se intensifican mutuamente creando el máximo contraste.",
+                page: 81
+            },
+            {
+                question: "La 'ley de los contrastes simultáneos' establece que:",
+                options: [
+                    "Un blanco resalta más cuanto más oscuro es el tono que le rodea.",
+                    "Los colores cálidos siempre deben ir junto a colores fríos.",
+                    "Nunca se deben mezclar más de tres colores.",
+                    "El dibujo debe tener un contraste bajo."
+                ],
+                answer: 0,
+                feedback: "Este principio fundamental del contraste explica cómo nuestra percepción de un color o tono se ve afectada por los colores o tonos que lo rodean.",
+                page: 138
+            },
+            {
+                question: "¿Qué es un 'rotulador' (marcador)?",
+                options: [
+                    "Un pincel fino para detalles.",
+                    "Un tipo de lápiz de cera.",
+                    "Una especie de pluma-fuente con un depósito que almacena tinta.",
+                    "Una barra de grafito sin madera."
+                ],
+                answer: 2,
+                feedback: "El rotulador es una herramienta de dibujo moderna que utiliza una punta de fieltro o fibra y un depósito interno de tinta.",
+                page: 94
+            },
+             {
+                question: "El término 'contrapposto' en la representación de la figura humana se refiere a:",
+                options: [
+                    "Una figura dibujada completamente de espaldas.",
+                    "Una pose en la que el peso del cuerpo descansa sobre una pierna, creando una asimetría y torsión en caderas y hombros.",
+                    "Una técnica de sombreado intenso.",
+                    "Una figura representada en movimiento rápido."
+                ],
+                answer: 1,
+                feedback: "El contrapposto es una pose que dota a las figuras de naturalidad, dinamismo y relajación, muy utilizada desde la Grecia Clásica.",
+                page: 146
+            },
+            {
+                question: "¿Qué técnica especial de dibujo se puede realizar con los lápices de colores acuarelables?",
+                options: [
+                    "Dibujar sobre metal.",
+                    "Mezclarlos con aceite.",
+                    "Utilizar un pincel húmedo para disolver los trazos y crear un efecto de acuarela.",
+                    "Calentarlos antes de usarlos."
+                ],
+                answer: 2,
+                feedback: "Los lápices acuarelables combinan la precisión del dibujo a lápiz con la fluidez y transparencia de la acuarela.",
+                page: 93
+            },
+            {
+                question: "Al hablar de 'luz y sombra', ¿a qué se refiere la 'luz cenital'?",
+                options: [
+                    "Una luz que viene desde atrás del modelo.",
+                    "Una luz lateral que incide desde un ángulo de 45°.",
+                    "Una luz que llega al modelo desde arriba, como la del mediodía.",
+                    "Una luz que viene de frente."
+                ],
+                answer: 2,
+                feedback: "La luz cenital (de arriba) tiende a crear sombras fuertes y proyectadas hacia abajo, acentuando el volumen de forma dramática.",
+                page: 116
+            }
+        ];
+
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const quizArea = document.getElementById('quiz-area');
+        const resultArea = document.getElementById('result-area');
+        const scoreElement = document.getElementById('score');
+        const feedbackGeneralElement = document.getElementById('feedback-general');
+
+        // --- FUNCIONES DEL CUESTIONARIO ---
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            // Reiniciar estado
+            currentQuestionIndex = 0;
+            score = 0;
+            resultArea.classList.add('hidden');
+            quizArea.classList.remove('hidden');
+
+            // Barajar preguntas
+            questions = [...allQuestions];
+            shuffleArray(questions);
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const questionData = questions[currentQuestionIndex];
+            
+            let optionsHtml = '';
+            questionData.options.forEach((option, index) => {
+                optionsHtml += `<button onclick="selectAnswer(${index}, this)" class="option-btn block w-full text-left p-4 my-2 border border-gray-300 rounded-lg hover:bg-gray-200 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                    ${option}
+                               </button>`;
+            });
+
+            quizArea.innerHTML = `
+                <div class="mb-6">
+                    <p class="text-sm font-semibold text-blue-600">Pregunta ${currentQuestionIndex + 1} de ${questions.length}</p>
+                    <h2 class="text-xl md:text-2xl font-semibold mt-1">${questionData.question}</h2>
+                </div>
+                <div id="options-container">
+                    ${optionsHtml}
+                </div>
+                <div id="feedback-container" class="feedback mt-4 p-4 border-l-4 rounded-r-lg">
+                    <p id="feedback-text" class="font-semibold"></p>
+                    <p id="feedback-page" class="text-sm mt-1"></p>
+                </div>
+                <div class="text-right mt-6">
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                        Siguiente
+                    </button>
+                </div>
+            `;
+        }
+        
+        function selectAnswer(selectedIndex, buttonElement) {
+            const questionData = questions[currentQuestionIndex];
+            const optionsContainer = document.getElementById('options-container');
+            const allOptionButtons = optionsContainer.querySelectorAll('.option-btn');
+
+            // Deshabilitar todos los botones para evitar múltiples respuestas
+            allOptionButtons.forEach(btn => btn.disabled = true);
+            
+            const feedbackContainer = document.getElementById('feedback-container');
+            const feedbackText = document.getElementById('feedback-text');
+            const feedbackPage = document.getElementById('feedback-page');
+            const nextBtn = document.getElementById('next-btn');
+
+            if (selectedIndex === questionData.answer) {
+                score += 4;
+                buttonElement.classList.add('correct');
+                feedbackContainer.classList.add('border-green-500', 'bg-green-50');
+                feedbackText.textContent = "¡Correcto! " + questionData.feedback;
+            } else {
+                buttonElement.classList.add('incorrect');
+                allOptionButtons[questionData.answer].classList.add('correct');
+                feedbackContainer.classList.add('border-red-500', 'bg-red-50');
+                feedbackText.textContent = "Incorrecto. " + questionData.feedback;
+            }
+
+            feedbackPage.textContent = `Puedes encontrar la respuesta en la página ${questionData.page} del PDF.`;
+            feedbackContainer.classList.add('show');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizArea.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            
+            const totalPoints = questions.length * 4;
+            scoreElement.textContent = `${score} / ${totalPoints}`;
+
+            let feedbackMsg = '';
+            const percentage = (score / totalPoints) * 100;
+
+            if (percentage >= 90) {
+                feedbackMsg = "¡Excelente! Eres un maestro del dibujo. Tu conocimiento de los fundamentos es impresionante.";
+                scoreElement.style.color = '#16a34a'; // green-600
+            } else if (percentage >= 70) {
+                feedbackMsg = "¡Muy bien! Tienes un sólido conocimiento sobre el dibujo. Sigue practicando para perfeccionar tus habilidades.";
+                 scoreElement.style.color = '#0284c7'; // sky-600
+            } else if (percentage >= 50) {
+                feedbackMsg = "¡Buen esfuerzo! Has captado varios conceptos importantes, pero un repaso al libro te ayudará a consolidar las bases.";
+                 scoreElement.style.color = '#f97316'; // orange-500
+            } else {
+                feedbackMsg = "No te desanimes. El mundo del dibujo es amplio. Te recomendamos volver a leer el libro para reforzar los conceptos clave. ¡Tú puedes!";
+                 scoreElement.style.color = '#ef4444'; // red-500
+            }
+
+            feedbackGeneralElement.textContent = feedbackMsg;
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        // Iniciar el cuestionario al cargar la página
+        window.onload = startQuiz;
+    </script>
+</body>
+</html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Plan de Convivencia Pacífica y Armónica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-label {
+            display: block;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .option-label:hover {
+            background-color: #f7fafc;
+        }
+        .option-label.selected {
+            background-color: #ebf8ff;
+            border-color: #90cdf4;
+        }
+        .option-label.correct {
+            background-color: #c6f6d5;
+            border-color: #68d391;
+        }
+        .option-label.incorrect {
+            background-color: #fed7d7;
+            border-color: #fc8181;
+        }
+        .feedback {
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+        }
+        .feedback.correct {
+            background-color: #e6fffa;
+            color: #2c7a7b;
+            border: 1px solid #b2f5ea;
+        }
+        .feedback.incorrect {
+            background-color: #fff5f5;
+            color: #c53030;
+            border: 1px solid #fed7d7;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+    <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-sky-700 mb-4">Cuestionario: Plan de Convivencia Pacífica y Armónica</h1>
+            <p class="mb-6 text-slate-600">Pon a prueba tus conocimientos sobre los Lineamientos para la Construcción del Plan de Convivencia Pacífica y Armónica. Cada pregunta tiene un valor de 4 puntos. ¡Mucha suerte!</p>
+            <button id="start-btn" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <div id="question-screen" class="hidden">
+            <div id="progress-bar-container" class="w-full bg-slate-200 rounded-full h-2.5 mb-4">
+                <div id="progress-bar" class="bg-sky-500 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+            <p id="question-counter" class="text-sm text-slate-500 mb-2"></p>
+            <h2 id="question-title" class="text-lg sm:text-xl font-semibold text-sky-700 mb-1"></h2>
+            <p id="question-text" class="text-slate-700 mb-6 leading-relaxed"></p>
+            <div id="options-container" class="space-y-3"></div>
+            <button id="next-btn" class="mt-6 w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out disabled:opacity-50" disabled>
+                Siguiente Pregunta
+            </button>
+            <div id="feedback-container" class="mt-4"></div>
+        </div>
+
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-sky-700 mb-4">Resultados del Cuestionario</h1>
+            <p class="text-xl text-slate-700 mb-2">Tu puntuación final es:</p>
+            <p id="score" class="text-4xl font-bold text-sky-600 mb-4"></p>
+            <p id="final-feedback" class="text-slate-600 mb-6 p-4 bg-sky-50 rounded-lg border border-sky-200"></p>
+            <button id="restart-btn" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out">
+                Intentar de Nuevo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const allQuestions = [
+            // Preguntas basadas en el PDF "LINEAMIENTOS PARA LA CONSTRUCCIÓN DEL PLAN DE CONVIVENCIA PACÍFICA Y ARMÓNICA"
+            {
+                topic: "Marco Normativo Internacional",
+                text: "Según el documento, ¿qué artículo de la Convención sobre los Derechos del Niño declara que 'los Estados partes adoptarán cuantas medidas sean adecuadas para velar por que la disciplina escolar se administre de modo compatible con la dignidad humana del niño'?",
+                options: [
+                    "Artículo 19",
+                    "Artículo 28",
+                    "Artículo 37",
+                    "Artículo 29, párrafo I"
+                ],
+                correctAnswer: 1,
+                reference: "p. 10",
+                feedback: "El Artículo 28 de la Convención sobre los Derechos del Niño se refiere a la administración de la disciplina escolar compatible con la dignidad humana del niño. [cite: 48]"
+            },
+            {
+                topic: "Marco Normativo Nacional - Ley Nº 548",
+                text: "¿Cuál de las siguientes NO es una de las acciones colectivas que la comunidad educativa debe adoptar para prevenir, detener y eliminar la violencia, según el Artículo 152, parágrafo I de la Ley Nº 548?",
+                options: [
+                    "Elaborar y desarrollar medidas de no violencia para resolver conflictos.",
+                    "Romper la cultura del silencio denunciando actos de violencia.",
+                    "Aplicar sanciones corporales en casos graves como última instancia.",
+                    "Elaborar un Plan de Convivencia Pacífica y Armónica."
+                ],
+                correctAnswer: 2,
+                reference: "p. 14",
+                feedback: "El Artículo 152, parágrafo I de la Ley Nº 548 lista acciones como elaborar medidas de no violencia[cite: 92], romper la cultura del silencio [cite: 94] y elaborar el Plan[cite: 95]. Las sanciones corporales están prohibidas (Art. 117, d)[cite: 92]."
+            },
+            {
+                topic: "Enfoques y Principios",
+                text: "El documento menciona varios enfoques para el Plan de Convivencia. ¿Cuál de estos enfoques busca 'restablecer las relaciones entre los actores de las comunidades educativas, en especial entre quienes han participado de situaciones de conflicto, violencia, acoso y discriminación'?",
+                options: [
+                    "Enfoque de habilidades para la vida",
+                    "Enfoque intercultural",
+                    "Enfoque restaurativo",
+                    "Enfoque inclusivo"
+                ],
+                correctAnswer: 2,
+                reference: "p. 21",
+                feedback: "El enfoque restaurativo es el que busca restablecer las relaciones afectadas por conflictos o violencia. [cite: 167]"
+            },
+            {
+                topic: "Conceptualización del Plan",
+                text: "El documento distingue entre convivencia escolar y clima escolar. ¿Cuál es la definición de 'clima escolar' según el texto?",
+                options: [
+                    "El conjunto de relaciones humanas que se dan en la unidad educativa.",
+                    "La percepción que tienen las personas sobre la unidad educativa a partir de diferentes elementos como seguridad, calidad de enseñanza, etc.",
+                    "Las normas explícitas que regulan el comportamiento de los estudiantes.",
+                    "Las actividades extracurriculares que fomentan la integración."
+                ],
+                correctAnswer: 1,
+                reference: "p. 24",
+                feedback: "El clima escolar es la concepción que tienen las personas sobre la unidad educativa basada en diversos elementos (nivel de seguridad, calidad de enseñanza, etc.)[cite: 184]. La convivencia es el conjunto de relaciones humanas. [cite: 178]"
+            },
+            {
+                topic: "Objetivos del Plan",
+                text: "Uno de los objetivos específicos del Plan de Convivencia Pacífica y Armónica es 'Fomentar la participación de todas y todos en las actividades académicas, sociales y en otras acciones'. ¿Cuál es el método que se considera más eficaz para lograr esto, según el documento?",
+                options: [
+                    "La imposición de normas estrictas por parte de la dirección.",
+                    "La creación de comités de vigilancia estudiantil.",
+                    "Como método más eficaz de prevención y resolución pacífica de conflictos.",
+                    "La organización de eventos recreativos mensuales."
+                ],
+                correctAnswer: 2,
+                reference: "p. 29",
+                feedback: "El documento indica que fomentar la participación es el método más eficaz para la prevención y resolución pacífica de conflictos. [cite: 218]"
+            },
+            {
+                topic: "Directrices para el Plan (Ley Nº 548)",
+                text: "Según las directrices del Artículo 152, parágrafo III de la Ley Nº 548, ¿qué debe contener el Plan de Convivencia respecto a las decisiones disciplinarias?",
+                options: [
+                    "Un listado de sanciones aplicables únicamente por el director.",
+                    "La posibilidad de aplicar decisiones arbitrarias en casos excepcionales.",
+                    "El procedimiento marco para la adopción de decisiones disciplinarias sujetas a criterios y valores conocidos, evitando decisiones arbitrarias.",
+                    "La delegación total de la potestad disciplinaria a los padres de familia."
+                ],
+                correctAnswer: 2,
+                reference: "p. 15, p. 33",
+                feedback: "La directriz 'e' en la página 33 (basada en Art. 152.III Ley 548) establece que el Plan debe incluir el procedimiento marco para decisiones disciplinarias, evitando la arbitrariedad. [cite: 103, 226]"
+            },
+            {
+                topic: "Derechos de los Estudiantes",
+                text: "¿Cuál de los siguientes NO es un derecho explícitamente mencionado para las y los estudiantes en el apartado 8.1 del documento?",
+                options: [
+                    "Recibir orientación escolar para conseguir el máximo desarrollo personal y social.",
+                    "Que se respete su libertad de expresión, sin más límite que el de no vulnerar el derecho de los demás.",
+                    "Exigir la suspensión de clases en caso de desacuerdo con un docente.",
+                    "La privacidad de sus datos personales y la confidencialidad en el manejo de su expediente personal."
+                ],
+                correctAnswer: 2,
+                reference: "p. 35",
+                feedback: "La página 35 lista los derechos de los estudiantes, entre ellos la orientación[cite: 239], libertad de expresión [cite: 245] y privacidad[cite: 240]. No se menciona el derecho a exigir suspensión de clases."
+            },
+            {
+                topic: "Roles de los Actores - Director/a",
+                text: "Dentro de los roles de la directora o director de la unidad educativa (apartado 9.1), ¿cuál es una de sus responsabilidades fundamentales en la construcción del Plan de Convivencia?",
+                options: [
+                    "Redactar unilateralmente el Plan y comunicarlo a la comunidad.",
+                    "Delegar toda la construcción a los estudiantes.",
+                    "Convocar al proceso de construcción, liderarlo y articular las acciones con los integrantes de la comunidad educativa.",
+                    "Aprobar el Plan sin necesidad de la participación de otros actores."
+                ],
+                correctAnswer: 2,
+                reference: "p. 38",
+                feedback: "La directora o director es responsable de convocar, liderar el proceso y articular acciones con la comunidad educativa para la construcción del Plan. [cite: 260, 261]"
+            },
+            {
+                topic: "Procedimientos Regulatorios - Mediación",
+                text: "El documento describe la mediación como una forma de resolución de conflictos. ¿Cuál es una característica distintiva del rol del mediador o mediadora?",
+                options: [
+                    "Imponer una solución basada en su experiencia.",
+                    "Actuar como juez y determinar la culpabilidad.",
+                    "Facilitar la comunicación entre los involucrados, ayudándolos a identificar intereses y posibles soluciones, sin imponer una solución.",
+                    "Representar legalmente a una de las partes en conflicto."
+                ],
+                correctAnswer: 2,
+                reference: "p. 43",
+                feedback: "El mediador facilita la comunicación y ayuda a encontrar soluciones, pero no impone ninguna; es una tercera persona neutral. [cite: 293, 295]"
+            },
+            {
+                topic: "Proceso de Construcción del Plan - Etapas",
+                text: "El proceso de construcción del Plan se plantea en cinco etapas. ¿Cuál es el objetivo principal de la primera etapa, 'Sensibilización y motivación'?",
+                options: [
+                    "Redactar y aprobar el borrador final del Plan.",
+                    "Conformar las comisiones de trabajo y asignar responsabilidades.",
+                    "Informar a la comunidad educativa sobre la importancia del Plan y comprometerlos en su construcción participativa.",
+                    "Realizar el diagnóstico de la convivencia escolar actual."
+                ],
+                correctAnswer: 2,
+                reference: "p. 45",
+                feedback: "La etapa de sensibilización y motivación busca informar sobre la importancia del Plan y comprometer a la comunidad en su construcción participativa. [cite: 303]"
+            },
+             {
+                topic: "Proceso de Construcción - Comisión de Aprobación",
+                text: "En la etapa de 'Construcción y aprobación' (11.3), ¿qué debe asegurarse la Comisión de Aprobación antes de aprobar el Plan de Convivencia Pacífica y Armónica?",
+                options: [
+                    "Que el Plan sea lo más breve posible para facilitar su lectura.",
+                    "Que el contenido cumpla la normativa vigente, respete los derechos y que el proceso de construcción haya sido participativo.",
+                    "Que el Plan haya sido redactado exclusivamente por docentes y la dirección.",
+                    "Que el Plan incluya un sistema de sanciones económicas para los estudiantes."
+                ],
+                correctAnswer: 1,
+                reference: "p. 47",
+                feedback: "La Comisión de Aprobación debe verificar que el Plan cumpla la normativa, respete derechos y haya sido construido participativamente. [cite: 324]"
+            },
+            {
+                topic: "Conceptualización - Elementos de la Convivencia",
+                text: "El documento menciona varios elementos en los que se sustentan las relaciones de convivencia (p.24-25). ¿Cuál de estos elementos se refiere a 'la capacidad cognitiva que permite reflexionar sobre los conflictos, teniendo en cuenta los valores universales para actuar de acuerdo a ellos'?",
+                options: [
+                    "Autoconocimiento",
+                    "Empatía y perspectiva social",
+                    "Razonamiento moral",
+                    "Capacidad de diálogo"
+                ],
+                correctAnswer: 2,
+                reference: "p. 24",
+                feedback: "El razonamiento moral es la capacidad cognitiva para reflexionar sobre conflictos considerando valores universales. [cite: 187]"
+            },
+            {
+                topic: "Marco Normativo Nacional - Ley 070",
+                text: "¿Qué establece la Ley Nº 070 Avelino Siñani - Elizardo Pérez en su Artículo 3, numeral 12, como una de las bases de la educación respecto a la convivencia?",
+                options: [
+                    "Que la educación es principalmente responsabilidad de los padres.",
+                    "Que es promotora de la convivencia pacífica y contribuye a erradicar toda forma de violencia en el ámbito educativo.",
+                    "Que debe priorizar la enseñanza de contenidos científicos sobre los valores.",
+                    "Que la disciplina escolar debe basarse en un sistema de recompensas y castigos."
+                ],
+                correctAnswer: 1,
+                reference: "p. 12",
+                feedback: "El Art. 3, numeral 12 de la Ley 070 indica que la educación es promotora de la convivencia pacífica y busca erradicar la violencia. [cite: 67]"
+            },
+            {
+                topic: "Enfoques y Principios - Principios",
+                text: "Uno de los principios para el Plan de Convivencia es la 'Interculturalidad'. ¿Qué implica este principio según el documento?",
+                options: [
+                    "Que todas las actuaciones deben homogeneizar las expresiones culturales.",
+                    "Que se debe priorizar la cultura dominante de la región.",
+                    "Que todas las actuaciones tengan en cuenta la pluralidad cultural, respetando las diferentes culturas en el marco de los derechos humanos.",
+                    "Que solo se deben considerar las culturas reconocidas oficialmente por el Estado."
+                ],
+                correctAnswer: 2,
+                reference: "p. 22",
+                feedback: "El principio de Interculturalidad implica tener en cuenta la pluralidad cultural, respetando las diferencias dentro del marco de los derechos humanos. [cite: 173]"
+            },
+            {
+                topic: "Finalidad del Plan",
+                text: "¿Cuál es la finalidad principal del Plan de Convivencia Pacífica y Armónica, según el apartado 6 del documento?",
+                options: [
+                    "Servir como un reglamento disciplinario estricto para sancionar a estudiantes.",
+                    "Contribuir al desarrollo de una educación de calidad, orientando la incorporación de temáticas de prevención de violencia y convivencia en las planificaciones y el PSP.",
+                    "Reemplazar la autoridad de los docentes en la resolución de conflictos.",
+                    "Establecer un ranking de las unidades educativas con mejor convivencia."
+                ],
+                correctAnswer: 1,
+                reference: "p. 31",
+                feedback: "La finalidad es contribuir a una educación de calidad, incorporando la prevención de violencia y la convivencia en la planificación curricular y el PSP. [cite: 220]"
+            },
+            {
+                topic: "Derechos del Personal Docente y Administrativo",
+                text: "De acuerdo con el apartado 8.3, ¿cuál es un derecho específico del personal docente y administrativo en relación con la convivencia escolar?",
+                options: [
+                    "Imponer sanciones disciplinarias de forma unilateral.",
+                    "Recibir capacitación y actualización sobre temáticas encaminadas a impulsar la convivencia escolar pacífica y armónica.",
+                    "Modificar el Plan de Convivencia sin consultar a otros actores.",
+                    "Estar exentos de participar en la resolución de conflictos estudiantiles."
+                ],
+                correctAnswer: 1,
+                reference: "p. 36",
+                feedback: "El personal docente y administrativo tiene derecho a recibir capacitación y actualización sobre temas de convivencia escolar pacífica y armónica. [cite: 256]"
+            },
+            {
+                topic: "Roles de los Actores - Estudiantes",
+                text: "El apartado 9.2 describe el rol de las y los estudiantes. ¿Cómo deben ser considerados en el proceso de construcción, evaluación y seguimiento del Plan?",
+                options: [
+                    "Como observadores pasivos del proceso liderado por adultos.",
+                    "Únicamente como receptores de las normas establecidas.",
+                    "Como parte principal y protagónica, participando en el análisis, reflexión y acción con metodologías apropiadas.",
+                    "Como responsables de financiar las actividades del Plan."
+                ],
+                correctAnswer: 2,
+                reference: "p. 39",
+                feedback: "Los estudiantes deben ser parte principal y protagónica, participando activamente en todas las fases del Plan con metodologías adecuadas a su edad. [cite: 266, 267]"
+            },
+            {
+                topic: "Procedimientos Regulatorios - Normas y Medidas Disciplinarias",
+                text: "Al adoptar normas y medidas disciplinarias, el documento enfatiza que estas deben garantizar ciertos aspectos (p.41). ¿Cuál de los siguientes NO es uno de esos aspectos?",
+                options: [
+                    "El respeto a los límites.",
+                    "La no impunidad ante la violencia.",
+                    "La aplicación de castigos ejemplarizantes para disuadir a otros.",
+                    "La inclusión, evitando vivencias de rechazo."
+                ],
+                correctAnswer: 2,
+                reference: "p. 41",
+                feedback: "Las normas deben garantizar el respeto a límites[cite: 277], la no impunidad ante la violencia[cite: 278], y la inclusión[cite: 279]. No se menciona la aplicación de castigos ejemplarizantes como un principio a garantizar, sino más bien la atención individualizada [cite: 281] y el desarrollo de responsabilidad."
+            },
+            {
+                topic: "Proceso de Construcción - Etapa de Socialización e Implementación",
+                text: "En la etapa de 'Socialización e implementación' (11.4), ¿quién está a cargo de la implementación del Plan y de generar estrategias para cumplir con lo establecido?",
+                options: [
+                    "Exclusivamente la directora o director de la unidad educativa.",
+                    "La Comisión de Construcción del Plan.",
+                    "La Comisión de Convivencia Pacífica y Armónica que se organiza al inicio de cada gestión educativa.",
+                    "Los padres de familia a través de la Junta Escolar."
+                ],
+                correctAnswer: 2,
+                reference: "p. 48",
+                feedback: "La implementación del Plan está a cargo de la Comisión de Convivencia Pacífica y Armónica, organizada anualmente. [cite: 335, 336]"
+            },
+            {
+                topic: "Estructura Propuesta del Plan - Antecedentes y Justificación",
+                text: "En la sección 'II. Antecedentes y justificación' de la estructura propuesta para el Plan (p.51-52), se sugiere responder a varias preguntas base. ¿Cuál de las siguientes preguntas NO forma parte de esa sugerencia?",
+                options: [
+                    "¿Cuál es el nombre de la institución educativa? [cite: 366]",
+                    "¿Cuáles son los problemas actuales de la convivencia escolar que han sido detectados? [cite: 369]",
+                    "¿Qué presupuesto se asignará para la implementación del Plan?",
+                    "¿Por qué es importante construir el Plan de Convivencia Pacífica y Armónica de manera participativa? [cite: 370]"
+                ],
+                correctAnswer: 2,
+                reference: "p. 51-52",
+                feedback: "Las preguntas base sugeridas incluyen el nombre de la UE[cite: 366], problemas detectados[cite: 369], y la importancia de la construcción participativa[cite: 370]. No se menciona explícitamente una pregunta sobre el presupuesto en esta sección de antecedentes."
+            },
+            {
+                topic: "Marco Normativo Internacional - OIT",
+                text: "¿Cuál es uno de los principales mecanismos normativos internacionales mencionados en el apartado 2.1 que se refiere a la protección contra la violencia hacia niños y niñas?",
+                options: [
+                    "El Pacto Internacional de Derechos Económicos, Sociales y Culturales.",
+                    "El Convenio 182 de la Organización Internacional del Trabajo (OIT) sobre las Peores Formas de Trabajo Infantil.",
+                    "La Declaración Universal de los Derechos Lingüísticos.",
+                    "El Protocolo de Kyoto sobre el cambio climático."
+                ],
+                correctAnswer: 1,
+                reference: "p. 9",
+                feedback: "El Convenio 182 de la OIT sobre las Peores Formas de Trabajo Infantil es uno de los mecanismos internacionales destacados para la protección infantil. [cite: 32]"
+            },
+            {
+                topic: "Conceptualización - Pedagogía del Cuidado",
+                text: "Dentro de los elementos de la convivencia, se menciona la 'Pedagogía del cuidado' (p.25). ¿Qué implica esta pedagogía en términos de roles de género?",
+                options: [
+                    "Reforzar los roles tradicionales de cuidado asignados a las mujeres.",
+                    "Proponer organizaciones distintas para las tareas domésticas que vayan acompañadas de un cambio de los roles femeninos y masculinos, fomentando la corresponsabilidad.",
+                    "Asignar las tareas de cuidado exclusivamente al personal administrativo de la escuela.",
+                    "Enseñar que el cuidado es una responsabilidad primordialmente femenina."
+                ],
+                correctAnswer: 1,
+                reference: "p. 25",
+                feedback: "La pedagogía del cuidado busca un cambio en los roles femeninos y masculinos, fomentando la corresponsabilidad en las tareas de cuidado. [cite: 199]"
+            },
+            {
+                topic: "Procedimientos Regulatorios - Arbitraje",
+                text: "A diferencia de la negociación y la mediación, ¿qué característica fundamental tiene el arbitraje en la toma de decisiones según el apartado 10.3?",
+                options: [
+                    "Las partes en conflicto toman la decisión final por consenso.",
+                    "Una comisión determina lo que debe hacerse y su decisión es vinculante (obligatoria).",
+                    "El árbitro solo ofrece recomendaciones no obligatorias.",
+                    "El arbitraje solo se aplica a conflictos entre docentes y directivos."
+                ],
+                correctAnswer: 1,
+                reference: "p. 44",
+                feedback: "En el arbitraje, una comisión toma una decisión vinculante que las partes en conflicto deben cumplir obligatoriamente. [cite: 298, 299]"
+            },
+            {
+                topic: "Proceso de Construcción - Seguimiento y Evaluación",
+                text: "En la etapa de 'Seguimiento y evaluación' (11.5), ¿quién está a cargo de esta tarea constante y qué permite identificar?",
+                options: [
+                    "La Dirección Distrital, permitiendo comparar unidades educativas.",
+                    "Una empresa auditora externa, permitiendo una evaluación objetiva.",
+                    "La Comisión de Convivencia Armónica y Pacífica, permitiendo la identificación de logros y dificultades para mejorar los procesos.",
+                    "Los estudiantes de último año, como parte de su proyecto de grado."
+                ],
+                correctAnswer: 2,
+                reference: "p. 48",
+                feedback: "El seguimiento y evaluación constante está a cargo de la Comisión de Convivencia Armónica y Pacífica y permite identificar logros y dificultades para mejorar. [cite: 338, 339]"
+            },
+            {
+                topic: "Estructura Propuesta del Plan - Acciones para la Convivencia",
+                text: "En el apartado 'VII. Acciones para la Convivencia Pacífica y Armónica' de la estructura propuesta (p.53), al planificar las actividades, ¿cuál de los siguientes elementos NO se menciona como un aspecto a considerar en la tabla de planificación?",
+                options: [
+                    "Objetivo (¿Qué pretendemos lograr?)",
+                    "Indicadores (¿Cómo mediremos los logros?)",
+                    "Presupuesto detallado por actividad.",
+                    "Responsables (¿Quién es el encargado de ejecutar cada actividad?)"
+                ],
+                correctAnswer: 2,
+                reference: "p. 53",
+                feedback: "La tabla de planificación de acciones incluye Ámbito, Objetivo, Actividades, Indicadores, Recursos, Cronograma y Responsables. [cite: 389, 390, 391, 392, 393] No se detalla explícitamente 'Presupuesto detallado por actividad' en esa lista específica de columnas para la tabla."
+            }
+        ];
+
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const questionTitleEl = document.getElementById('question-title');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const scoreEl = document.getElementById('score');
+        const finalFeedbackEl = document.getElementById('final-feedback');
+        const progressBar = document.getElementById('progress-bar');
+        const questionCounterEl = document.getElementById('question-counter');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOptionElement = null;
+        let shuffledQuestions = [];
+        const pointsPerQuestion = 4; // Nuevo valor de puntos por pregunta
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', loadNextQuestion);
+        restartBtn.addEventListener('click', restartQuiz);
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+        
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            resultsScreen.classList.add('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            shuffledQuestions = shuffleArray(allQuestions);
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            resetState();
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const question = shuffledQuestions[currentQuestionIndex];
+                questionTitleEl.textContent = question.topic;
+                questionTextEl.textContent = `Pregunta ${currentQuestionIndex + 1}: ${question.text}`;
+                questionCounterEl.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+
+                let optionsWithIndices = question.options.map((option, index) => ({ text: option, originalIndex: index }));
+                shuffleArray(optionsWithIndices);
+
+                optionsContainer.innerHTML = '';
+                optionsWithIndices.forEach(optionObj => {
+                    const optionElement = document.createElement('label');
+                    optionElement.classList.add('option-label', 'block', 'cursor-pointer', 'p-3', 'border', 'rounded-md', 'hover:bg-slate-50', 'transition-colors');
+                    
+                    const radioInput = document.createElement('input');
+                    radioInput.type = 'radio';
+                    radioInput.name = 'option';
+                    radioInput.value = optionObj.originalIndex;
+                    radioInput.classList.add('mr-2', 'accent-sky-500');
+                    
+                    optionElement.appendChild(radioInput);
+                    optionElement.append(optionObj.text);
+                    
+                    optionElement.addEventListener('click', () => {
+                        if (nextBtn.disabled) { 
+                            if (selectedOptionElement) {
+                                selectedOptionElement.classList.remove('selected', 'bg-sky-100', 'border-sky-400');
+                            }
+                            selectedOptionElement = optionElement;
+                            optionElement.classList.add('selected', 'bg-sky-100', 'border-sky-400');
+                            radioInput.checked = true;
+                            checkAnswer(parseInt(radioInput.value), optionElement);
+                        }
+                    });
+                    optionsContainer.appendChild(optionElement);
+                });
+                updateProgressBar();
+            } else {
+                showResults();
+            }
+        }
+
+        function resetState() {
+            nextBtn.disabled = true;
+            nextBtn.textContent = 'Siguiente Pregunta';
+            feedbackContainer.innerHTML = '';
+            feedbackContainer.className = 'feedback mt-4';
+            selectedOptionElement = null;
+            if (optionsContainer.firstChild) {
+                 Array.from(optionsContainer.children).forEach(child => {
+                    child.classList.remove('correct', 'incorrect', 'selected', 'bg-sky-100', 'border-sky-400', 'pointer-events-none');
+                    child.querySelector('input').disabled = false;
+                });
+            }
+        }
+
+        function checkAnswer(selectedIndex, selectedLabel) {
+            const question = shuffledQuestions[currentQuestionIndex];
+            const isCorrect = selectedIndex === question.correctAnswer;
+            
+            Array.from(optionsContainer.children).forEach(child => {
+                child.classList.add('pointer-events-none');
+                child.querySelector('input').disabled = true;
+            });
+
+            if (isCorrect) {
+                score += pointsPerQuestion; // Usar la variable pointsPerQuestion
+                selectedLabel.classList.remove('selected', 'bg-sky-100', 'border-sky-400');
+                selectedLabel.classList.add('correct', 'bg-green-100', 'border-green-400', 'text-green-700');
+                feedbackContainer.innerHTML = `<p class="font-semibold">¡Correcto!</p><p>${question.feedback}</p>`;
+                feedbackContainer.classList.add('correct', 'bg-green-50', 'border', 'border-green-300', 'text-green-700');
+            } else {
+                selectedLabel.classList.remove('selected', 'bg-sky-100', 'border-sky-400');
+                selectedLabel.classList.add('incorrect', 'bg-red-100', 'border-red-400', 'text-red-700');
+                feedbackContainer.innerHTML = `<p class="font-semibold">Incorrecto.</p><p>${question.feedback}</p>`;
+                feedbackContainer.classList.add('incorrect', 'bg-red-50', 'border', 'border-red-300', 'text-red-700');
+
+                const correctOptionOriginalIndex = question.correctAnswer;
+                const correctLabel = Array.from(optionsContainer.children).find(label => parseInt(label.querySelector('input').value) === correctOptionOriginalIndex);
+                if (correctLabel) {
+                    correctLabel.classList.add('correct', 'bg-green-100', 'border-green-400', 'text-green-700');
+                }
+            }
+            nextBtn.disabled = false;
+             if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                nextBtn.textContent = 'Ver Resultados';
+            }
+        }
+        
+        function loadNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgressBar() {
+            const progressPercentage = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        function showResults() {
+            questionScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            
+            const totalPossibleScore = shuffledQuestions.length * pointsPerQuestion; // Usar la variable
+            const finalScore = parseFloat(score.toFixed(1));
+            scoreEl.textContent = `${finalScore} / ${totalPossibleScore.toFixed(1)}`;
+
+            let feedbackMessage = "";
+            const percentage = (finalScore / totalPossibleScore) * 100;
+
+            if (percentage >= 90) {
+                feedbackMessage = "¡Sobresaliente! Tu conocimiento sobre los lineamientos del Plan de Convivencia es excepcional. ¡Gran trabajo!";
+                finalFeedbackEl.className = 'text-slate-600 mb-6 p-4 bg-green-50 rounded-lg border border-green-300';
+            } else if (percentage >= 70) {
+                feedbackMessage = "¡Muy bien! Demuestras un sólido entendimiento de los lineamientos. Sigue así.";
+                finalFeedbackEl.className = 'text-slate-600 mb-6 p-4 bg-sky-50 rounded-lg border border-sky-300';
+            } else if (percentage >= 50) {
+                feedbackMessage = "Aprobado. Tienes una comprensión básica, pero hay áreas importantes que puedes reforzar. ¡Revisa el documento!";
+                finalFeedbackEl.className = 'text-slate-600 mb-6 p-4 bg-yellow-50 rounded-lg border border-yellow-300';
+            } else {
+                feedbackMessage = "Necesitas repasar. Te recomendamos estudiar más a fondo los lineamientos para mejorar tu comprensión. ¡Ánimo!";
+                finalFeedbackEl.className = 'text-slate-600 mb-6 p-4 bg-red-50 rounded-lg border border-red-300';
+            }
+            finalFeedbackEl.textContent = feedbackMessage;
+        }
+
+        function restartQuiz() {
+            resultsScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            progressBar.style.width = '0%';
+        }
+    </script>
+</body>
+</html>

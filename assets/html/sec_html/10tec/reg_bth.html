@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo BTH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid #e0e0e0;
+        }
+        .question-card {
+            background-color: #f9fafb;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            text-align: left;
+            background-color: #ffffff;
+            color: #374151;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .option-button:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        .option-button.selected {
+            background-color: #e0f2fe;
+            border-color: #38b2ac;
+            font-weight: bold;
+            color: #1a202c;
+        }
+        .option-button.correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+            font-weight: bold;
+            color: #065f46;
+        }
+        .option-button.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            font-weight: bold;
+            color: #991b1b;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        .feedback.correct {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .feedback.incorrect {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            padding: 12px 25px;
+            border-radius: 10px;
+            background-color: #4f46e5;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+        }
+        .nav-button:hover {
+            background-color: #4338ca;
+        }
+        .nav-button:disabled {
+            background-color: #a78bfa;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .submit-button {
+            background-color: #10b981;
+        }
+        .submit-button:hover {
+            background-color: #059669;
+        }
+        .score-section {
+            text-align: center;
+            margin-top: 30px;
+            padding: 30px;
+            background-color: #eff6ff;
+            border-radius: 15px;
+            border: 1px solid #bfdbfe;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .score-section h2 {
+            font-size: 2em;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        .score-section p {
+            font-size: 1.2em;
+            color: #3b82f6;
+            margin-bottom: 15px;
+        }
+        .score-section .score {
+            font-size: 3em;
+            font-weight: bold;
+            color: #1d4ed8;
+        }
+        .restart-button {
+            background-color: #f59e0b;
+            margin-top: 20px;
+        }
+        .restart-button:hover {
+            background-color: #d97706;
+        }
+        .credits {
+            text-align: center;
+            margin-top: 30px;
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        .question-number {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #4b5563;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-6">
+    <div id="quiz-container" class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Cuestionario: Reglamento BTH</h1>
+
+        <div id="questions-section">
+            <!-- Questions will be loaded here by JavaScript -->
+        </div>
+
+        <div id="navigation" class="navigation-buttons">
+            <button id="prev-button" class="nav-button" disabled>Anterior</button>
+            <button id="next-button" class="nav-button">Siguiente</button>
+            <button id="submit-button" class="nav-button submit-button hidden">Finalizar Cuestionario</button>
+        </div>
+
+        <div id="score-section" class="score-section hidden">
+            <h2 class="text-blue-700">¡Cuestionario Completado!</h2>
+            <p class="text-blue-600">Tu puntuación total es:</p>
+            <div id="final-score" class="score text-blue-800"></div>
+            <p id="final-feedback" class="text-blue-600 mt-4"></p>
+            <button id="restart-button" class="nav-button restart-button">Reiniciar Cuestionario</button>
+        </div>
+
+        <div class="credits">
+            Desarrollado por Victor Crespo
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el objetivo principal del Reglamento del Bachillerato Técnico Humanístico (BTH)?",
+                options: [
+                    "Normar la implementación y sostenibilidad del BTH.",
+                    "Establecer la currícula de todas las unidades educativas.",
+                    "Definir los salarios de los maestros del BTH.",
+                    "Autorizar la creación de nuevas unidades educativas en general."
+                ],
+                answer: "Normar la implementación y sostenibilidad del BTH.",
+                feedback: "Correcto. El Reglamento busca normar la implementación y sostenibilidad del BTH en las unidades educativas de Educación Secundaria Comunitaria Productiva y centros de educación alternativa.",
+                page: "Página 6"
+            },
+            {
+                question: "¿En qué subsistemas se aplica de manera obligatoria el presente Reglamento?",
+                options: [
+                    "Solo en el Subsistema de Educación Regular.",
+                    "Solo en el Subsistema de Educación Alternativa y Especial.",
+                    "En ambos: Educación Regular y Educación Alternativa y Especial.",
+                    "Exclusivamente en unidades educativas privadas."
+                ],
+                answer: "En ambos: Educación Regular y Educación Alternativa y Especial.",
+                feedback: "Correcto. El Reglamento se aplica de forma obligatoria en unidades educativas de Educación Secundaria Comunitaria Productiva y centros de educación alternativa de ambos subsistemas.",
+                page: "Página 6"
+            },
+            {
+                question: "¿Cuál de los siguientes NO es un enfoque del Bachillerato Técnico Humanístico en el Subsistema de Educación Regular?",
+                options: [
+                    "Tecnológico.",
+                    "Productivo.",
+                    "Financiero.",
+                    "Socioambiental."
+                ],
+                answer: "Financiero.",
+                feedback: "Correcto. Los enfoques son tecnológico, productivo, emprendimiento comunitario y socioambiental. El enfoque 'financiero' no se menciona directamente.",
+                page: "Página 7"
+            },
+            {
+                question: "¿Cuántas horas de formación en Técnica Tecnológica General se establecen en las unidades educativas Técnico Humanísticas Plenas?",
+                options: [
+                    "1920 horas.",
+                    "1280 horas.",
+                    "640 horas.",
+                    "320 horas."
+                ],
+                answer: "640 horas.",
+                feedback: "Correcto. La carga horaria de Técnica Tecnológica General es de 640 horas, distribuidas en 1ro, 2do y 3er año de escolaridad.",
+                page: "Página 12"
+            },
+            {
+                question: "¿Cuál es el porcentaje de formación práctica en Técnica Tecnológica Especializada?",
+                options: [
+                    "30%.",
+                    "50%.",
+                    "70%.",
+                    "100%."
+                ],
+                answer: "70%.",
+                feedback: "Correcto. El 70% de la formación en Técnica Tecnológica Especializada es de carácter práctico.",
+                page: "Página 12"
+            },
+            {
+                question: "¿Qué tipo de unidades educativas Humanísticas implementan el Bachillerato Técnico Humanístico (BTH) desarrollando Técnica Tecnológica General y Especializada?",
+                options: [
+                    "Unidades educativas Humanísticas.",
+                    "Unidades educativas Técnico Humanísticas Plenas.",
+                    "Unidades educativas Asociadas.",
+                    "Talleres Tecnológicos Productivos."
+                ],
+                answer: "Unidades educativas Técnico Humanísticas Plenas.",
+                feedback: "Correcto. Las Unidades educativas Técnico Humanísticas Plenas son las que implementan el BTH desarrollando ambos tipos de técnica tecnológica.",
+                page: "Página 11"
+            },
+            {
+                question: "¿Cuál es la duración de los periodos académicos en Técnica Tecnológica?",
+                options: [
+                    "30 minutos.",
+                    "40 minutos.",
+                    "45 minutos.",
+                    "60 minutos."
+                ],
+                answer: "40 minutos.",
+                feedback: "Correcto. Los periodos académicos tienen una duración de 40 minutos.",
+                page: "Página 12"
+            },
+            {
+                question: "¿Qué documento se obtiene a la conclusión del proceso de formación en el área Técnica Tecnológica?",
+                options: [
+                    "Diploma de Bachiller.",
+                    "Título Técnico Superior.",
+                    "Título Técnico Medio.",
+                    "Certificado de Habilidades Técnicas."
+                ],
+                answer: "Título Técnico Medio.",
+                feedback: "Correcto. A la conclusión, los estudiantes obtienen el Título Técnico Medio.",
+                page: "Página 11"
+            },
+            {
+                question: "¿Quién es responsable de la asignación de carreras Técnica Tecnológica Especializadas en el Sistema de Información Educativa?",
+                options: [
+                    "El Ministerio de Educación.",
+                    "La Dirección Departamental de Educación.",
+                    "La directora o director de la unidad educativa Técnico Humanística Plena.",
+                    "El Viceministerio de Educación Regular."
+                ],
+                answer: "La directora o director de la unidad educativa Técnico Humanística Plena.",
+                feedback: "Correcto. Es responsabilidad de la directora o director de la unidad educativa Técnico Humanística Plena.",
+                page: "Página 13"
+            },
+            {
+                question: "¿Qué se debe generar anualmente al inicio de cada gestión escolar, en coordinación con el Gobierno Autónomo Municipal, respecto al equipamiento e insumos?",
+                options: [
+                    "Un reporte de gastos.",
+                    "Un informe de necesidades.",
+                    "Un inventario.",
+                    "Un plan de mejoras."
+                ],
+                answer: "Un inventario.",
+                feedback: "Correcto. Se debe realizar la entrega de inventario del equipamiento e insumos.",
+                page: "Página 16"
+            },
+            {
+                question: "¿Qué se promueve con el enfoque de 'Emprendimiento comunitario'?",
+                options: [
+                    "La formación de empleados para grandes empresas.",
+                    "La generación de espíritus emprendedores comunitarios y entidades socioproductivas.",
+                    "La dependencia económica del Estado.",
+                    "La especialización individual sin colaboración."
+                ],
+                answer: "La generación de espíritus emprendedores comunitarios y entidades socioproductivas.",
+                feedback: "Correcto. Este enfoque busca la generación de entidades socioproductivas y cooperativas.",
+                page: "Página 7"
+            },
+            {
+                question: "¿Cuál es la responsabilidad de los Gobiernos Autónomos Municipales en la sostenibilidad del BTH?",
+                options: [
+                    "Solo supervisar la currícula.",
+                    "Asignar partidas presupuestarias para infraestructura, equipamiento y servicios básicos.",
+                    "Seleccionar a los estudiantes.",
+                    "Diseñar los programas de estudio."
+                ],
+                answer: "Asignar partidas presupuestarias para infraestructura, equipamiento y servicios básicos.",
+                feedback: "Correcto. Los Gobiernos Autónomos Municipales deben asignar presupuestos y garantizar infraestructura, equipamiento, mobiliario, etc.",
+                page: "Página 10"
+            },
+            {
+                question: "¿Cómo se clasifican las unidades educativas Técnico Humanísticas Plenas según su ámbito administrativo?",
+                options: [
+                    "Primarias, Secundarias, Terciarias.",
+                    "Urbanas y Rurales.",
+                    "Taller Tecnológico Productivo, Núcleo Tecnológico Productivo, Módulo Tecnológico Productivo, Unidad Educativa Asociada.",
+                    "Fiscales y Privadas."
+                ],
+                answer: "Taller Tecnológico Productivo, Núcleo Tecnológico Productivo, Módulo Tecnológico Productivo, Unidad Educativa Asociada.",
+                feedback: "Correcto. Estas son las clasificaciones administrativas de las unidades educativas Técnico Humanísticas Plenas.",
+                page: "Página 14"
+            },
+            {
+                question: "¿Qué tipo de unidad educativa Técnico Humanística Plena atiende únicamente a sus estudiantes y cuenta con infraestructura y equipamiento propio?",
+                options: [
+                    "Núcleo Tecnológico Productivo.",
+                    "Módulo Tecnológico Productivo.",
+                    "Unidad Educativa Asociada.",
+                    "Taller Tecnológico Productivo."
+                ],
+                answer: "Taller Tecnológico Productivo.",
+                feedback: "Correcto. El Taller Tecnológico Productivo es la unidad educativa con infraestructura y equipamiento propio que atiende solo a sus estudiantes.",
+                page: "Página 14"
+            },
+            {
+                question: "¿Cuál es el plazo para iniciar el trámite de constitución de una unidad educativa Técnico Humanística Plena - Taller Tecnológico Productivo?",
+                options: [
+                    "Del 1 al 30 de agosto de cada gestión escolar.",
+                    "Del 1 al 30 de septiembre de cada gestión escolar.",
+                    "Del 1 al 31 de octubre de cada gestión escolar.",
+                    "Del 1 al 30 de noviembre de cada gestión escolar."
+                ],
+                answer: "Del 1 al 30 de septiembre de cada gestión escolar.",
+                feedback: "Correcto. Este es el plazo establecido para iniciar dicho trámite.",
+                page: "Página 15"
+            },
+            {
+                question: "¿Qué se debe presentar como requisito para la constitución de una unidad educativa Técnico Humanística Plena - Módulo Tecnológico Productivo, además del certificado RUE, proyecto de constitución, condiciones de infraestructura y equipamiento?",
+                options: [
+                    "Lista de personal docente.",
+                    "Compromiso Municipal de Sostenimiento del Bachillerato Técnico Humanístico y Requerimiento de Ítems/Horas.",
+                    "Resultados de evaluaciones anteriores.",
+                    "Plan de estudios alternativo."
+                ],
+                answer: "Compromiso Municipal de Sostenimiento del Bachillerato Técnico Humanístico y Requerimiento de Ítems/Horas.",
+                feedback: "Correcto. Estos son requisitos adicionales para la constitución de un Módulo Tecnológico Productivo.",
+                page: "Página 22"
+            },
+            {
+                question: "¿Quién es responsable de verificar 'in situ' el cumplimiento de requisitos y condiciones para la constitución de unidades educativas Técnico Humanísticas Plenas en la Dirección Distrital Educativa?",
+                options: [
+                    "El Ministerio de Educación.",
+                    "La Dirección Departamental de Educación.",
+                    "La Dirección Distrital Educativa.",
+                    "La unidad educativa solicitante."
+                ],
+                answer: "La Dirección Distrital Educativa.",
+                feedback: "Correcto. La Dirección Distrital Educativa es la encargada de la verificación in situ.",
+                page: "Página 17"
+            },
+            {
+                question: "¿Qué ocurre si una unidad educativa Técnico Humanística Plena - Taller Tecnológico Productivo no cumple con los requisitos establecidos para su constitución?",
+                options: [
+                    "Se le otorga una extensión de tiempo.",
+                    "El trámite se aprueba con observaciones.",
+                    "Se determina la conclusión del trámite y no se iniciará ningún trámite hasta la siguiente gestión educativa.",
+                    "Se le asigna un estado provisional."
+                ],
+                answer: "Se determina la conclusión del trámite y no se iniciará ningún trámite hasta la siguiente gestión educativa.",
+                feedback: "Correcto. El incumplimiento de requisitos resulta en la conclusión del trámite y la imposibilidad de iniciarlo hasta la próxima gestión.",
+                page: "Página 17"
+            },
+            {
+                question: "¿Qué tipo de maestros pueden desempeñarse en Técnica Tecnológica Especializada en el Subsistema de Educación Regular?",
+                options: [
+                    "Solo maestros con formación inicial en ESFM a nivel Licenciatura.",
+                    "Maestros con pertinencia académica a la carrera ofertada, incluyendo formación inicial y complementaria.",
+                    "Únicamente maestros de áreas humanísticas.",
+                    "Maestros con título de Técnico Medio sin formación complementaria."
+                ],
+                answer: "Maestros con pertinencia académica a la carrera ofertada, incluyendo formación inicial y complementaria.",
+                feedback: "Correcto. Se requiere pertinencia académica y se mencionan varias opciones de formación inicial y complementaria.",
+                page: "Página 40"
+            },
+            {
+                question: "¿Cuál es el propósito del Bachillerato Técnico Humanístico en el Subsistema de Educación Alternativa y Especial?",
+                options: [
+                    "Solo formar a personas menores de 15 años.",
+                    "Contribuir a potenciar capacidades productivas y desarrollar emprendimientos individuales, familiares y comunitarios.",
+                    "Centrarse exclusivamente en la formación humanística.",
+                    "Reducir las opciones laborales."
+                ],
+                answer: "Contribuir a potenciar capacidades productivas y desarrollar emprendimientos individuales, familiares y comunitarios.",
+                feedback: "Correcto. El propósito es potenciar capacidades productivas y fomentar emprendimientos.",
+                page: "Página 49"
+            },
+            {
+                question: "¿Cuál es la carga horaria del Bachillerato Técnico Humanístico en los centros de educación alternativa?",
+                options: [
+                    "1000 horas.",
+                    "1500 horas.",
+                    "2000 horas.",
+                    "2500 horas."
+                ],
+                answer: "2000 horas.",
+                feedback: "Correcto. La carga horaria es de 2000 horas de formación Técnica Tecnológica y Productiva.",
+                page: "Página 53"
+            },
+            {
+                question: "¿Qué tipo de proceso formativo debe realizarse para el BTH en Educación Alternativa y Especial de forma regular?",
+                options: [
+                    "A distancia.",
+                    "Semipresencial.",
+                    "Presencial.",
+                    "Virtual."
+                ],
+                answer: "Presencial.",
+                feedback: "Correcto. El proceso formativo debe realizarse en la modalidad presencial, con excepciones autorizadas.",
+                page: "Página 54"
+            },
+            {
+                question: "¿Qué se debe realizar en los centros de educación alternativa para la ratificación de sus centros con Bachillerato Técnico Humanístico, además del diagnóstico y la determinación de carreras?",
+                options: [
+                    "Una solicitud al Ministerio de Educación.",
+                    "Un informe a la Dirección Distrital ratificando la autorización y carreras que aplicarán.",
+                    "Una auditoría externa.",
+                    "Un evento de socialización con la comunidad."
+                ],
+                answer: "Un informe a la Dirección Distrital ratificando la autorización y carreras que aplicarán.",
+                feedback: "Correcto. Los centros deben remitir un informe a la Dirección Distrital para la ratificación y actualización de la Resolución Administrativa.",
+                page: "Página 64"
+            },
+            {
+                question: "¿Qué sucede con los estudiantes de 6to año de escolaridad del Subsistema de Educación Regular que en gestiones pasadas fueron retenidos y cuentan con calificaciones de Técnica Tecnológica General en 4to año de escolaridad, según las disposiciones transitorias?",
+                options: [
+                    "Deben reiniciar toda la formación técnica.",
+                    "Serán nivelados en una carrera Técnica Tecnológica Especializada.",
+                    "Continuarán solo con la formación humanística.",
+                    "No podrán optar por el Título Técnico Medio."
+                ],
+                answer: "Serán nivelados en una carrera Técnica Tecnológica Especializada.",
+                feedback: "Correcto. Serán nivelados en una carrera Técnica Tecnológica Especializada hasta el Segundo Trimestre de la gestión.",
+                page: "Página 65"
+            },
+            {
+                question: "¿Qué carrera cambia su denominación de 'CONTABILIDAD' a partir de la gestión 2023 en Educación Secundaria Comunitaria Productiva?",
+                options: [
+                    "ADMINISTRACIÓN DE EMPRESAS.",
+                    "CONTADURÍA GENERAL.",
+                    "SECRETARIADO EJECUTIVO.",
+                    "MERCADOTECNIA."
+                ],
+                answer: "CONTADURÍA GENERAL.",
+                feedback: "Correcto. La carrera de 'CONTABILIDAD' se modifica a 'CONTADURÍA GENERAL'.",
+                page: "Página 65"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let shuffledQuestions = [];
+
+        const questionsSection = document.getElementById('questions-section');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const submitButton = document.getElementById('submit-button');
+        const scoreSection = document.getElementById('score-section');
+        const finalScore = document.getElementById('final-score');
+        const finalFeedback = document.getElementById('final-feedback');
+        const restartButton = document.getElementById('restart-button');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            questionsSection.innerHTML = ''; // Clear previous question
+
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                showScore();
+                return;
+            }
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            const questionCard = document.createElement('div');
+            questionCard.className = 'question-card';
+
+            const questionNumber = document.createElement('div');
+            questionNumber.className = 'question-number';
+            questionNumber.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+            questionCard.appendChild(questionNumber);
+
+            const questionText = document.createElement('p');
+            questionText.className = 'text-lg font-semibold text-gray-700 mb-4';
+            questionText.textContent = q.question;
+            questionCard.appendChild(questionText);
+
+            const optionsDiv = document.createElement('div');
+            q.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option;
+                button.onclick = () => selectOption(index);
+                optionsDiv.appendChild(button);
+            });
+            questionCard.appendChild(optionsDiv);
+
+            questionsSection.appendChild(questionCard);
+
+            // Restore selection if already answered
+            if (userAnswers[currentQuestionIndex] !== null) {
+                selectOption(userAnswers[currentQuestionIndex], true);
+            }
+
+            updateNavigationButtons();
+        }
+
+        function selectOption(selectedIndex, isRestoring = false) {
+            const buttons = questionsSection.querySelectorAll('.option-button');
+            const q = shuffledQuestions[currentQuestionIndex];
+
+            // If an answer has been submitted, prevent further selection
+            if (userAnswers[currentQuestionIndex] !== null && !isRestoring) {
+                return;
+            }
+
+            // Clear previous selections visually if not restoring
+            if (!isRestoring) {
+                buttons.forEach(btn => btn.classList.remove('selected'));
+            }
+
+            // Apply selected class
+            buttons[selectedIndex].classList.add('selected');
+            userAnswers[currentQuestionIndex] = selectedIndex;
+
+            // Provide immediate feedback if not restoring
+            if (!isRestoring) {
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'feedback mt-4';
+                
+                const selectedOptionText = q.options[selectedIndex];
+                if (selectedOptionText === q.answer) {
+                    feedbackDiv.classList.add('correct');
+                    feedbackDiv.innerHTML = `<p>${q.feedback}</p><p class="mt-2">Respuesta en: ${q.page}</p>`;
+                    if (!shuffledQuestions[currentQuestionIndex].correct) { // Only add points once
+                        score += 4;
+                        shuffledQuestions[currentQuestionIndex].correct = true;
+                    }
+                } else {
+                    feedbackDiv.classList.add('incorrect');
+                    feedbackDiv.innerHTML = `<p>Incorrecto. La respuesta correcta es: <strong>${q.answer}</strong>. ${q.feedback}</p><p class="mt-2">Respuesta en: ${q.page}</p>`;
+                    if (shuffledQuestions[currentQuestionIndex].correct) { // Remove points if previously correct
+                        score -= 4;
+                        shuffledQuestions[currentQuestionIndex].correct = false;
+                    }
+                }
+                
+                // Remove existing feedback before adding new one
+                const existingFeedback = questionsSection.querySelector('.feedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                questionsSection.querySelector('.question-card').appendChild(feedbackDiv);
+
+                // Disable all buttons after selection
+                buttons.forEach(btn => btn.disabled = true);
+            } else {
+                // When restoring, apply correct/incorrect styles directly without re-calculating score
+                const selectedOptionText = q.options[selectedIndex];
+                if (selectedOptionText === q.answer) {
+                    buttons[selectedIndex].classList.add('correct');
+                } else {
+                    buttons[selectedIndex].classList.add('incorrect');
+                    // Find and mark the correct answer
+                    const correctAnswerIndex = q.options.indexOf(q.answer);
+                    if (correctAnswerIndex !== -1) {
+                        buttons[correctAnswerIndex].classList.add('correct');
+                    }
+                }
+                // Add feedback section when restoring
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'feedback mt-4';
+                if (selectedOptionText === q.answer) {
+                    feedbackDiv.classList.add('correct');
+                    feedbackDiv.innerHTML = `<p>${q.feedback}</p><p class="mt-2">Respuesta en: ${q.page}</p>`;
+                } else {
+                    feedbackDiv.classList.add('incorrect');
+                    feedbackDiv.innerHTML = `<p>Incorrecto. La respuesta correcta es: <strong>${q.answer}</strong>. ${q.feedback}</p><p class="mt-2">Respuesta en: ${q.page}</p>`;
+                }
+                const existingFeedback = questionsSection.querySelector('.feedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                questionsSection.querySelector('.question-card').appendChild(feedbackDiv);
+                buttons.forEach(btn => btn.disabled = true);
+            }
+        }
+
+        function updateNavigationButtons() {
+            prevButton.disabled = currentQuestionIndex === 0;
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                nextButton.classList.add('hidden');
+                submitButton.classList.remove('hidden');
+            } else {
+                nextButton.classList.remove('hidden');
+                submitButton.classList.add('hidden');
+            }
+        }
+
+        function showScore() {
+            questionsSection.classList.add('hidden');
+            document.getElementById('navigation').classList.add('hidden');
+            scoreSection.classList.remove('hidden');
+            finalScore.textContent = `${score} / ${shuffledQuestions.length * 4}`;
+
+            let feedbackText = '';
+            if (score >= (shuffledQuestions.length * 4 * 0.9)) {
+                feedbackText = "¡Excelente! Has demostrado un conocimiento sobresaliente del reglamento.";
+            } else if (score >= (shuffledQuestions.length * 4 * 0.7)) {
+                feedbackText = "¡Buen trabajo! Tienes un sólido entendimiento del reglamento.";
+            } else if (score >= (shuffledQuestions.length * 4 * 0.5)) {
+                feedbackText = "Necesitas repasar algunas áreas, pero vas por buen camino.";
+            } else {
+                feedbackText = "Es importante que revises el reglamento para fortalecer tus conocimientos.";
+            }
+            finalFeedback.textContent = feedbackText;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers.fill(null);
+            shuffledQuestions = shuffleArray([...questions]); // Reshuffle for a new quiz
+            shuffledQuestions.forEach(q => q.correct = false); // Reset correct flag
+            questionsSection.classList.remove('hidden');
+            document.getElementById('navigation').classList.remove('hidden');
+            scoreSection.classList.add('hidden');
+            loadQuestion();
+        }
+
+        prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            loadQuestion();
+        });
+
+        submitButton.addEventListener('click', showScore);
+        restartButton.addEventListener('click', restartQuiz);
+
+        // Initial load
+        restartQuiz(); // Call restartQuiz to initialize the quiz
+    </script>
+</body>
+</html>

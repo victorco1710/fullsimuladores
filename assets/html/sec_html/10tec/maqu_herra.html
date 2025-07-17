@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Máquinas y Herramientas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #f9fafb;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 5rem; /* Add margin to avoid overlap with footer */
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .correct {
+            background-color: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #166534 !important;
+            font-weight: 600;
+        }
+        .incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b !important;
+        }
+        .footer-credit {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 0;
+            text-align: center;
+            background-color: #1f2937;
+            color: #d1d5db;
+            font-size: 0.875rem;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-gray-200">
+
+    <div id="quiz-container" class="quiz-container">
+        <div id="start-screen">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">Cuestionario: Máquinas y Herramientas</h1>
+            <p class="text-center text-gray-600 mb-8">Pon a prueba tus conocimientos sobre el documento. Responde 25 preguntas y obtén tu puntuación final.</p>
+            <button id="start-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-700">Pregunta <span id="question-number"></span> de 25</h2>
+                <div class="text-xl font-bold text-blue-600">Puntuación: <span id="score">0</span></div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-inner mb-6">
+                <p id="question-text" class="text-lg text-gray-800 leading-relaxed"></p>
+            </div>
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Opciones se insertarán aquí -->
+            </div>
+            <div id="feedback-container" class="mt-6 p-4 rounded-lg text-left hidden">
+                <p id="feedback-text" class="font-semibold"></p>
+                <p id="page-info" class="text-sm text-gray-600 mt-1"></p>
+            </div>
+            <button id="next-btn" class="w-full mt-8 bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-colors duration-300 hidden">
+                Siguiente Pregunta
+            </button>
+        </div>
+
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">¡Cuestionario Completado!</h1>
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-6 rounded-lg mb-6">
+                <p class="text-xl">Tu puntuación final es:</p>
+                <p id="final-score" class="text-6xl font-bold my-4"></p>
+            </div>
+            <p id="final-feedback" class="text-lg text-gray-600 mb-8"></p>
+            <button id="restart-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                Intentar de Nuevo
+            </button>
+        </div>
+    </div>
+    
+    <div class="footer-credit">
+        desarrollado por Victor Crespo
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es la definición simple de 'herramientas' según el documento?",
+                options: ["Una prolongación de la mano del hombre", "Máquinas complejas para la industria", "Dispositivos electrónicos de medición", "Objetos para construir edificios"],
+                answer: "Una prolongación de la mano del hombre",
+                page: 8,
+                feedback: "Las herramientas se definen como una extensión de las capacidades humanas para realizar tareas."
+            },
+            {
+                question: "¿Cuáles se consideran las primeras máquinas herramientas incipientes, según los hallazgos arqueológicos?",
+                options: ["Tornos alfareros en el Imperio persa", "Taladros de la Edad de Hierro", "Prensas hidráulicas romanas", "Molinos de agua celtas"],
+                answer: "Tornos alfareros en el Imperio persa",
+                page: 9,
+                feedback: "Los tornos alfareros accionados con el pie, datados alrededor de 1000 a.C., son considerados precursores de las máquinas herramientas."
+            },
+            {
+                question: "Además de sus famosas obras de arte, ¿qué importante aporte hizo Leonardo da Vinci a la mecánica?",
+                options: ["Bocetos de tornos y estudios sobre engranajes", "La invención del motor de corriente continua", "El descubrimiento de los aceros rápidos", "El diseño de la primera línea de montaje"],
+                answer: "Bocetos de tornos y estudios sobre engranajes",
+                page: 11,
+                feedback: "Da Vinci dedicó mucho tiempo a diseñar máquinas y a estudiar la forma ideal y la relación de los engranajes."
+            },
+            {
+                question: "¿Quién ideó y construyó la máquina de vapor para usos industriales, dando origen a la Revolución Industrial?",
+                options: ["James Watt", "Denis Papin", "Thomas Newcomen", "John Wilkinson"],
+                answer: "James Watt",
+                page: 11,
+                feedback: "Aunque otros sentaron las bases, James Watt perfeccionó la máquina de vapor para su aplicación industrial a gran escala."
+            },
+            {
+                question: "¿Cuál fue el gran descubrimiento de Frederick Winslow Taylor que revolucionó las herramientas de corte?",
+                options: ["Los aceros rápidos, que conservan su dureza 'al rojo vivo'", "El metal duro (widia)", "Las herramientas de cerámica", "El sistema de rosca estándar"],
+                answer: "Los aceros rápidos, que conservan su dureza 'al rojo vivo'",
+                page: 16,
+                feedback: "Taylor descubrió los aceros rápidos, que podían cortar a velocidades mucho mayores sin perder el filo, gracias a su propiedad de 'dureza al rojo vivo'."
+            },
+            {
+                question: "¿Qué sistema de energía reemplazó a las máquinas de vapor en el siglo XX, impulsando la fabricación de máquinas herramientas?",
+                options: ["Los motores de corriente continua", "La energía hidráulica", "La energía nuclear", "Los motores de combustión interna"],
+                answer: "Los motores de corriente continua",
+                page: 18,
+                feedback: "Los motores eléctricos permitieron un diseño más flexible, limpio y eficiente para las máquinas herramientas, reemplazando a las voluminosas máquinas de vapor."
+            },
+            {
+                question: "El 'Metal Duro' o 'Hardmetal' es un compuesto de:",
+                options: ["Carburo de tungsteno y cobalto", "Acero, cromo y vanadio", "Óxido de aluminio y nitruro de silicio", "Hierro y carbono"],
+                answer: "Carburo de tungsteno y cobalto",
+                page: 21,
+                feedback: "Este material, descubierto accidentalmente, resultó ser extremadamente duro y revolucionó el corte de metales."
+            },
+            {
+                question: "La marca 'Widia', utilizada para el metal duro, es una abreviatura alemana que significa:",
+                options: ["Como el diamante", "Corte rápido", "Acero fuerte", "Nueva era"],
+                answer: "Como el diamante",
+                page: 21,
+                feedback: "Proviene de 'wie diamant' (como el diamante), por su dureza excepcional, cercana a la del diamante."
+            },
+            {
+                question: "¿Qué invento sirvió de inspiración para el primer sistema de control numérico (CN)?",
+                options: ["La pianola", "El telar de Jacquard", "El telégrafo", "La máquina de escribir"],
+                answer: "La pianola",
+                page: 22,
+                feedback: "El principio de la pianola, con su rollo de papel perforado que dictaba las notas, inspiró las cintas perforadas del primer CN para controlar máquinas."
+            },
+            {
+                question: "¿Qué significan las siglas CNC en el contexto de las máquinas herramientas?",
+                options: ["Control Numérico Computarizado", "Comando Numérico Central", "Controlador de Nueva Generación", "Corte Numérico de Calidad"],
+                answer: "Control Numérico Computarizado",
+                page: 23,
+                feedback: "La llegada de la computadora permitió evolucionar del CN mecánico al CNC, un sistema mucho más flexible y potente."
+            },
+            {
+                question: "¿Qué herramientas futuristas se mencionan al final del Capítulo 1 como la nueva era del mecanizado?",
+                options: ["El láser y el ultrasonido", "La robótica y la inteligencia artificial", "La impresión 3D y la nanotecnología", "Los plasmas y los chorros de agua"],
+                answer: "El láser y el ultrasonido",
+                page: 26,
+                feedback: "Estas tecnologías representan un cambio de paradigma en cómo se elimina el material, prometiendo revolucionar la industria."
+            },
+            {
+                question: "¿Qué sector industrial es el que más utiliza máquinas herramientas?",
+                options: ["Metalmecánico", "Plástico", "Textil", "Maderero"],
+                answer: "Metalmecánico",
+                page: 29,
+                feedback: "El sector metalmecánico abarca un 59% del uso de máquinas herramientas, siendo el principal usuario a nivel mundial."
+            },
+            {
+                question: "¿Cuáles son las dos variantes principales del proceso de mecanizado?",
+                options: ["Con arranque de viruta y sin arranque de viruta", "En caliente y en frío", "Manual y automático", "Primario y secundario"],
+                answer: "Con arranque de viruta y sin arranque de viruta",
+                page: 33,
+                feedback: "El mecanizado puede dar forma a una pieza deformándola (sin arranque) o cortando y eliminando material (con arranque)."
+            },
+            {
+                question: "¿Cuál es la máquina herramienta convencional donde la pieza gira y la herramienta está fija?",
+                options: ["Torno", "Fresadora", "Taladro", "Rectificadora"],
+                answer: "Torno",
+                page: 34,
+                feedback: "El torno es la máquina de mecanizado por rotación de pieza más antigua y versátil. La pieza gira mientras la herramienta corta."
+            },
+            {
+                question: "¿Cuál es la máquina herramienta convencional donde la herramienta gira y la pieza está fija en una mesa móvil?",
+                options: ["Fresadora", "Torno", "Cepilladora", "Serrucho mecánico"],
+                answer: "Fresadora",
+                page: 36,
+                feedback: "En la fresadora, la herramienta giratoria (fresa) arranca viruta de la pieza, que se sujeta a una mesa."
+            },
+            {
+                question: "¿Cuál es la función principal de las herramientas de corte en un proceso de mecanizado?",
+                options: ["El arranque de viruta", "La sujeción de la pieza", "La refrigeración del proceso", "La medición de tolerancias"],
+                answer: "El arranque de viruta",
+                page: 45,
+                feedback: "Las herramientas de corte están diseñadas específicamente para quitar material de la pieza de trabajo y darle forma."
+            },
+            {
+                question: "¿Cómo clasificó F. W. Taylor a las herramientas de corte en una división elemental?",
+                options: ["Monofilo y multifilo", "Positivas y negativas", "Estáticas y giratorias", "De desbaste y de acabado"],
+                answer: "Monofilo y multifilo",
+                page: 46,
+                feedback: "Taylor las clasificó según si tenían un solo filo de corte (monofilo, como en un torno) o varios (multifilo, como en una fresa)."
+            },
+            {
+                question: "¿Qué innovación permitió usar el metal duro en 'insertos' sin necesidad de soldarlos a un mango?",
+                options: ["El sistema de sujeción por brida (Kendex)", "El recubrimiento de titanio", "La sinterización a alta presión", "El afilado con diamante"],
+                answer: "El sistema de sujeción por brida (Kendex)",
+                page: 51,
+                feedback: "El sistema Kendex introdujo los 'insertos intercambiables', que se sujetaban mecánicamente, agilizando enormemente la producción."
+            },
+            {
+                question: "¿Para qué se aplican recubrimientos como el TiN (Nitruro de Titanio) a los insertos de metal duro?",
+                options: ["Para incrementar su dureza o tenacidad", "Para hacerlos más baratos", "Para cambiarles el color", "Para que no se oxiden"],
+                answer: "Para incrementar su dureza o tenacidad",
+                page: 53,
+                feedback: "Los recubrimientos cerámicos mejoran las propiedades del sustrato de metal duro, aumentando su vida útil, resistencia al calor y rendimiento."
+            },
+            {
+                question: "La tecnología CIM (Manufactura Integrada por Computadora) busca:",
+                options: ["La integración y el control por computadora de todas las actividades de producción", "Diseñar piezas en 3D", "Controlar un robot de soldadura", "Programar una sola máquina CNC"],
+                answer: "La integración y el control por computadora de todas las actividades de producción",
+                page: 63,
+                feedback: "CIM es una filosofía de trabajo que busca integrar todas las áreas de la empresa, desde el diseño hasta la producción, usando la informática."
+            },
+            {
+                question: "El proceso de Mecanizado de Alta Velocidad (MAV) combina:",
+                options: ["Altas velocidades de rotación y de avance", "Baja velocidad y mucha profundidad", "Herramientas grandes y poca potencia", "Corte en seco y refrigeración por aire"],
+                answer: "Altas velocidades de rotación y de avance",
+                page: 65,
+                feedback: "MAV es una tecnología de corte que utiliza velocidades de 5 a 10 veces superiores a las convencionales, combinando altas RPM y avances."
+            },
+            {
+                question: "¿Qué ventaja principal ofrece el sistema de insertos 'Wiper'?",
+                options: ["Reduce el tiempo de mecanizado a la mitad o mejora el acabado superficial", "Permite cortar materiales más duros", "Funciona sin refrigerante", "Es más barato que los insertos normales"],
+                answer: "Reduce el tiempo de mecanizado a la mitad o mejora el acabado superficial",
+                page: 66,
+                feedback: "El perfilado especial del filo de los insertos Wiper permite duplicar el avance manteniendo la misma rugosidad, o mejorarla con el mismo avance."
+            },
+            {
+                question: "¿Qué tecnología no convencional es especialmente útil para mecanizar materiales duros y frágiles como la cerámica?",
+                options: ["El mecanizado por ultrasonido", "El corte por plasma", "El estampado en frío", "El trefilado"],
+                answer: "El mecanizado por ultrasonido",
+                page: 71,
+                feedback: "El mecanizado por ultrasonido (RUM) combina rotación y vibración de alta frecuencia para mecanizar eficazmente materiales frágiles y duros."
+            },
+            {
+                question: "¿Cuál es el compuesto del CBN, un material de dureza cercana a la del diamante?",
+                options: ["Nitruro de boro cúbico", "Carburo de silicio", "Dióxido de zirconio", "Alúmina pura"],
+                answer: "Nitruro de boro cúbico",
+                page: 57,
+                feedback: "El CBN (Nitruro de Boro Cúbico) es un material superduro, solo superado por el diamante, utilizado para mecanizar aceros templados y otros materiales difíciles."
+            },
+            {
+                question: "¿En qué industria se utilizó por primera vez la robótica de forma masiva para la tarea de soldadura por puntos?",
+                options: ["Automovilística", "Aeronáutica", "Naval", "Ferroviaria"],
+                answer: "Automovilística",
+                page: 67,
+                feedback: "La industria automotriz fue pionera en la implementación de robots para la soldadura de carrocerías, siendo la tarea más frecuente robotizada."
+            }
+        ];
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackTextEl = document.getElementById('feedback-text');
+        const pageInfoEl = document.getElementById('page-info');
+        const scoreEl = document.getElementById('score');
+        
+        const finalScoreEl = document.getElementById('final-score');
+        const finalFeedbackEl = document.getElementById('final-feedback');
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            resultsScreen.classList.add('hidden');
+            
+            shuffledQuestions = [...quizData];
+            shuffleArray(shuffledQuestions);
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreEl.textContent = score;
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            questionNumberEl.textContent = currentQuestionIndex + 1;
+            questionTextEl.textContent = currentQuestion.question;
+
+            const shuffledOptions = [...currentQuestion.options];
+            shuffleArray(shuffledOptions);
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-btn', 'w-full', 'p-4', 'text-left', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'hover:bg-blue-50', 'hover:border-blue-400');
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackContainer.classList.add('hidden');
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const isCorrect = selectedBtn.textContent === currentQuestion.answer;
+
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                button.style.cursor = 'not-allowed';
+                if (button.textContent === currentQuestion.answer) {
+                    button.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                score += 4;
+                scoreEl.textContent = score;
+                feedbackTextEl.innerHTML = `<strong class='text-green-700'>¡Respuesta Correcta!</strong> ${currentQuestion.feedback}`;
+                feedbackContainer.className = 'mt-6 p-4 rounded-lg text-left bg-green-100';
+            } else {
+                selectedBtn.classList.add('incorrect');
+                feedbackTextEl.innerHTML = `<strong class='text-red-700'>Respuesta Incorrecta.</strong> ${currentQuestion.feedback}`;
+                feedbackContainer.className = 'mt-6 p-4 rounded-lg text-left bg-red-100';
+            }
+
+            pageInfoEl.textContent = `Referencia: Página ${currentQuestion.page} del PDF.`;
+            feedbackContainer.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+        
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            finalScoreEl.textContent = score;
+            
+            let feedback = '';
+            const percentage = (score / (quizData.length * 4)) * 100;
+            if (percentage >= 90) {
+                feedback = '¡Excelente trabajo! Tienes un conocimiento profundo sobre máquinas y herramientas.';
+            } else if (percentage >= 70) {
+                feedback = '¡Muy bien! Has demostrado un buen entendimiento del tema.';
+            } else if (percentage >= 50) {
+                feedback = '¡Buen intento! Hay algunos temas que puedes repasar para mejorar.';
+            } else {
+                feedback = 'Parece que necesitas repasar el documento. ¡No te desanimes y vuelve a intentarlo!';
+            }
+            finalFeedbackEl.textContent = feedback;
+        }
+
+        function handleNextButton() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', handleNextButton);
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

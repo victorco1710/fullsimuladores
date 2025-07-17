@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Ley N° 348</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-2xl border border-blue-200">
+        <div id="quiz-start-screen" class="text-center">
+            <h1 class="text-3xl font-bold text-indigo-800 mb-6">Cuestionario Ley N° 348</h1>
+            <p class="text-lg text-gray-700 mb-8">
+                Este cuestionario interactivo te ayudará a evaluar tu conocimiento sobre la Ley N° 348, "Ley Integral para Garantizar a las Mujeres una Vida Libre de Violencia". Consta de 35 preguntas de opción múltiple, cada una con retroalimentación detallada y la referencia a la página del PDF.
+                Cada pregunta tiene un valor de 2.8 puntos. ¡Prepárate para el desafío!
+            </p>
+            <button id="start-quiz-button"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                Comenzar Cuestionario
+            </button>
+            <p class="text-sm text-gray-500 mt-10">PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025.</p>
+            <p class="text-sm text-gray-500">© Victor</p>
+        </div>
+
+        <div id="quiz-container" class="hidden">
+            <div class="text-right text-gray-600 text-lg mb-4">
+                Pregunta <span id="current-question-number">1</span> de <span id="total-questions">35</span>
+            </div>
+            <h2 id="question-text" class="text-2xl font-semibold text-gray-900 mb-6"></h2>
+            <div id="options-container" class="space-y-4">
+                <!-- Options will be loaded here by JavaScript -->
+            </div>
+
+            <div class="mt-8 flex justify-between items-center">
+                <button id="verify-button"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+                    Verificar Respuesta
+                </button>
+                <button id="next-button"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition duration-300 ease-in-out hidden">
+                    Siguiente Pregunta
+                </button>
+            </div>
+
+            <div id="feedback-container" class="mt-8 p-4 rounded-lg bg-gray-50 border border-gray-200 text-gray-700 hidden">
+                <p class="font-semibold text-lg mb-2">Retroalimentación:</p>
+                <p id="feedback-text" class="mb-2"></p>
+                <p class="text-sm text-gray-500">Página de referencia: <span id="page-reference"></span></p>
+            </div>
+            <p class="text-sm text-gray-500 mt-10 text-center">PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025.</p>
+            <p class="text-sm text-gray-500 text-center">© Victor</p>
+        </div>
+
+        <div id="quiz-results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-indigo-800 mb-6">¡Cuestionario Completado!</h1>
+            <p class="text-xl text-gray-800 mb-4">Tu puntuación total es: <span id="final-score" class="font-extrabold text-indigo-600"></span> de <span id="max-score" class="font-extrabold text-indigo-600"></span> puntos.</p>
+            <p id="general-feedback" class="text-lg text-gray-700 mb-8"></p>
+            <button id="restart-quiz-button"
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                Reiniciar Cuestionario
+            </button>
+            <p class="text-sm text-gray-500 mt-10">PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025.</p>
+            <p class="text-sm text-gray-500">© Victor</p>
+        </div>
+    </div>
+
+    <script>
+        // Define all quiz questions
+        const allQuestions = [
+            {
+                question: "¿Cuál de los siguientes NO es un fin explícito de la Ley N° 348, según su Artículo 2?",
+                options: [
+                    "Establecer mecanismos integrales de prevención.",
+                    "Garantizar a las mujeres una vida digna y el ejercicio pleno de sus derechos.",
+                    "Promover la autonomía económica de las mujeres a través de microcréditos.",
+                    "Establecer políticas integrales de atención, protección y reparación."
+                ],
+                correctAnswer: "Promover la autonomía económica de las mujeres a través de microcréditos.",
+                feedback: "El Artículo 2 (página 1) establece como objeto y finalidad de la Ley 'establecer mecanismos, medidas y políticas integrales de prevención, atención, protección y reparación a las mujeres en situación de violencia, así como la persecución y sanción a los agresores, con el fin de garantizar a las mujeres una vida digna y el ejercicio pleno de sus derechos para Vivir Bien'. La promoción de microcréditos no es un fin explícito en este artículo.",
+                page: 1
+            },
+            {
+                question: "Según el principio de 'Igualdad' en el Artículo 4, ¿qué tipo de discriminación NO se menciona explícitamente como eliminable?",
+                options: [
+                    "Por diferencias de sexo.",
+                    "Por diferencias culturales.",
+                    "Por diferencias de edad.",
+                    "Por diferencias económicas."
+                ],
+                correctAnswer: "Por diferencias de edad.",
+                feedback: "El principio de 'Igualdad' (Artículo 4, numeral 2, página 1) busca eliminar toda forma de distinción o discriminación 'por diferencias de sexo, culturales, económicas, físicas, sociales o de cualquier otra índole'. La edad no se menciona explícitamente aquí, aunque podría estar cubierta por 'cualquier otra índole', la pregunta busca lo *no* explícito.",
+                page: 1
+            },
+            {
+                question: "El principio de 'Informalidad' (Artículo 4) establece que no se exigirá el cumplimiento de requisitos formales o materiales que entorpezcan el proceso. ¿A qué niveles de la administración pública se aplica este principio?",
+                options: [
+                    "Solo a las instancias de atención directa a las víctimas.",
+                    "Únicamente a los niveles de detección y procesamiento.",
+                    "A todos los niveles de la administración pública destinada a prevenir, atender, detectar, procesar y sancionar cualquier forma de violencia.",
+                    "Exclusivamente a las fases de restablecimiento de derechos."
+                ],
+                correctAnswer: "A todos los niveles de la administración pública destinada a prevenir, atender, detectar, procesar y sancionar cualquier forma de violencia.",
+                feedback: "El principio de 'Informalidad' (Artículo 4, numeral 11, página 2) se aplica 'En todos los niveles de la administración pública destinada a prevenir, atender, detectar, procesar y sancionar cualquier forma de violencia hacia las mujeres'.",
+                page: 2
+            },
+            {
+                question: "De acuerdo con la definición de 'Violencia' en el Artículo 6, ¿cuál de las siguientes opciones describe una consecuencia que NO se considera violencia por el solo hecho de ser mujer?",
+                options: [
+                    "Sufrimiento o daño físico.",
+                    "Perjuicio en su patrimonio.",
+                    "Pérdida de una oportunidad laboral por falta de cualificación.",
+                    "Daño psicológico."
+                ],
+                correctAnswer: "Pérdida de una oportunidad laboral por falta de cualificación.",
+                feedback: "La definición de 'Violencia' (Artículo 6, numeral 1, página 3) incluye 'la muerte, sufrimiento o daño físico, sexual o psicológico a una mujer u otra persona, le genere perjuicio en su patrimonio, en su economía, en su fuente laboral o en otro ámbito cualquiera, por el sólo hecho de ser mujer'. Una pérdida de oportunidad laboral por falta de cualificación, sin que medie una acción u omisión por el hecho de ser mujer, no encaja en esta definición.",
+                page: 3
+            },
+            {
+                question: "La Violencia Feminicida, según el Artículo 7, se define como la acción de extrema violencia que viola el derecho fundamental a la vida y causa la muerte de la mujer. ¿Cuál es la característica esencial que la distingue de otros tipos de homicidio?",
+                options: [
+                    "El uso de armas de fuego.",
+                    "Que la muerte se produce por el hecho de ser mujer.",
+                    "Que ocurre en el ámbito doméstico.",
+                    "Que el agresor tiene antecedentes penales."
+                ],
+                correctAnswer: "Que la muerte se produce por el hecho de ser mujer.",
+                feedback: "El Artículo 7, numeral 2 (página 3) define la Violencia Feminicida como la acción que causa la muerte de la mujer 'por el hecho de serlo', que es la característica distintiva.",
+                page: 3
+            },
+            {
+                question: "La Violencia Mediática (Artículo 7) es producida por los medios masivos de comunicación. ¿Cuál de las siguientes acciones NO se considera una manifestación de este tipo de violencia?",
+                options: [
+                    "Difusión de mensajes estereotipados que promueven la sumisión de mujeres.",
+                    "Publicaciones que injurian o difaman a una mujer.",
+                    "La emisión de noticias sobre crímenes violentos sin identificar a la víctima.",
+                    "Imágenes que atentan contra la dignidad, nombre e imagen de la mujer."
+                ],
+                correctAnswer: "La emisión de noticias sobre crímenes violentos sin identificar a la víctima.",
+                feedback: "El Artículo 7, numeral 4 (página 3) describe la Violencia Mediática como aquella que 'promueven la sumisión y/o explotación de mujeres, que la injurian, difaman, discriminan, deshonran, humillan o que atentan contra su dignidad, su nombre y su imagen'. La emisión de noticias sobre crímenes violentos sin identificar a la víctima no encaja en esta definición de violencia mediática, aunque sí se pide en otros artículos la difusión objetiva y precautelando la dignidad.",
+                page: 3
+            },
+            {
+                question: "Según el Artículo 7, la Violencia Patrimonial y Económica se manifiesta de diversas formas. ¿Cuál de las siguientes acciones NO corresponde a este tipo de violencia?",
+                options: [
+                    "Controlar o limitar los ingresos económicos de la mujer.",
+                    "Privar a la mujer de los medios indispensables para vivir.",
+                    "Ocasionar daño o menoscabo de sus bienes propios o gananciales.",
+                    "Exigir a la mujer que presente un certificado de no embarazo para acceder a un empleo."
+                ],
+                correctAnswer: "Exigir a la mujer que presente un certificado de no embarazo para acceder a un empleo.",
+                feedback: "El Artículo 7, numeral 10 (página 4) define la Violencia Patrimonial y Económica en relación con el daño a bienes, valores, recursos, control de ingresos o privación de medios para vivir. La exigencia de un certificado de no embarazo para acceder a un empleo es una forma de discriminación laboral, cubierta por la Violencia Laboral (Artículo 7, numeral 11) y Artículo 21, numeral 2, no por la violencia patrimonial y económica.",
+                page: 4
+            },
+            {
+                question: "Respecto a la información que genera el Sistema Integral Plurinacional de Prevención, Atención, Sanción y Erradicación de la Violencia en razón de Género (SIPPASE), el Artículo 11 establece que esta información es de carácter:",
+                options: [
+                    "Público y de libre acceso para cualquier ciudadano.",
+                    "Reservado, salvo requerimiento fiscal u orden judicial para certificaciones.",
+                    "Semipúblico, accesible solo para instituciones gubernamentales.",
+                    "Confidencial, sin posibilidad de ser difundida bajo ninguna circunstancia."
+                ],
+                correctAnswer: "Reservado, salvo requerimiento fiscal u orden judicial para certificaciones.",
+                feedback: "El Artículo 11, parágrafo I (página 5) establece que la información de datos que el SIPPASE genere 'será de carácter reservado'. El parágrafo II añade que la entidad responsable del registro 'podrá emitir certificaciones sobre antecedentes de los agresores, denuncias... a sólo requerimiento fiscal u orden judicial'.",
+                page: 5
+            },
+            {
+                question: "Para el acceso a un cargo público, el Artículo 13 establece un requisito inexcusable. ¿Cuál de las siguientes opciones describe correctamente este requisito?",
+                options: [
+                    "No contar con antecedentes de violencia ejercida contra una mujer o cualquier miembro de su familia, con sentencia ejecutoriada.",
+                    "Haber participado en programas de sensibilización sobre género.",
+                    "Contar con una licenciatura en derechos humanos.",
+                    "No tener ningún tipo de denuncia, incluso si no hay sentencia."
+                ],
+                correctAnswer: "No contar con antecedentes de violencia ejercida contra una mujer o cualquier miembro de su familia, con sentencia ejecutoriada.",
+                feedback: "El Artículo 13, parágrafo I (página 6) establece como requisito inexcusable 'el no contar con antecedentes de violencia ejercida contra una mujer o cualquier miembro de su familia, que tenga sentencia ejecutoriada en calidad de cosa juzgada'.",
+                page: 6
+            },
+            {
+                question: "¿Qué Ministerio es designado como el Ente Rector responsable de la coordinación, articulación y vigilancia de la aplicación efectiva y cumplimiento de la Ley N° 348?",
+                options: [
+                    "Ministerio de Salud y Deportes.",
+                    "Ministerio de Educación.",
+                    "Ministerio de Justicia.",
+                    "Ministerio de la Presidencia."
+                ],
+                correctAnswer: "Ministerio de Justicia.",
+                feedback: "El Artículo 16 (página 6) designa al 'Ministerio de Justicia, en el marco de sus competencias y atribuciones [como] el Ente Rector responsable de coordinación, articulación y vigilancia de la aplicación efectiva y cumplimiento de la presente Ley.'",
+                page: 6
+            },
+            {
+                question: "La Prevención Colectiva, según el Artículo 17, se refiere a medidas destinadas a prevenir la violencia y proteger a las mujeres a través de sus organizaciones. ¿Cuál de los siguientes ejemplos NO se menciona como una colectividad a la que puedan pertenecer las mujeres para este fin?",
+                options: [
+                    "Sindicatos.",
+                    "Juntas vecinales.",
+                    "Empresas privadas con fines de lucro.",
+                    "Comunidades indígena originario campesinos."
+                ],
+                correctAnswer: "Empresas privadas con fines de lucro.",
+                feedback: "El Artículo 17, parágrafo I, numeral 3 (página 7) menciona 'sindicatos, juntas vecinales, gremios, comunidades, naciones, pueblos indígena originario campesinos, interculturales y afrobolivianas'. Las empresas privadas con fines de lucro no se mencionan explícitamente en este contexto.",
+                page: 7
+            },
+            {
+                question: "En el ámbito educativo, el Artículo 19 establece la creación de centros de atención psicológica en las unidades educativas. ¿Con qué tipo de instituciones se debe realizar un convenio para la atención psicológica de estudiantes que viven en familias en situación de violencia?",
+                options: [
+                    "Con organizaciones no gubernamentales internacionales.",
+                    "Con universidades públicas o privadas.",
+                    "Con el Ministerio de Salud.",
+                    "Con la Policía Boliviana."
+                ],
+                correctAnswer: "Con universidades públicas o privadas.",
+                feedback: "El Artículo 19, numeral 3 (página 8) establece la creación de un centro de atención psicológica 'en convenio con universidades públicas o privadas'.",
+                page: 8
+            },
+            {
+                question: "Según el Artículo 20, ¿quiénes deben extender un certificado médico de oficio, de forma obligatoria y gratuita, a mujeres que requieran atención por daño físico o sexual emergente de actos de violencia?",
+                options: [
+                    "Únicamente los médicos forenses.",
+                    "Solo el personal médico del Sistema de Salud Público.",
+                    "El personal médico del Sistema de Salud Público, seguro social a corto plazo y servicios privados.",
+                    "Cualquier profesional de la salud, previa solicitud de la mujer."
+                ],
+                correctAnswer: "El personal médico del Sistema de Salud Público, seguro social a corto plazo y servicios privados.",
+                feedback: "El Artículo 20, numeral 9 (página 9) indica que 'El personal médico del Sistema de Salud Público, seguro social a corto plazo y servicios privados, deberán extender de oficio, de forma obligatoria, gratuita y en papel corriente, un certificado médico a mujeres que requieran atención por daño físico o sexual emergente de actos de violencia'.",
+                page: 9
+            },
+            {
+                question: "En el ámbito laboral, el Artículo 21 prohíbe expresamente la imposición de ciertos requisitos para el acceso a un puesto de trabajo. ¿Cuál de los siguientes NO está prohibido de manera expresa?",
+                options: [
+                    "Pruebas de laboratorio para detectar VIH/SIDA.",
+                    "Pruebas de embarazo.",
+                    "Entrevistas sobre decisiones personales.",
+                    "Pruebas de aptitud relacionadas con la idoneidad del cargo."
+                ],
+                correctAnswer: "Pruebas de aptitud relacionadas con la idoneidad del cargo.",
+                feedback: "El Artículo 21, numeral 2 (página 10) prohíbe 'la presentación de pruebas de laboratorio, prueba de VIH/SIDA, de embarazo, entrevistas sobre decisiones o situaciones personales u otras de cualquier otra índole que afecte una decisión más allá de la idoneidad'. Las pruebas de aptitud relacionadas con la idoneidad no están prohibidas.",
+                page: 10
+            },
+            {
+                question: "Los medios de comunicación tienen la obligación de destinar un espacio mínimo gratuito para la difusión de mensajes que promuevan los valores de la Ley. ¿Bajo qué principio se enmarca esta obligación?",
+                options: [
+                    "Principio de publicidad.",
+                    "Principio de responsabilidad social.",
+                    "Principio de libertad de expresión.",
+                    "Principio de equidad de género."
+                ],
+                correctAnswer: "Principio de responsabilidad social.",
+                feedback: "El Artículo 23, numeral 2 (página 11) establece que los medios de comunicación deben 'Destinar, en el marco de la responsabilidad social, un espacio mínimo gratuito para la difusión de mensajes que promuevan los valores establecidos en la presente Ley.'",
+                page: 11
+            },
+            {
+                question: "Las Casas de Acogida y Refugio Temporal se constituyen en refugio seguro. ¿Cuál es la regla fundamental respecto a su localización?",
+                options: [
+                    "Puede ser revelada solo a familiares directos de las mujeres acogidas.",
+                    "No podrá ser revelada, salvo a personas autorizadas para acudir a ellos.",
+                    "Debe ser publicada en el sitio web del Ministerio de Justicia.",
+                    "Puede ser revelada con el consentimiento expreso de la mujer acogida."
+                ],
+                correctAnswer: "No podrá ser revelada, salvo a personas autorizadas para acudir a ellos.",
+                feedback: "El Artículo 27 (página 12) establece que la localización de las Casas de Acogida y Refugio Temporal 'no podrá ser revelada, salvo a personas autorizadas para acudir a ellos'.",
+                page: 12
+            },
+            {
+                question: "¿Cuál es el tiempo máximo de permanencia de las mujeres en las Casas de Acogida y Refugio Temporal, salvo excepciones justificadas?",
+                options: [
+                    "Seis meses.",
+                    "Un año.",
+                    "Tres meses.",
+                    "Nueve meses."
+                ],
+                correctAnswer: "Tres meses.",
+                feedback: "El Artículo 28 (página 12) indica que las mujeres 'no podrán permanecer en ellas más de tres meses, a menos que por la gravedad de la violencia sufrida o debido a condiciones especiales que así lo justifiquen'.",
+                page: 12
+            },
+            {
+                question: "Respecto a la rehabilitación de los agresores, el Artículo 31 establece una condición fundamental. ¿Cuál es?",
+                options: [
+                    "La terapia de rehabilitación sustituirá la sanción penal impuesta.",
+                    "La terapia se prestará junto a la mujer agredida para facilitar la reconciliación.",
+                    "La rehabilitación será dispuesta por orden expresa de la autoridad jurisdiccional y no sustituirá la sanción.",
+                    "Es un proceso voluntario que el agresor puede iniciar en cualquier momento."
+                ],
+                correctAnswer: "La rehabilitación será dispuesta por orden expresa de la autoridad jurisdiccional y no sustituirá la sanción.",
+                feedback: "El Artículo 31, parágrafo I (página 13) establece que la rehabilitación 'será dispuesta por orden expresa [de la autoridad jurisdiccional], con el objetivo de promover cambios en su conducta agresiva. La terapia no sustituirá la sanción impuesta por los hechos de violencia.' El parágrafo II añade que 'En ningún caso, la terapia se prestará junto a la mujer agredida.'",
+                page: 13
+            },
+            {
+                question: "Una de las medidas de protección que puede dictar la autoridad competente es prohibir al agresor enajenar, hipotecar, prendar, disponer o cambiar la titularidad del derecho propietario de bienes comunes. ¿Qué tipo de bienes abarca esta medida?",
+                options: [
+                    "Solo bienes inmuebles.",
+                    "Solo bienes muebles.",
+                    "Bienes muebles o inmuebles comunes.",
+                    "Cualquier bien del agresor, incluso si no es común."
+                ],
+                correctAnswer: "Bienes muebles o inmuebles comunes.",
+                feedback: "El Artículo 35, numeral 2 (página 14) especifica 'bienes muebles o inmuebles comunes'.",
+                page: 14
+            },
+            {
+                question: "¿Cuál de las siguientes condiciones NO es un motivo explícito para la declaratoria de alerta contra la violencia hacia las mujeres, según el Artículo 37?",
+                options: [
+                    "Se registre un alto índice de delitos contra la vida en un territorio determinado.",
+                    "Se detecte un ámbito especial con casos de violencia que impida el ejercicio pleno de derechos humanos.",
+                    "Se haya agotado el presupuesto anual destinado a la prevención de la violencia.",
+                    "Se registre un alto índice de delitos contra la libertad sexual de las mujeres."
+                ],
+                correctAnswer: "Se haya agotado el presupuesto anual destinado a la prevención de la violencia.",
+                feedback: "El Artículo 37, parágrafo II (página 15) establece dos condiciones para la declaratoria de alerta: '1. Se registre un alto índice de delitos contra la vida, la libertad y la integridad física, psicológica o sexual de las mujeres en un territorio determinado. 2. Se detecte un ámbito especial en el que se reporten casos de violencia contra las mujeres y que como consecuencia impida el ejercicio pleno de sus derechos humanos.' El agotamiento del presupuesto no es un motivo explícito.",
+                page: 15
+            },
+            {
+                question: "¿Cuál es la duración máxima de la alerta contra la violencia hacia las mujeres, según el Artículo 39?",
+                options: [
+                    "Seis meses.",
+                    "Un año.",
+                    "Dos años.",
+                    "Indefinida, hasta que las causas desaparezcan."
+                ],
+                correctAnswer: "Un año.",
+                feedback: "El Artículo 39 (página 15) establece que la alerta 'no podrá prolongarse por más de un (1) año'.",
+                page: 15
+            },
+            {
+                question: "En las comunidades indígena originario campesinas, ¿qué tipos de casos de violencia deben ser derivados obligatoriamente a la jurisdicción ordinaria, de conformidad con la Ley de Deslinde Jurisdiccional?",
+                options: [
+                    "Todos los casos de violencia familiar o doméstica.",
+                    "Únicamente los casos de violencia económica.",
+                    "Todos los casos de violencia sexual, feminicidio y delitos análogos.",
+                    "Solo los casos que involucren a menores de edad."
+                ],
+                correctAnswer: "Todos los casos de violencia sexual, feminicidio y delitos análogos.",
+                feedback: "El Artículo 41, parágrafo II (página 16) establece que 'Todos los casos de violencia sexual, feminicidio y delitos análogos serán derivados a la jurisdicción ordinaria, de conformidad a la Ley de Deslinde Jurisdiccional.'",
+                page: 16
+            },
+            {
+                question: "La conciliación está prohibida en cualquier hecho de violencia contra las mujeres que comprometa su vida e integridad sexual. ¿Bajo qué condición excepcional podría ser promovida la conciliación, según el Artículo 46?",
+                options: [
+                    "Siempre que ambas partes lo soliciten de mutuo acuerdo.",
+                    "Únicamente por la víctima, solo por única vez y no siendo posible en casos de reincidencia.",
+                    "Cuando no exista daño físico evidente.",
+                    "Para evitar la carga procesal del Ministerio Público."
+                ],
+                correctAnswer: "Únicamente por la víctima, solo por única vez y no siendo posible en casos de reincidencia.",
+                feedback: "El Artículo 46, parágrafo IV (página 18) establece: 'Excepcionalmente la conciliación podrá ser promovida únicamente por la víctima, sólo por única vez y no siendo posible en casos de reincidencia.'",
+                page: 18
+            },
+            {
+                question: "¿Qué tipo de patrocinio legal deben brindar los Servicios Legales Integrales Municipales (SLIMs) a las mujeres en situación de violencia?",
+                options: [
+                    "Patrocinio legal con costo reducido.",
+                    "Patrocinio legal gratuito en instancias administrativas, policiales y judiciales.",
+                    "Patrocinio legal solo en la etapa de investigación policial.",
+                    "Patrocinio legal únicamente si la mujer carece de recursos económicos."
+                ],
+                correctAnswer: "Patrocinio legal gratuito en instancias administrativas, policiales y judiciales.",
+                feedback: "El Artículo 50, parágrafo II, numeral 6 (página 18) establece que los SLIMs deben 'Brindar patrocinio legal gratuito en instancias administrativas, policiales y judiciales para la prosecución de los procesos hasta conseguir una sentencia firme.'",
+                page: 18
+            },
+            {
+                question: "La Fuerza Especial de Lucha Contra la Violencia (FELCV) se crea como un organismo especializado de la Policía Boliviana. ¿Bajo qué dirección funcional opera la FELCV?",
+                options: [
+                    "Bajo la dirección del Ministerio de Gobierno.",
+                    "Bajo la dirección funcional del Ministerio Público.",
+                    "Bajo la dirección del Ente Rector (Ministerio de Justicia).",
+                    "De forma autónoma e independiente."
+                ],
+                correctAnswer: "Bajo la dirección funcional del Ministerio Público.",
+                feedback: "El Artículo 53, parágrafo I (página 19) establece que la FELCV opera 'bajo la dirección funcional del Ministerio Público'.",
+                page: 19
+            },
+            {
+                question: "En caso de delito flagrante, la Plataforma de Atención y Recepción de Denuncias de la FELCV tiene la función de aprehender a los presuntos responsables. ¿En qué plazo máximo deben ponerlos a disposición del Ministerio Público?",
+                options: [
+                    "Veinticuatro (24) horas.",
+                    "Cuarenta y ocho (48) horas.",
+                    "Ocho (8) horas.",
+                    "Setenta y dos (72) horas."
+                ],
+                correctAnswer: "Ocho (8) horas.",
+                feedback: "El Artículo 54, numeral 2 (página 20) indica que la FELCV debe 'aprehenderlos de inmediato en caso de delito flagrante y ponerlos a disposición del Ministerio Público, en el plazo máximo de ocho (8) horas.'",
+                page: 20
+            },
+            {
+                question: "La investigación de hechos de violencia contra las mujeres se seguirá de oficio. ¿Qué instancia tiene la obligación de remitir obligatoriamente toda denuncia al Ministerio Público y reportarla al SIPPASE?",
+                options: [
+                    "Solo la víctima.",
+                    "Cualquier persona que conozca el hecho.",
+                    "La instancia receptora de la denuncia.",
+                    "El Ministerio Público, una vez que inicie la investigación."
+                ],
+                correctAnswer: "La instancia receptora de la denuncia.",
+                feedback: "El Artículo 59, parágrafo I (página 21) establece que 'Toda denuncia deberá ser obligatoriamente remitida al Ministerio Público y reportada al Sistema Integral Plurinacional de Prevención, Atención, Sanción y Erradicación de la Violencia en razón de Género - SIPPASE'. Esto se refiere a la instancia que recibe la denuncia inicialmente.",
+                page: 21
+            },
+            {
+                question: "Un certificado médico extendido por cualquier profesional de salud para establecer el estado físico de la mujer agredida, ¿qué valor tiene para fines judiciales una vez homologado por un experto forense?",
+                options: [
+                    "Es un mero indicio, sin valor probatorio.",
+                    "Adquiere valor probatorio.",
+                    "Solo tiene valor si es emitido por un médico forense directamente.",
+                    "Es una prueba complementaria, no fundamental."
+                ],
+                correctAnswer: "Adquiere valor probatorio.",
+                feedback: "El Artículo 65 (página 22) establece que 'Para fines judiciales, este certificado médico se lo tendrá como un indicio respecto a los delitos establecidos en la presente Ley, una vez homologado, adquirirá valor probatorio.'",
+                page: 22
+            },
+            {
+                question: "Según el Artículo 72 bis de la Ley N° 025 (modificado por la Ley 348), los jueces de sentencia en materia de violencia contra las mujeres tienen competencia para conocer y resolver juicios por delitos de acción pública. ¿Cuál es el límite de pena privativa de libertad para que estos juzgados sean competentes?",
+                options: [
+                    "Cuyo máximo legal sea de seis o menos años.",
+                    "Cuyo máximo legal sea de cuatro o menos años.",
+                    "Cuyo máximo legal sea de cinco o menos años.",
+                    "Sin límite de pena, siempre que constituyan violencia contra las mujeres."
+                ],
+                correctAnswer: "Cuyo máximo legal sea de cuatro o menos años.",
+                feedback: "El Artículo 72 bis (página 24) establece que los jueces de sentencia tienen competencia para delitos 'sancionados con pena privativa de libertad cuyo máximo legal sea de cuatro o menos años'.",
+                page: 24
+            },
+            {
+                question: "En delitos de violencia hacia las mujeres, el Artículo 76 permite la aplicación de sanciones alternativas a la privación de libertad. ¿Cuál de las siguientes condiciones debe cumplirse para su aplicación?",
+                options: [
+                    "El autor debe ser reincidente.",
+                    "La pena impuesta debe ser mayor a tres años.",
+                    "El autor no debe ser reincidente y la pena impuesta no debe ser mayor a tres años.",
+                    "El condenado debe haber cumplido al menos un cuarto de la pena."
+                ],
+                correctAnswer: "El autor no debe ser reincidente y la pena impuesta no debe ser mayor a tres años.",
+                feedback: "El Artículo 76, parágrafo I (página 26) establece que las sanciones alternativas se podrán aplicar 'siempre que el autor no sea reincidente' y 'La pena impuesta no sea mayor a tres años'.",
+                page: 26
+            },
+            {
+                question: "Las multas impuestas como sanción alternativa o accesoria, ¿a qué servicios se destinarán, según el Artículo 77?",
+                options: [
+                    "Al Tesoro General de la Nación.",
+                    "A los Servicios de Atención Integral a cargo de los Gobiernos Autónomos Municipales.",
+                    "Directamente a la mujer víctima como reparación del daño.",
+                    "Al Ministerio de Justicia para programas de prevención."
+                ],
+                correctAnswer: "A los Servicios de Atención Integral a cargo de los Gobiernos Autónomos Municipales.",
+                feedback: "El Artículo 77 (página 26) establece que 'Las multas serán destinadas a los Servicios de Atención Integral a cargo de los Gobiernos Autónomos Municipales, quienes constituirán un fondo y abrirán una cuenta fiscal exclusiva para este propósito'.",
+                page: 26
+            },
+            {
+                question: "La sanción de inhabilitación, según el Artículo 81, se puede aplicar en ciertos casos de delitos de violencia. ¿Cuál es el límite temporal máximo de esta sanción?",
+                options: [
+                    "Diez años.",
+                    "Quince años.",
+                    "Doce años.",
+                    "Veinte años."
+                ],
+                correctAnswer: "Doce años.",
+                feedback: "El Artículo 81 (página 27) establece que la inhabilitación 'Tiene un límite temporal de doce años'.",
+                page: 27
+            },
+            {
+                question: "El Artículo 252 bis (Feminicidio), incorporado por la Ley 348, sanciona a quien mate a una mujer bajo ciertas circunstancias. ¿Cuál de las siguientes NO es una circunstancia explícitamente mencionada para configurar el delito de Feminicidio?",
+                options: [
+                    "El autor sea o haya sido cónyuge o conviviente de la víctima.",
+                    "Por haberse negado la víctima a establecer una relación de pareja.",
+                    "Cuando la muerte sea resultado de un accidente de tránsito.",
+                    "Cuando con anterioridad al hecho de la muerte, la mujer haya sido víctima de violencia por el mismo agresor."
+                ],
+                correctAnswer: "Cuando la muerte sea resultado de un accidente de tránsito.",
+                feedback: "El Artículo 252 bis (página 30) lista nueve circunstancias para el feminicidio. Un accidente de tránsito no es una de ellas.",
+                page: 30
+            },
+            {
+                question: "El Artículo 272 bis (Violencia Familiar o Doméstica), incorporado por la Ley 348, establece una pena de reclusión para quien agrediere físicamente, psicológica o sexualmente. ¿Cuál es el rango de esta pena?",
+                options: [
+                    "De uno (1) a tres (3) años.",
+                    "De dos (2) a cuatro (4) años.",
+                    "De tres (3) a cinco (5) años.",
+                    "De cuatro (4) a seis (6) años."
+                ],
+                correctAnswer: "De dos (2) a cuatro (4) años.",
+                feedback: "El Artículo 272 bis (página 30) establece una pena de reclusión 'de dos (2) a cuatro (4) años, siempre que no constituya otro delito'.",
+                page: 30
+            },
+            {
+                question: "En todo proceso penal por hechos que atenten contra la vida, la seguridad o la integridad de las mujeres, ¿a quién corresponde la carga de la prueba, según el Artículo 86?",
+                options: [
+                    "A la mujer denunciante.",
+                    "Al Ministerio Público.",
+                    "Al agresor.",
+                    "Al juez, quien debe recabar todas las pruebas."
+                ],
+                correctAnswer: "Al Ministerio Público.",
+                feedback: "El Artículo 86, numeral 12 (página 32) establece que 'En todo proceso penal por hechos que atenten contra la vida, la seguridad o la integridad física, psicológica y/o sexual de las mujeres, la carga de la prueba corresponderá al Ministerio Público.'",
+                page: 32
+            },
+            {
+                question: "Según el Artículo 4, el principio de 'Despatriarcalización' implica la transformación de estructuras, relaciones, tradiciones, costumbres y comportamientos desiguales de poder. ¿Cuál es el objetivo principal de esta transformación?",
+                options: [
+                    "Promover la igualdad de género en el ámbito económico exclusivamente.",
+                    "Visibilizar, denunciar y erradicar el patriarcado y la explotación de las mujeres por los hombres.",
+                    "Establecer nuevas formas de dominio femenino sobre el masculino.",
+                    "Limitar la participación de las mujeres en la vida pública."
+                ],
+                correctAnswer: "Visibilizar, denunciar y erradicar el patriarcado y la explotación de las mujeres por los hombres.",
+                feedback: "El Artículo 4, numeral 12 (página 2) define la despatriarcalización como 'la elaboración de políticas públicas desde la identidad plurinacional, para la visibilización, denuncia y erradicación del patriarcado, a través de la transformación de las estructuras, relaciones, tradiciones, costumbres y comportamientos desiguales de poder, dominio, exclusión opresión y explotación de las mujeres por los hombres'.",
+                page: 2
+            },
+            {
+                question: "El Artículo 5 establece el ámbito de aplicación de la Ley N° 348. ¿A quiénes se aplica esta Ley, independientemente de su género, cuando sufren alguna de las formas de violencia que sanciona?",
+                options: [
+                    "Solo a las mujeres.",
+                    "A toda persona que por su situación de vulnerabilidad, sufra cualquiera de las formas de violencia.",
+                    "Únicamente a los menores de edad y personas con discapacidad.",
+                    "Solo a ciudadanos bolivianos dentro del territorio nacional."
+                ],
+                correctAnswer: "A toda persona que por su situación de vulnerabilidad, sufra cualquiera de las formas de violencia.",
+                feedback: "El Artículo 5, parágrafo IV (página 3) establece que 'Las disposiciones de la presente Ley serán aplicables a toda persona que por su situación de vulnerabilidad, sufra cualquiera de las formas de violencia que esta Ley sanciona, independientemente de su género.'",
+                page: 3
+            },
+            {
+                question: "Según el Artículo 7, la 'Violencia Psicológica' se caracteriza por acciones sistemáticas. ¿Cuál de las siguientes NO es una consecuencia directa mencionada de este tipo de violencia?",
+                options: [
+                    "Disminución de la autoestima.",
+                    "Depresión.",
+                    "Inestabilidad psicológica.",
+                    "Lesiones corporales internas."
+                ],
+                correctAnswer: "Lesiones corporales internas.",
+                feedback: "El Artículo 7, numeral 3 (página 3) describe la Violencia Psicológica y sus consecuencias como 'la disminución de su autoestima, depresión, inestabilidad psicológica, desorientación e incluso el suicidio'. Las lesiones corporales internas corresponden a la Violencia Física.",
+                page: 3
+            },
+            {
+                question: "El Artículo 9 detalla las responsabilidades de los Órganos del Estado, Entidades Territoriales Autónomas e Instituciones Públicas para la aplicación de la Ley. ¿Cuál de las siguientes acciones NO se menciona explícitamente como una de sus responsabilidades?",
+                options: [
+                    "Adoptar, implementar y supervisar protocolos de atención especializada.",
+                    "Crear y sostener servicios de atención y reeducación integral especializada para los agresores.",
+                    "Establecer cuotas mínimas de representación femenina en cargos públicos.",
+                    "Articular los instrumentos, políticas, servicios y acciones interinstitucionales vinculadas."
+                ],
+                correctAnswer: "Establecer cuotas mínimas de representación femenina en cargos públicos.",
+                feedback: "El Artículo 9 (página 5) detalla las responsabilidades, pero no menciona el establecimiento de cuotas mínimas de representación femenina en cargos públicos. Se enfoca en la atención, prevención, protección y sanción de la violencia.",
+                page: 5
+            },
+            {
+                question: "El Artículo 14 establece programas indicativos para erradicar la violencia. ¿Qué tipo de programa se enfoca en 'deconstruir los estereotipos sexistas y los roles asignados socialmente a las mujeres'?",
+                options: [
+                    "Programa de prevención en los ámbitos estructural, individual y colectivo.",
+                    "Programa de formación, especialización, sensibilización y capacitación.",
+                    "Programa de orientación e información a las mujeres.",
+                    "Programa de comunicación."
+                ],
+                correctAnswer: "Programa de comunicación.",
+                feedback: "El Artículo 14, numeral 5 (página 6) describe el 'Programa de comunicación para de construir los estereotipos sexistas y los roles asignados socialmente a las mujeres, promoviendo la autorregulación de los medios de comunicación en cuanto a la publicidad que emiten, el uso irrespetuoso y comercial de la imagen de las mujeres'.",
+                page: 6
+            },
+            {
+                question: "Según el Artículo 18, las autoridades indígena originario campesinas y afrobolivianas adoptarán medidas de prevención. ¿Qué principio fundamental deben respetar en su planificación, ejecución y seguimiento?",
+                options: [
+                    "La primacía de sus usos y costumbres sobre cualquier otra norma.",
+                    "El respeto a los derechos reconocidos en la Constitución Política del Estado y el bloque de constitucionalidad.",
+                    "La exclusión de la participación de las mujeres en la planificación.",
+                    "La aplicación de sanciones tradicionales sin intervención externa."
+                ],
+                correctAnswer: "El respeto a los derechos reconocidos en la Constitución Política del Estado y el bloque de constitucionalidad.",
+                feedback: "El Artículo 18 (página 8) establece que 'Ninguna norma o procedimiento propio de las naciones y pueblos indígena originario campesinas podrá vulnerar los derechos reconocidos en la Constitución Política del Estado y el bloque de constitucionalidad.'",
+                page: 8
+            },
+            {
+                question: "El Artículo 24 establece que los servicios de atención integral deben ser organizados, coordinados y fortalecidos en cada municipio. ¿Qué instancias deben apoyar de manera permanente?",
+                options: [
+                    "Las Casas Comunitarias de la Mujer y las redes de promotoras.",
+                    "Los Servicios Legales Integrales Municipales y las Casas de Acogida y Refugio Temporal.",
+                    "Los Ministerios de Justicia y Salud.",
+                    "Las universidades y centros de formación superior públicos."
+                ],
+                correctAnswer: "Los Servicios Legales Integrales Municipales y las Casas de Acogida y Refugio Temporal.",
+                feedback: "El Artículo 24, parágrafo II (página 11) indica que los programas y servicios de atención 'serán organizados, coordinados y fortalecidos en cada municipio... como instancias de apoyo permanente a los Servicios Legales Integrales Municipales y las Casas de Acogida y Refugio Temporal.'",
+                page: 11
+            },
+            {
+                question: "El Artículo 32 establece la finalidad de las medidas de protección. ¿Cuál de las siguientes opciones describe el objetivo principal de estas medidas?",
+                options: [
+                    "Garantizar la reparación económica del daño causado.",
+                    "Interrumpir e impedir un hecho de violencia o garantizar la investigación y sanción si se consumó.",
+                    "Promover la conciliación entre la víctima y el agresor.",
+                    "Establecer la custodia de los hijos menores de edad."
+                ],
+                correctAnswer: "Interrumpir e impedir un hecho de violencia o garantizar la investigación y sanción si se consumó.",
+                feedback: "El Artículo 32, parágrafo I (página 13) establece que las medidas de protección tienen por objeto 'interrumpir e impedir un hecho de violencia contra las mujeres, o garantizar, en caso de que éste se haya consumado, que se realice la investigación, procesamiento y sanción correspondiente.'",
+                page: 13
+            },
+            {
+                question: "Según el Artículo 45, el Estado garantizará a toda mujer en situación de violencia el acceso a la justicia. ¿Cuál de las siguientes NO es una garantía explícitamente mencionada?",
+                options: [
+                    "Acceso a la justicia de manera gratuita, real, oportuna y efectiva.",
+                    "La adopción de decisiones judiciales ecuánimes e independientes, sin sesgos de género.",
+                    "El derecho a elegir el juez que llevará su caso.",
+                    "Orientación y asistencia jurídica inmediata, gratuita y especializada."
+                ],
+                correctAnswer: "El derecho a elegir el juez que llevará su caso.",
+                feedback: "El Artículo 45 (página 17) lista varias garantías, incluyendo el acceso a la justicia gratuita, decisiones ecuánimes y asistencia jurídica. Sin embargo, no se menciona el derecho a elegir el juez que llevará el caso.",
+                page: 17
+            },
+            {
+                question: "El Artículo 86 establece los principios procesales en las causas por hechos de violencia contra las mujeres. ¿Qué implica el principio de 'Celeridad'?",
+                options: [
+                    "Que todos los procesos deben ser orales.",
+                    "Que los operadores de justicia deben dar estricto cumplimiento a los plazos procesales sin dilación.",
+                    "Que las mujeres en situación de violencia estarán exentas del pago de valores.",
+                    "Que la carga de la prueba corresponderá a la mujer denunciante."
+                ],
+                correctAnswer: "Que los operadores de justicia deben dar estricto cumplimiento a los plazos procesales sin dilación.",
+                feedback: "El Artículo 86, numeral 2 (página 32) define la 'Celeridad' como la obligación de 'Todas las operadoras y operadores de la administración de justicia, bajo responsabilidad, deben dar estricto cumplimiento a los plazos procesales previstos, sin dilación alguna bajo apercibimiento.'",
+                page: 32
+            },
+            {
+                question: "Según el Artículo 94, en la investigación de delitos de violencia contra las mujeres, ¿quién tiene la responsabilidad de reunir las pruebas necesarias?",
+                options: [
+                    "La mujer agredida.",
+                    "El Ministerio Público.",
+                    "La Fuerza Especial de Lucha Contra la Violencia (FELCV).",
+                    "El juez de instrucción."
+                ],
+                correctAnswer: "El Ministerio Público.",
+                feedback: "El Artículo 94 (página 34) establece que 'Ninguna mujer debe tener la responsabilidad de demostrar judicialmente aquellas acciones, actos, situaciones o hechos relacionados con su situación de violencia; será el Ministerio Público quien, como responsable de la investigación de los delitos, reúna las pruebas necesarias'.",
+                page: 34
+            }
+        ];
+
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let selectedAnswer = null;
+        let score = 0;
+        let showFeedback = false;
+
+        // Get DOM elements
+        const quizStartScreen = document.getElementById('quiz-start-screen');
+        const quizContainer = document.getElementById('quiz-container');
+        const quizResultsScreen = document.getElementById('quiz-results-screen');
+        const startQuizButton = document.getElementById('start-quiz-button');
+        const currentQuestionNumberSpan = document.getElementById('current-question-number');
+        const totalQuestionsSpan = document.getElementById('total-questions');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const verifyButton = document.getElementById('verify-button');
+        const nextButton = document.getElementById('next-button');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackText = document.getElementById('feedback-text');
+        const pageReference = document.getElementById('page-reference');
+        const finalScoreSpan = document.getElementById('final-score');
+        const maxScoreSpan = document.getElementById('max-score');
+        const generalFeedbackParagraph = document.getElementById('general-feedback');
+        const restartQuizButton = document.getElementById('restart-quiz-button');
+
+        // Function to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        // Function to load a question
+        function loadQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            currentQuestionNumberSpan.textContent = currentQuestionIndex + 1;
+            totalQuestionsSpan.textContent = questions.length;
+            questionText.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = ''; // Clear previous options
+            selectedAnswer = null;
+            showFeedback = false;
+            feedbackContainer.classList.add('hidden');
+            verifyButton.classList.remove('hidden');
+            nextButton.classList.add('hidden');
+            verifyButton.disabled = true; // Disable verify until an option is selected
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('w-full', 'text-left', 'p-4', 'rounded-lg', 'border-2', 'transition', 'duration-200', 'ease-in-out', 'bg-gray-50', 'border-gray-200', 'hover:bg-gray-100', 'text-gray-800', 'font-medium');
+                button.addEventListener('click', () => selectAnswer(option, button));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Function to handle answer selection
+        function selectAnswer(option, clickedButton) {
+            selectedAnswer = option;
+            verifyButton.disabled = false; // Enable verify button
+
+            // Reset styles for all options
+            Array.from(optionsContainer.children).forEach(button => {
+                button.classList.remove('bg-indigo-50', 'border-indigo-500');
+            });
+
+            // Apply selected style to the clicked button
+            clickedButton.classList.add('bg-indigo-50', 'border-indigo-500');
+        }
+
+        // Function to handle answer verification
+        function verifyAnswer() {
+            if (selectedAnswer === null) return;
+
+            showFeedback = true;
+            verifyButton.classList.add('hidden');
+            nextButton.classList.remove('hidden');
+
+            const currentQuestion = questions[currentQuestionIndex];
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true; // Disable all options after verification
+                if (button.textContent === currentQuestion.correctAnswer) {
+                    button.classList.remove('bg-indigo-50', 'border-indigo-500', 'bg-gray-50', 'border-gray-200', 'hover:bg-gray-100');
+                    button.classList.add('bg-green-100', 'border-green-500');
+                } else if (button.textContent === selectedAnswer) {
+                    button.classList.remove('bg-indigo-50', 'border-indigo-500', 'bg-gray-50', 'border-gray-200', 'hover:bg-gray-100');
+                    button.classList.add('bg-red-100', 'border-red-500');
+                }
+            });
+
+            if (selectedAnswer === currentQuestion.correctAnswer) {
+                score += 2.8;
+            }
+
+            feedbackText.textContent = currentQuestion.feedback;
+            pageReference.textContent = currentQuestion.page;
+            feedbackContainer.classList.remove('hidden');
+        }
+
+        // Function to move to the next question or show results
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Function to display final results
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            quizResultsScreen.classList.remove('hidden');
+            finalScoreSpan.textContent = score.toFixed(1);
+            maxScoreSpan.textContent = (questions.length * 2.8).toFixed(1);
+            generalFeedbackParagraph.textContent = getGeneralFeedback(score);
+        }
+
+        // Function to get general feedback based on score
+        function getGeneralFeedback(finalScore) {
+            const maxScore = questions.length * 2.8;
+            const percentage = (finalScore / maxScore) * 100;
+
+            if (percentage >= 90) {
+                return "¡Excelente! Has demostrado un conocimiento sobresaliente de la Ley N° 348. ¡Estás muy bien preparado/a!";
+            } else if (percentage >= 70) {
+                return "¡Muy bien! Tienes un buen dominio de la Ley N° 348. Repasa las áreas donde tuviste dudas para mejorar aún más.";
+            } else if (percentage >= 50) {
+                return "Necesitas repasar algunos aspectos de la Ley N° 348. Con un estudio más profundo, podrás mejorar tu puntuación significativamente.";
+            } else {
+                return "Es importante que dediques más tiempo al estudio de la Ley N° 348. ¡No te desanimes, con esfuerzo lo lograrás!";
+            }
+        }
+
+        // Function to start the quiz
+        function startQuiz() {
+            questions = shuffleArray([...allQuestions]); // Shuffle all questions
+            currentQuestionIndex = 0;
+            score = 0;
+            quizStartScreen.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // Function to restart the quiz
+        function restartQuiz() {
+            quizResultsScreen.classList.add('hidden');
+            quizStartScreen.classList.remove('hidden');
+            // Reset all state variables
+            currentQuestionIndex = 0;
+            selectedAnswer = null;
+            score = 0;
+            showFeedback = false;
+        }
+
+        // Event Listeners
+        startQuizButton.addEventListener('click', startQuiz);
+        verifyButton.addEventListener('click', verifyAnswer);
+        nextButton.addEventListener('click', nextQuestion);
+        restartQuizButton.addEventListener('click', restartQuiz);
+    </script>
+</body>
+</html>

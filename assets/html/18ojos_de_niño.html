@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Con ojos de Niño</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-button {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+        }
+        .correct {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+            border-color: #16a34a !important; /* green-600 */
+        }
+        .incorrect {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #dc2626 !important; /* red-600 */
+        }
+        .disabled-options .option-button:not(.correct):not(.incorrect) {
+            background-color: #e5e7eb; /* gray-200 */
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+         #feedback-section p {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-sky-100 to-indigo-200 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl">
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl font-bold text-indigo-700">Cuestionario Interactivo</h1>
+            <p class="text-gray-600 mt-1">"Con ojos de Niño" - Francesco Tonucci</p>
+        </header>
+
+        <div id="quiz-container">
+            <div id="question-area" class="mb-6">
+                <h2 id="question-text" class="text-xl font-semibold text-gray-800 mb-4"></h2>
+                <div id="options-container" class="space-y-3">
+                    </div>
+            </div>
+
+            <div id="feedback-section" class="mb-6 min-h-[50px]">
+                </div>
+
+            <div id="navigation-area" class="flex justify-between items-center">
+                <div id="score-display" class="text-lg font-semibold text-indigo-600">Puntuación: 0</div>
+                <button id="next-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-150 ease-in-out">
+                    Siguiente Pregunta
+                </button>
+            </div>
+        </div>
+
+        <div id="results-container" class="hidden text-center">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">Resultados del Cuestionario</h2>
+            <p id="final-score" class="text-3xl font-bold text-gray-800 mb-3"></p>
+            <p id="final-feedback" class="text-lg text-gray-700 mb-6"></p>
+            <button id="restart-button" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-150 ease-in-out">
+                Volver a Intentar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                questionText: "¿Según James Heckman, por qué los programas de formación activa para el trabajo en Holanda tienen beneficios económicos nulos?",
+                options: [
+                    "La medida llega demasiado tarde.",
+                    "Falta de inversión adecuada en los programas.",
+                    "Los métodos de formación son obsoletos.",
+                    "Desinterés general de los participantes."
+                ],
+                correctAnswer: "La medida llega demasiado tarde.",
+                feedbackText: "Correcto. James Heckman argumenta que esta medida llega demasiado tarde para encontrar el método adecuado que permita resolver el problema (Página 1)."
+            },
+            {
+                questionText: "¿Cuál es una de las razones principales por las que el autor considera que el mercado NO debería establecer la agenda de la formación educativa?",
+                options: [
+                    "El proyecto educativo se tornaría conservador, enfocado en las exigencias del presente.",
+                    "El mercado no posee suficientes recursos financieros para la educación.",
+                    "Los estudiantes generalmente no están interesados en las demandas del mercado laboral.",
+                    "Las demandas del mercado cambian con demasiada rapidez para la planificación educativa."
+                ],
+                correctAnswer: "El proyecto educativo se tornaría conservador, enfocado en las exigencias del presente.",
+                feedbackText: "Correcto. El autor sostiene que si el mercado dicta la educación, esta se volvería una defensa del pasado, proyectada sobre las exigencias del presente (Página 2)."
+            },
+            {
+                questionText: "Según el autor, ¿en qué momento de la vida de una persona comienza realmente la orientación vocacional?",
+                options: [
+                    "A los tres o seis años de edad.",
+                    "Al finalizar la educación obligatoria (catorce años).",
+                    "Al terminar la escuela superior (diecinueve años).",
+                    "Durante la pubertad, con los primeros intereses definidos."
+                ],
+                correctAnswer: "A los tres o seis años de edad.",
+                feedbackText: "Correcto. El autor es enfático al afirmar: \"No se elige a los catorce o diecinueve años, sino a los tres, a los seis\" (Página 2)."
+            },
+            {
+                questionText: "¿Cómo describe el autor la \"vieja concepción\" del alumno en el modelo educativo tradicional que critica?",
+                options: [
+                    "Como un vaso vacío que se debe llenar progresivamente con conocimientos.",
+                    "Como un protagonista activo y central de su propio proceso de aprendizaje.",
+                    "Como un individuo que llega a la escuela con un cúmulo de saberes y experiencias previas.",
+                    "Como un colaborador esencial del maestro en la construcción del saber."
+                ],
+                correctAnswer: "Como un vaso vacío que se debe llenar progresivamente con conocimientos.",
+                feedbackText: "Correcto. Esta concepción se describe como: \"El vaso vacío que se llena poco a poco, acumulando lecciones, conocimientos, competencias\" (Página 2)."
+            },
+            {
+                questionText: "¿Cuál considera el autor que es el aspecto más negativo cuando los progenitores imponen a sus hijos actividades basadas en sus propias aspiraciones no cumplidas?",
+                options: [
+                    "Se vuelve imposible para los progenitores conocer las verdaderas preferencias y aptitudes de sus hijos.",
+                    "Los hijos inevitablemente desarrollan un profundo resentimiento hacia dichas actividades.",
+                    "Los hijos se vuelven excesivamente competitivos y ansiosos por el rendimiento.",
+                    "Los hijos pierden la capacidad de tomar decisiones autónomas sobre sus intereses."
+                ],
+                correctAnswer: "Se vuelve imposible para los progenitores conocer las verdaderas preferencias y aptitudes de sus hijos.",
+                feedbackText: "Correcto. El autor señala que de este modo, \"los progenitores perciben como imposible conocer las preferencias y las aptitudes de sus hijos, que solo afloran en el juego o en el tiempo libre\" (Página 3)."
+            },
+            {
+                questionText: "De acuerdo con la cita de Don Lorenzo Milani mencionada por el autor, ¿cuál es la característica distintiva del \"mejor alumno\" que evidencia el éxito de la educación?",
+                options: [
+                    "Ser rebelde, poseer ideas propias y ser capaz de cuestionar incluso al maestro.",
+                    "Ser el alumno que consistentemente obtiene las calificaciones más altas en todas las asignaturas.",
+                    "Ser el más obediente, respetuoso y disciplinado dentro del aula.",
+                    "Ser aquel que mejor memoriza y repite el contenido impartido en los libros de texto."
+                ],
+                correctAnswer: "Ser rebelde, poseer ideas propias y ser capaz de cuestionar incluso al maestro.",
+                feedbackText: "Correcto. Se cita a Milani: \"El alumno rebelde... es el mejor, es la demostración del éxito de la educación. Rebelde significa que tiene ideas propias, que es capaz de expresarlas, aunque sea cuestionando al maestro\" (Página 4)."
+            },
+            {
+                questionText: "¿Cómo define Francesco Tonucci la \"verdadera orientación\" en el contexto educativo?",
+                options: [
+                    "Aquella que permite a cada individuo reconocer, desarrollar al máximo y convertir en excelencia sus preferencias, capacidades, deseos y talentos.",
+                    "Un proceso formal que debe realizarse exclusivamente al finalizar la etapa de educación obligatoria.",
+                    "La cuidadosa selección de carreras universitarias que presentan la mayor demanda en el mercado laboral actual.",
+                    "La adaptación progresiva del estudiante a un modelo de aprendizaje y comportamiento preestablecido por la institución escolar."
+                ],
+                correctAnswer: "Aquella que permite a cada individuo reconocer, desarrollar al máximo y convertir en excelencia sus preferencias, capacidades, deseos y talentos.",
+                feedbackText: "Correcto. La página 5 define la verdadera orientación como \"aquella que permite a cada uno reconocer sus preferencias, capacidades, deseos y talentos, y desarrollarlos lo máximo posible hasta convertirlos en los mejores, al menos en algún ámbito\"."
+            },
+            {
+                questionText: "Según el análisis del autor, ¿dónde radica fundamentalmente el problema de la orientación académico-profesional?",
+                options: [
+                    "En el enfoque general de la educación: su filosofía, objetivos, propuestas y métodos.",
+                    "En la insuficiente cantidad de información detallada sobre las diversas opciones universitarias y profesionales.",
+                    "En la natural indecisión y falta de madurez de los adolescentes al momento de tomar decisiones cruciales.",
+                    "En la excesiva presión y expectativas que las familias ejercen sobre los jóvenes."
+                ],
+                correctAnswer: "En el enfoque general de la educación: su filosofía, objetivos, propuestas y métodos.",
+                feedbackText: "Correcto. El autor afirma: \"El problema radica no tanto en la orientación académica-profesional como tal, sino en el enfoque general de la educación, su filosofia, sus objetivos, sus propuestas, sus métodos\" (Página 5)."
+            },
+            {
+                questionText: "¿Cuál es una característica primordial de una \"escuela de la diversidad\", tal como la concibe el autor?",
+                options: [
+                    "Considerar la diversidad no como un problema, sino como un recurso valioso y un derecho fundamental.",
+                    "Agrupar a los alumnos en aulas homogéneas según sus niveles de rendimiento académico.",
+                    "Implementar un currículo único y estandarizado para todos los estudiantes, garantizando así la igualdad de oportunidades.",
+                    "Centrar los esfuerzos pedagógicos exclusivamente en atender las necesidades de los alumnos con mayores dificultades de aprendizaje."
+                ],
+                correctAnswer: "Considerar la diversidad no como un problema, sino como un recurso valioso y un derecho fundamental.",
+                feedbackText: "Correcto. En la página 6, se describe la \"escuela de la diversidad\" indicando que \"La diversidad es un recurso y un derecho. A partir de este principio, la escuela permitirá que cualquiera de sus alumnos se realiza al máximo de sus posibilidades\"."
+            },
+            {
+                questionText: "¿Cuál es una ventaja crucial de la \"escuela de los laboratorios\" propuesta por Tonucci, en comparación con la tradicional \"escuela de las aulas\"?",
+                options: [
+                    "Facilita que todos los estudiantes, especialmente los más débiles, encuentren sentido a las propuestas escolares al vivenciar las disciplinas en ambientes adecuados y estimulantes.",
+                    "Reduce significativamente los costos de infraestructura educativa al optimizar el uso compartido de espacios multifuncionales.",
+                    "Permite a los profesores una mayor especialización al dedicarse exclusivamente a un tipo de laboratorio o área de conocimiento.",
+                    "Elimina por completo la necesidad de utilizar libros de texto y cuadernos, fomentando un aprendizaje puramente experiencial."
+                ],
+                correctAnswer: "Facilita que todos los estudiantes, especialmente los más débiles, encuentren sentido a las propuestas escolares al vivenciar las disciplinas en ambientes adecuados y estimulantes.",
+                feedbackText: "Correcto. En las páginas 7 y 8, se argumenta que la escuela de laboratorios podría ayudar, \"especialmente a aquellos más débiles, a perderse menos, a encontrar con más facilidad el sentido a las propuestas escolares y el motivo de los cambios tan rápidos\"."
+            }
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionTextElement = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackSection = document.getElementById('feedback-section');
+        const scoreDisplay = document.getElementById('score-display');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+        const finalScoreElement = document.getElementById('final-score');
+        const finalFeedbackElement = document.getElementById('final-feedback');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            shuffledQuestions = [...questions];
+            shuffleArray(shuffledQuestions);
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplay.textContent = `Puntuación: ${score}`;
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            nextButton.textContent = 'Siguiente Pregunta';
+            nextButton.disabled = true; // Disabled until an answer is selected
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            feedbackSection.innerHTML = '';
+            optionsContainer.classList.remove('disabled-options');
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            questionTextElement.textContent = currentQuestion.questionText;
+            optionsContainer.innerHTML = '';
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button', 'w-full', 'text-left', 'p-3', 'border-2', 'border-gray-300', 'rounded-lg', 'hover:bg-indigo-100', 'hover:border-indigo-400', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500');
+                button.onclick = () => selectAnswer(button, option, currentQuestion.correctAnswer, currentQuestion.feedbackText);
+                optionsContainer.appendChild(button);
+            });
+            nextButton.disabled = true; 
+        }
+
+        function selectAnswer(buttonElement, selectedOption, correctAnswer, feedback) {
+            optionsContainer.classList.add('disabled-options'); // Disable other options
+            Array.from(optionsContainer.children).forEach(btn => btn.disabled = true);
+
+            let questionFeedbackHTML = '';
+
+            if (selectedOption === correctAnswer) {
+                score += 10;
+                buttonElement.classList.add('correct');
+                questionFeedbackHTML = `<p class="text-green-600 font-semibold">¡Correcto!</p><p class="text-sm text-gray-700">${feedback}</p>`;
+            } else {
+                buttonElement.classList.add('incorrect');
+                questionFeedbackHTML = `<p class="text-red-600 font-semibold">Incorrecto.</p><p class="text-sm text-gray-700">La respuesta correcta era: "${correctAnswer}".</p><p class="text-sm text-gray-700">${feedback.replace('Correcto. ', '')}</p>`;
+                // Highlight the correct answer
+                Array.from(optionsContainer.children).forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                         btn.classList.remove('incorrect'); // Ensure it's not marked incorrect if it was clicked first
+                    }
+                });
+            }
+            scoreDisplay.textContent = `Puntuación: ${score}`;
+            feedbackSection.innerHTML = questionFeedbackHTML;
+            nextButton.disabled = false;
+
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                nextButton.textContent = 'Ver Resultados';
+            }
+        }
+
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        restartButton.addEventListener('click', startQuiz);
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            finalScoreElement.textContent = `Tu puntuación final es: ${score} de ${shuffledQuestions.length * 10}`;
+
+            let feedbackMsg = '';
+            const percentage = (score / (shuffledQuestions.length * 10)) * 100;
+            if (percentage >= 80) {
+                feedbackMsg = "¡Excelente! Demuestras un profundo conocimiento del texto de Francesco Tonucci. ¡Sigue así!";
+            } else if (percentage >= 50) {
+                feedbackMsg = "¡Buen trabajo! Has comprendido varios puntos clave del documento. ¡Un poco más de lectura y lo dominarás!";
+            } else {
+                feedbackMsg = "Sigue intentándolo. Te recomendamos releer con atención \"Con ojos de Niño\" para afianzar los conceptos e ideas del autor.";
+            }
+            finalFeedbackElement.textContent = feedbackMsg;
+        }
+
+        // Initial call to start the quiz
+        startQuiz();
+    </script>
+</body>
+</html>

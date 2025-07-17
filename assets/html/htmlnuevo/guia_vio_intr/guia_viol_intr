@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario sobre Violencia Intrafamiliar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 1.5rem;
+        }
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4c51bf; /* Indigo */
+        }
+        .question-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .option-button {
+            background-color: #edf2f7; /* Light gray */
+            color: #2d3748; /* Dark gray */
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            text-align: left;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .option-button:hover:not(.correct):not(.incorrect) {
+            background-color: #e2e8f0; /* Lighter gray on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+        }
+        .option-button.selected {
+            border-color: #667eea; /* Blue for selected */
+            background-color: #e0e7ff; /* Lighter blue for selected */
+        }
+        .option-button.correct {
+            background-color: #d1fae5; /* Green for correct */
+            border-color: #34d399; /* Green border */
+            color: #065f46; /* Darker green text */
+            pointer-events: none; /* Disable after selection */
+        }
+        .option-button.incorrect {
+            background-color: #fee2e2; /* Red for incorrect */
+            border-color: #ef4444; /* Red border */
+            color: #991b1b; /* Darker red text */
+            pointer-events: none; /* Disable after selection */
+        }
+        .feedback-container {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .feedback-correct {
+            background-color: #ecfdf5; /* Light green */
+            border: 1px solid #a7f3d0; /* Green border */
+            color: #065f46; /* Dark green text */
+        }
+        .feedback-incorrect {
+            background-color: #fff7ed; /* Light orange */
+            border: 1px solid #fed7aa; /* Orange border */
+            color: #9a3412; /* Dark orange text */
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+        .nav-button {
+            background-color: #667eea; /* Blue */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:hover {
+            background-color: #5a67d8; /* Darker blue */
+            transform: translateY(-2px);
+        }
+        .nav-button:disabled {
+            background-color: #a0aec0; /* Gray when disabled */
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .final-score-container {
+            text-align: center;
+            padding: 2rem;
+            background-color: #e0e7ff; /* Light blue */
+            border-radius: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+        .final-score-container h2 {
+            font-size: 2.5rem;
+            color: #4c51bf;
+            margin-bottom: 1rem;
+        }
+        .final-score-container p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+        .footer {
+            margin-top: auto; /* Pushes footer to the bottom */
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        @media (max-width: 640px) {
+            .container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .score-display {
+                margin-top: 0.5rem;
+                align-self: flex-end;
+            }
+            .option-button {
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+            }
+            .navigation-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div class="container">
+        <div class="header">
+            <h1 class="text-2xl font-bold text-gray-800">Cuestionario: Violencia Intrafamiliar</h1>
+            <div class="score-display">Puntuación: <span id="score">0</span> / 100</div>
+        </div>
+
+        <div id="quiz-area" class="question-container">
+            <div id="question-card">
+                <p class="text-lg font-semibold mb-4" id="question-text"></p>
+                <div id="options-container" class="options-grid">
+                    <!-- Options will be loaded here by JS -->
+                </div>
+                <div id="feedback" class="feedback-container hidden">
+                    <!-- Feedback will be loaded here by JS -->
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button id="next-button" class="nav-button" disabled>Siguiente Pregunta</button>
+            </div>
+        </div>
+
+        <div id="final-score-area" class="final-score-container hidden">
+            <h2 class="text-4xl font-bold mb-4">Cuestionario Completado</h2>
+            <p class="text-2xl mb-4">Tu Puntuación Final: <span id="final-score-display" class="font-extrabold text-indigo-700"></span> / 100</p>
+            <p id="general-feedback" class="text-lg"></p>
+            <button id="restart-button" class="nav-button mt-6">Reiniciar Cuestionario</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor
+    </footer>
+
+    <script>
+        // Array of questions, options, correct answers, feedback, and page numbers.
+        const questions = [
+            {
+                question: "¿Cuál es la principal característica que distingue a la 'Guía para la identificación y denuncia de la violencia intrafamiliar' de un documento normativo, según el Ministro de Educación?",
+                options: [
+                    "Su carácter vinculante en todos los procesos judiciales.",
+                    "Su función de apoyo y orientación, en contraste con el Protocolo de prevención, actuación y denuncia de casos de violencia.",
+                    "Su obligatoriedad para todas las unidades educativas a nivel nacional.",
+                    "Su enfoque exclusivo en la sanción de los agresores."
+                ],
+                answer: "Su función de apoyo y orientación, en contraste con el Protocolo de prevención, actuación y denuncia de casos de violencia.",
+                feedback: "La guía tiene un carácter orientador y de apoyo, mientras que el procedimiento normativo se encuentra en el Protocolo de prevención, actuación y denuncia de casos de violencia.",
+                page: 8
+            },
+            {
+                question: "Según el 'Informe sobre la situación mundial de la prevención de la violencia contra los niños 2020', ¿cuántos niños menores de cuatro años sufren castigos violentos por parte de sus cuidadores?",
+                options: [
+                    "Más de mil millones.",
+                    "Aproximadamente 120 millones.",
+                    "Trescientos millones.",
+                    "40.150."
+                ],
+                answer: "Trescientos millones.",
+                feedback: "El informe señala que trescientos millones de niños menores de cuatro años sufren castigos violentos por sus cuidadores.",
+                page: 9
+            },
+            {
+                question: "El modelo ecológico explica la multifactorialidad de la violencia contra niñas, niños y adolescentes identificando cuatro categorías de factores de influencia. ¿Cuál de las siguientes NO es una de esas categorías?",
+                options: [
+                    "El niño.",
+                    "La familia.",
+                    "Las instituciones religiosas.",
+                    "La sociedad."
+                ],
+                answer: "Las instituciones religiosas.",
+                feedback: "El modelo ecológico identifica cuatro categorías de factores de influencia: el niño, la familia, la comunidad y la sociedad.",
+                page: 11
+            },
+            {
+                question: "¿Cuál es el objetivo principal de esta guía en relación con la violencia intrafamiliar en el ámbito educativo?",
+                options: [
+                    "Establecer sanciones legales directas para los agresores.",
+                    "Garantizar la prevención, identificación temprana y referencia oportuna para la restitución de derechos.",
+                    "Reemplazar los protocolos existentes de prevención y denuncia.",
+                    "Capacitar a las maestras y maestros en intervención psicológica profunda."
+                ],
+                answer: "Garantizar la prevención, identificación temprana y referencia oportuna para la restitución de derechos.",
+                feedback: "El objetivo de la guía es orientar la actuación de la comunidad educativa para garantizar la prevención, identificación temprana y referencia oportuna, coadyuvando a la restitución de los derechos vulnerados.",
+                page: 13
+            },
+            {
+                question: "La violencia intrafamiliar por 'omisión o supresión' se caracteriza por:",
+                options: [
+                    "Comportamientos deliberados y recurrentes de agresión física.",
+                    "La imposición de trabajo excesivo e inadecuado para la edad.",
+                    "La falta de provisión de estímulos y condiciones para asistir a la unidad educativa, entre otras negligencias.",
+                    "Abuso de medios correctivos o disciplinarios que ponen en peligro la integridad."
+                ],
+                answer: "La falta de provisión de estímulos y condiciones para asistir a la unidad educativa, entre otras negligencias.",
+                feedback: "La violencia por omisión y supresión se entiende como la omisión de responsabilidades en relación a necesidades básicas, incluyendo la no provisión de estímulos y condiciones para asistir a la unidad educativa.",
+                page: 17
+            },
+            {
+                question: "¿Cuál de las siguientes NO es una manifestación de violencia psicológica o emocional según la guía?",
+                options: [
+                    "Hostilidad verbal como insultos y burlas.",
+                    "Amenazas de abandono o bloqueo de iniciativas infantiles.",
+                    "Palmadas o golpes con el puño que causan enrojecimiento de la piel.",
+                    "Actitud de evitar el contacto o cercanía con el niño/a, minimizando iniciativas de apego."
+                ],
+                answer: "Palmadas o golpes con el puño que causan enrojecimiento de la piel.",
+                feedback: "Las palmadas o golpes que causan enrojecimiento son consideradas violencia física, no psicológica. La violencia psicológica se refiere a acciones que socavan la valoración de sí mismo, como insultos, burlas, desprecio, críticas o amenazas de abandono.",
+                page: 15
+            },
+            {
+                question: "Según la Tabla 1, ¿cuál es la pena máxima de privación de libertad para el delito de Violación?",
+                options: [
+                    "Seis (6) a diez (10) años.",
+                    "Quince (15) años.",
+                    "Diez (10) a quince (15) años.",
+                    "Seis (6) años."
+                ],
+                answer: "Quince (15) años.",
+                feedback: "La pena máxima para el delito de Violación es la privación de libertad de 15 años.",
+                page: 16
+            },
+            {
+                question: "¿Cuál de las siguientes situaciones NO se considera explotación laboral según la Ley N.º 548?",
+                options: [
+                    "Dedicación exclusiva al trabajo a una edad demasiado temprana.",
+                    "Trabajo que impide el acceso a la educación.",
+                    "Recibir un salario adecuado y justo por el trabajo realizado.",
+                    "Trabajo que provoca estrés físico, social o psicológico."
+                ],
+                answer: "Recibir un salario adecuado y justo por el trabajo realizado.",
+                feedback: "Recibir un salario adecuado no se considera explotación laboral. La explotación laboral incluye recibir un salario inadecuado.",
+                page: 17
+            },
+            {
+                question: "En la niñez, ¿cuál de las siguientes es una señal o consecuencia a *largo plazo* de la violencia, específicamente en el área conductual?",
+                options: [
+                    "Conductas regresivas (chuparse el dedo).",
+                    "Llanto reiterado sin causa aparente.",
+                    "Fracaso o abandono escolar.",
+                    "Retraimiento o hiperactividad."
+                ],
+                answer: "Fracaso o abandono escolar.",
+                feedback: "El fracaso o abandono escolar es una consecuencia a largo plazo en el área conductual para la niñez. Las otras opciones son a corto/mediano plazo.",
+                page: 20
+            },
+            {
+                question: "¿Cuál de los siguientes es un factor de riesgo individual para el agresor o agresora, según la guía?",
+                options: [
+                    "Desintegración familiar.",
+                    "Pobreza.",
+                    "Rasgos de hiperactividad en el niño.",
+                    "Reducida capacidad de control de sus impulsos."
+                ],
+                answer: "Reducida capacidad de control de sus impulsos.",
+                feedback: "En el caso del agresor o agresora, los factores de riesgo individuales están generalmente relacionados a características inherentes a su personalidad, como la reducida capacidad de control de sus impulsos.",
+                page: 21
+            },
+            {
+                question: "¿Por qué el castigo físico o psicológico, aunque parezca eficaz a corto plazo, es ineficaz a largo plazo según la guía?",
+                options: [
+                    "Porque genera dependencia del niño hacia el agresor.",
+                    "Porque no permite al niño controlar su comportamiento a partir de sus experiencias y reflexionar sobre las consecuencias.",
+                    "Porque solo es aplicable en edades muy tempranas.",
+                    "Porque incrementa la autoestima del niño al superar el dolor."
+                ],
+                answer: "Porque no permite al niño controlar su comportamiento a partir de sus experiencias y reflexionar sobre las consecuencias.",
+                feedback: "El castigo no deja que la niña, el niño y/o adolescente controle su comportamiento a partir de sus experiencias, reflexione y comprenda de las consecuencias de su comportamiento.",
+                page: 24
+            },
+            {
+                question: "Si una maestra o maestro identifica signos de posible violencia en un estudiante, ¿cuál es la acción más importante a seguir, según la guía?",
+                options: [
+                    "Confrontar inmediatamente a la familia del estudiante.",
+                    "Realizar un interrogatorio exhaustivo al estudiante en público.",
+                    "Establecer una cercanía con el estudiante para indagar sobre cambios en su comportamiento o situaciones particulares.",
+                    "Ignorar los signos hasta que la violencia sea evidente."
+                ],
+                answer: "Establecer una cercanía con el estudiante para indagar sobre cambios en su comportamiento o situaciones particulares.",
+                feedback: "Las maestras y los maestros deben prestar atención a los indicadores de violencia y, en caso de que se presenten varios, establecer una cercanía con las niñas, los niños y adolescentes para indagar.",
+                page: 27
+            },
+            {
+                question: "¿Cuál de los siguientes indicadores de comportamiento en un niño víctima de violencia se relaciona con 'somatizaciones'?",
+                options: [
+                    "Cambios bruscos de comportamiento (agresividad, retraimiento).",
+                    "Sentimientos de culpa frente a acciones o inacciones.",
+                    "Dolores de cabeza, mareos, desmayos sin explicación médica.",
+                    "Fantaseo con detalles excesivos."
+                ],
+                answer: "Dolores de cabeza, mareos, desmayos sin explicación médica.",
+                feedback: "Las somatizaciones son la presencia de síntomas físicos (como dolores de cabeza, mareos, desmayos) que no pueden ser explicados médicamente y tienen origen psicológico.",
+                page: 28
+            },
+            {
+                question: "Durante la intervención con una posible víctima de violencia, ¿qué acción se *NO* se debe realizar?",
+                options: [
+                    "Escuchar de manera atenta y creer lo que se escucha.",
+                    "Realizar preguntas abiertas.",
+                    "Forzar a hablar de cosas que no quiere decir.",
+                    "Mantener una postura objetiva ante la situación."
+                ],
+                answer: "Forzar a hablar de cosas que no quiere decir.",
+                feedback: "No se debe forzar a la víctima a hablar de cosas que no quiere decir. La conversación debe ser amigable y basada en preguntas abiertas.",
+                page: 29
+            },
+            {
+                question: "Si se sospecha de abuso sexual, ¿quién debe realizar la conversación con la posible víctima y bajo qué condiciones?",
+                options: [
+                    "Cualquier maestro/a en un ambiente ruidoso para disimular.",
+                    "Una maestra en un ambiente tranquilo y con privacidad, y si el caso lo amerita, también un maestro entrenado.",
+                    "El director de la unidad educativa junto con el agresor.",
+                    "Un grupo de maestros en un espacio abierto para mayor transparencia."
+                ],
+                answer: "Una maestra en un ambiente tranquilo y con privacidad, y si el caso lo amerita, también un maestro entrenado.",
+                feedback: "Cuando se sospeche de abuso sexual, la conversación deberá ser realizada por una maestra en un ambiente tranquilo y con privacidad y, si el caso lo amerita, también por un maestro entrenado, amable y con actitud abierta.",
+                page: 30
+            },
+            {
+                question: "¿Cuál de los siguientes elementos es crucial para que una maestra o maestro examine sus limitaciones al intervenir en un caso de violencia?",
+                options: [
+                    "La cantidad de años de servicio en la docencia.",
+                    "Si cuenta con los elementos necesarios para apoyar a la víctima, especialmente si tiene una experiencia de abuso no trabajada.",
+                    "El nivel de rendimiento académico del estudiante.",
+                    "La disponibilidad de recursos materiales en la unidad educativa."
+                ],
+                answer: "Si cuenta con los elementos necesarios para apoyar a la víctima, especialmente si tiene una experiencia de abuso no trabajada.",
+                feedback: "Si el adulto no siente que cuenta con los elementos que se requieren para apoyar a la víctima en el proceso, ya sea porque tiene una experiencia de abuso no trabajada o por cualquier otra causa, lo mejor será traspasar el caso.",
+                page: 31
+            },
+            {
+                question: "Según la Tabla 7 de Valoración del Riesgo, ¿qué caracteriza un 'RIESGO ALTO' en casos de omisión o descuido?",
+                options: [
+                    "Omisiones y descuido que no afectan significativamente el crecimiento del niño.",
+                    "Omisiones que determinan una ligera afectación, pero con una relación de afecto.",
+                    "Omisiones intensas y frecuentes que determinan un daño severo, con importante afectación y posibles lesiones reiteradas.",
+                    "Descuido ocasional sin consecuencias duraderas."
+                ],
+                answer: "Omisiones intensas y frecuentes que determinan un daño severo, con importante afectación y posibles lesiones reiteradas.",
+                feedback: "En riesgo alto, las omisiones son intensas y frecuentes, determinan un severo daño, con importante afectación en el crecimiento, desarrollo, educación, salud y relaciones sociales de la niña, del niño o adolescente, y se presentan lesiones o daño reiterado.",
+                page: 33
+            },
+            {
+                question: "En casos de 'Maltrato psicológico', ¿cuál de las siguientes situaciones indica un 'RIESGO ALTO'?",
+                options: [
+                    "Actitudes de maltrato aisladas que afectan solo algunos ámbitos emocionales.",
+                    "Insultos, control excesivo o amenazas habituales que afectan emocional, de desarrollo y relaciones sociales, pero con algunos rasgos de cuidado.",
+                    "Rechazo constante o abandono que impiden frecuentemente la interacción del estudiante con otras personas.",
+                    "Uso ocasional de hostilidad verbal sin daño notorio."
+                ],
+                answer: "Rechazo constante o abandono que impiden frecuentemente la interacción del estudiante con otras personas.",
+                feedback: "El riesgo alto en maltrato psicológico incluye situaciones en las que hay rechazo constante, abandono e impiden frecuentemente la interacción de la o el estudiante con otras personas, pudiendo presentar riesgo de homicidio.",
+                page: 34
+            },
+            {
+                question: "En casos de violencia sexual, ¿cuál es la única opción de intervención contemplada por la guía, sin importar quién sea el agresor?",
+                options: [
+                    "Mediación con la persona agresora para llegar a un acuerdo.",
+                    "Arreglos extrajudiciales para evitar el proceso legal.",
+                    "Derivación o denuncia inmediata a las instancias correspondientes (Defensoría de la Niñez y Adolescencia).",
+                    "Contención emocional exclusiva por parte de la maestra o maestro."
+                ],
+                answer: "Derivación o denuncia inmediata a las instancias correspondientes (Defensoría de la Niñez y Adolescencia).",
+                feedback: "En casos de violencia sexual, nunca existe la opción de mediación ni arreglos extrajudiciales; se debe derivar o denunciar de manera inmediata a las instancias correspondientes.",
+                page: 36
+            },
+            {
+                question: "¿Cuál es el plazo máximo para que la autoridad educativa acuda a las Defensorías de la Niñez y Adolescencia (DNA) en casos de riesgo alto y medio de violencia?",
+                options: [
+                    "48 horas.",
+                    "Una semana.",
+                    "24 horas.",
+                    "Al final del ciclo escolar."
+                ],
+                answer: "24 horas.",
+                feedback: "La autoridad educativa debe acudir en un plazo máximo de 24 horas a las Defensorías de la Niñez y Adolescencia en los casos de riesgo alto y medio.",
+                page: 38
+            }
+        ];
+
+        let currentQuestions = []; // To store the shuffled questions for the current quiz session
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const pointsPerQuestion = 5;
+
+        // Get DOM elements
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback');
+        const scoreDisplay = document.getElementById('score');
+        const nextButton = document.getElementById('next-button');
+        const quizArea = document.getElementById('quiz-area');
+        const finalScoreArea = document.getElementById('final-score-area');
+        const finalScoreDisplay = document.getElementById('final-score-display');
+        const generalFeedback = document.getElementById('general-feedback');
+        const restartButton = document.getElementById('restart-button');
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Function to start or restart the quiz
+        function startQuiz() {
+            currentQuestions = shuffleArray([...questions]); // Shuffle a copy of the original questions
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplay.textContent = score;
+            quizArea.classList.remove('hidden'); // Show quiz area
+            finalScoreArea.classList.add('hidden'); // Hide final score area
+            nextButton.disabled = true; // Disable next button initially
+            loadQuestion(); // Load the first question
+        }
+
+        // Function to load and display a question
+        function loadQuestion() {
+            feedbackContainer.classList.add('hidden'); // Hide feedback
+            feedbackContainer.innerHTML = ''; // Clear previous feedback
+            optionsContainer.innerHTML = ''; // Clear previous options
+            nextButton.disabled = true; // Disable next button until an option is selected
+
+            if (currentQuestionIndex < currentQuestions.length) {
+                const q = currentQuestions[currentQuestionIndex];
+                questionText.textContent = `${currentQuestionIndex + 1}. ${q.question}`; // Display question number and text
+
+                const shuffledOptions = shuffleArray([...q.options]); // Shuffle options for the current question
+
+                // Create buttons for each option
+                shuffledOptions.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.classList.add('option-button', 'rounded-xl', 'p-3', 'm-1', 'w-full', 'text-left');
+                    button.onclick = () => selectOption(button, option, q.answer, q.feedback, q.page);
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                showFinalScore(); // If all questions are answered, show final score
+            }
+        }
+
+        // Function to handle option selection
+        function selectOption(selectedButton, selectedOption, correctAnswer, feedbackText, page) {
+            // Disable all options after one is selected to prevent multiple selections
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                button.classList.add('pointer-events-none'); // Visually disable pointer events
+            });
+
+            if (selectedOption === correctAnswer) {
+                score += pointsPerQuestion; // Add points for correct answer
+                selectedButton.classList.add('correct'); // Highlight correct button
+                feedbackContainer.classList.remove('feedback-incorrect');
+                feedbackContainer.classList.add('feedback-correct');
+                feedbackContainer.innerHTML = `<p class="font-bold">¡Correcto!</p><p>${feedbackText} (Página ${page})</p>`;
+            } else {
+                selectedButton.classList.add('incorrect'); // Highlight incorrect button
+                // Find and highlight the correct answer for user to see
+                Array.from(optionsContainer.children).forEach(button => {
+                    if (button.textContent === correctAnswer) {
+                        button.classList.add('correct');
+                    }
+                });
+                feedbackContainer.classList.remove('feedback-correct');
+                feedbackContainer.classList.add('feedback-incorrect');
+                feedbackContainer.innerHTML = `<p class="font-bold">¡Incorrecto!</p><p>La respuesta correcta era: ${correctAnswer}</p><p>${feedbackText} (Página ${page})</p>`;
+            }
+            scoreDisplay.textContent = score; // Update real-time score display
+            feedbackContainer.classList.remove('hidden'); // Show feedback
+            nextButton.disabled = false; // Enable next button
+        }
+
+        // Function to display the final score and general feedback
+        function showFinalScore() {
+            quizArea.classList.add('hidden'); // Hide quiz area
+            finalScoreArea.classList.remove('hidden'); // Show final score area
+            finalScoreDisplay.textContent = score; // Display final score
+
+            let feedbackMessage = "";
+            if (score === 100) {
+                feedbackMessage = "¡Felicidades! Has demostrado un conocimiento excepcional sobre la guía. ¡Estás muy bien preparado/a!";
+            } else if (score >= 70) {
+                feedbackMessage = "¡Buen trabajo! Has respondido correctamente a la mayoría de las preguntas. Repasa las áreas donde tuviste dificultades para mejorar aún más.";
+            } else if (score >= 40) {
+                feedbackMessage = "Has completado el cuestionario. Te sugiero revisar la guía nuevamente para reforzar los conceptos clave y mejorar tu puntuación.";
+            } else {
+                feedbackMessage = "Necesitas un repaso más profundo de la guía. No te desanimes, cada intento es una oportunidad para aprender y mejorar.";
+            }
+            generalFeedback.textContent = feedbackMessage; // Display general feedback
+        }
+
+        // Event listener for the "Next Question" button
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++; // Move to the next question
+            loadQuestion(); // Load the next question
+        });
+
+        // Event listener for the "Restart Quiz" button
+        restartButton.addEventListener('click', startQuiz);
+
+        // Initialize the quiz when the page loads
+        document.addEventListener('DOMContentLoaded', startQuiz);
+    </script>
+</body>
+</html>

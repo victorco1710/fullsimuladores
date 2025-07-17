@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Didáctica de la Música para Educación Infantil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .feedback-correct {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .feedback-incorrect {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex flex-col min-h-screen">
+
+    <main id="quiz-container" class="flex-grow container mx-auto p-4 md:p-8 flex items-center justify-center">
+        <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6 md:p-8 text-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-700 mb-2">Cuestionario Interactivo</h1>
+            <p class="text-md text-gray-500 mb-6">Didáctica de la Música para Educación Infantil</p>
+            
+            <div id="start-screen">
+                <p class="mb-6">Pon a prueba tus conocimientos con 25 preguntas. Cada respuesta correcta vale 4 puntos.</p>
+                <button id="start-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg">
+                    Comenzar Cuestionario
+                </button>
+            </div>
+
+            <div id="quiz-screen" class="hidden">
+                <div class="text-right text-gray-500 mb-4">
+                    <span id="question-counter"></span> | <span id="score">Puntuación: 0</span>
+                </div>
+                <div id="question-box" class="mb-6 min-h-[80px]">
+                    <p id="question" class="text-lg md:text-xl font-semibold"></p>
+                </div>
+                <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <!-- Option buttons will be inserted here -->
+                </div>
+                <div id="feedback" class="min-h-[100px] p-4 rounded-lg mt-4 text-left">
+                    <!-- Feedback will be shown here -->
+                </div>
+            </div>
+
+            <div id="result-screen" class="hidden">
+                 <h2 class="text-2xl font-bold mb-4">¡Cuestionario completado!</h2>
+                 <p class="text-xl mb-2">Tu puntuación final es:</p>
+                 <p id="final-score" class="text-5xl font-bold text-indigo-600 mb-6"></p>
+                 <div id="general-feedback" class="bg-gray-100 p-4 rounded-lg mb-6"></div>
+                 <button id="restart-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg">
+                     Intentar de Nuevo
+                 </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full text-center py-4 bg-white border-t border-gray-200">
+        <p class="text-sm text-gray-500">desarrollado por Victor Crespo</p>
+    </footer>
+
+    <script>
+        // --- DATASET DE PREGUNTAS ---
+        const questions = [
+            {
+                question: "¿Cuál es la definición más difundida de música?",
+                options: ["El arte de combinar los sonidos en el tiempo", "El lenguaje del sentimiento", "Un ejercicio secreto de aritmética", "El germen de todas las virtudes"],
+                answer: 0,
+                feedback: "¡Correcto! La definición más difundida de música es 'el arte de combinar los sonidos en el tiempo'. Esta es la concepción más generalizada que engloba sus elementos esenciales.",
+                page: 17
+            },
+            {
+                question: "Según Platón, ¿qué tipo de canciones se deben cantar a los niños pequeños para que se relajen?",
+                options: ["Canciones de juego", "Canciones de cuna", "Canciones de marcha", "Canciones de trabajo"],
+                answer: 1,
+                feedback: "¡Correcto! En su obra 'Las Leyes', Platón señala la importancia de mecer o balancear a los niños mientras se les canta una canción de cuna para su relajación y bienestar.",
+                page: 18
+            },
+            {
+                question: "¿Qué son los parámetros del sonido?",
+                options: ["Volumen, tono y eco", "Altura, duración, intensidad y timbre", "Ritmo, melodía y armonía", "Sonido, silencio y ruido"],
+                answer: 1,
+                feedback: "¡Muy bien! Los cuatro parámetros o cualidades que definen cualquier sonido son la altura (agudo/grave), la duración (largo/corto), la intensidad (fuerte/débil) y el timbre (color del sonido).",
+                page: 16
+            },
+            {
+                question: "En el lenguaje musical, ¿qué es el pentagrama?",
+                options: ["Un signo que indica la velocidad", "Una figura que representa la duración", "El conjunto de cinco líneas y cuatro espacios", "El nombre de las notas musicales"],
+                answer: 2,
+                feedback: "¡Excelente! El pentagrama es el conjunto de cinco líneas y cuatro espacios donde se escriben las notas y demás signos musicales para representar gráficamente la música.",
+                page: 26
+            },
+            {
+                question: "La cualidad del sonido que permite diferenciar si es agudo o grave se llama:",
+                options: ["Intensidad", "Duración", "Altura", "Timbre"],
+                answer: 2,
+                feedback: "¡Correcto! La altura es la cualidad que nos permite distinguir entre sonidos agudos (altos) y graves (bajos), y depende de la frecuencia de la vibración.",
+                page: 16
+            },
+            {
+                question: "¿Qué es el ritmo en música?",
+                options: ["La velocidad de una canción", "La combinación de distintas duraciones", "La sucesión de notas de distinta altura", "El volumen de los instrumentos"],
+                answer: 1,
+                feedback: "¡Muy bien! El ritmo es el elemento que organiza la música en el tiempo, y se crea a partir de la combinación de sonidos de diferentes duraciones.",
+                page: 30
+            },
+            {
+                question: "¿Qué afirma la teoría de las inteligencias múltiples de Gardner sobre la inteligencia musical?",
+                options: ["Que es la única inteligencia importante", "Que no existe como tal", "Que es una de las siete variedades de inteligencia", "Que solo la tienen los genios"],
+                answer: 2,
+                feedback: "¡Correcto! Howard Gardner propone que la inteligencia musical es una de las siete (o más) inteligencias distintas que posee el ser humano, relativamente independiente de las demás.",
+                page: 57
+            },
+            {
+                question: "Según el método Orff, ¿cuál es considerado el primer instrumento y el más natural?",
+                options: ["La flauta", "El piano", "El cuerpo", "El xilófono"],
+                answer: 2,
+                feedback: "¡Perfecto! El método Orff parte de la idea de que el cuerpo es el instrumento más primario, utilizando pitos, palmas, rodillas y pisadas para hacer música antes de usar instrumentos externos.",
+                page: 91
+            },
+            {
+                question: "¿En qué se basa principalmente el método Dalcroze?",
+                options: ["En el canto coral", "En la educación rítmica a través del movimiento corporal", "En el uso de instrumentos de percusión", "En el aprendizaje del lenguaje musical"],
+                answer: 1,
+                feedback: "¡Así es! El método Dalcroze, también conocido como 'Rítmica', se fundamenta en la relación entre música y movimiento, utilizando el cuerpo para experimentar y comprender el ritmo.",
+                page: 88
+            },
+            {
+                question: "¿Cuál es el elemento central en la metodología de Zoltán Kodály?",
+                options: ["La improvisación instrumental", "La relajación", "La canción folklórica", "La música electrónica"],
+                answer: 2,
+                feedback: "¡Correcto! Para Kodály, la canción folklórica es la 'lengua materna' musical de los niños. Su método utiliza el canto y el folklore como base de toda la educación musical.",
+                page: 101
+            },
+            {
+                question: "¿Qué es la fonomimia, utilizada en el método Kodály?",
+                options: ["Un tipo de danza húngara", "Un sistema de signos manuales para representar las alturas", "Un instrumento de percusión", "Una forma de escribir música"],
+                answer: 1,
+                feedback: "¡Muy bien! La fonomimia es un recurso del método Kodály que asocia un gesto o signo manual a cada sonido de la escala, ayudando a la interiorización de las alturas.",
+                page: 102
+            },
+            {
+                question: "¿Cuál es el principal foco del método Willems?",
+                options: ["La expresión corporal", "La construcción de instrumentos", "La educación auditiva", "La composición musical"],
+                answer: 2,
+                feedback: "¡Excelente! El método Willems pone un énfasis especial en la educación del oído. Considera que el desarrollo de la audición es la base para toda la formación musical.",
+                page: 94
+            },
+            {
+                question: "El método Martenot concede una gran importancia a un aspecto psicofisiológico. ¿Cuál es?",
+                options: ["La nutrición", "La relajación y el control muscular", "La memoria visual", "El desarrollo de la fuerza"],
+                answer: 1,
+                feedback: "¡Correcto! Una de las características distintivas del método Martenot es la importancia que le da a la relajación y al control muscular como preparación para la actividad musical.",
+                page: 98
+            },
+             {
+                question: "¿Cómo se llama la cualidad que nos permite diferenciar el sonido de una flauta y el de un violín, aunque toquen la misma nota con la misma intensidad?",
+                options: ["Altura", "Intensidad", "Duración", "Timbre"],
+                answer: 3,
+                feedback: "¡Muy bien! El timbre es el 'color' del sonido. Es la cualidad que nos permite distinguir la fuente sonora, es decir, qué o quién está produciendo el sonido.",
+                page: 18
+            },
+            {
+                question: "¿Qué son los 'instrumentos corporales' en el método Orff?",
+                options: ["Instrumentos hechos con forma de cuerpo humano", "Pitos, palmas, palmas en rodillas y pisadas", "Juguetes sonoros que se usan con el cuerpo", "Instrumentos que se tocan muy cerca del cuerpo"],
+                answer: 1,
+                feedback: "¡Correcto! Los instrumentos corporales o gestos sonoros son los sonidos que podemos producir con nuestro propio cuerpo. Orff los sistematizó en cuatro planos sonoros: pitos, palmas, rodillas y pisadas.",
+                page: 91
+            },
+            {
+                question: "La metodología de la Educación Infantil debe basarse principalmente en:",
+                options: ["La memorización y la repetición", "La competición y los exámenes", "La experimentación y el juego", "Las clases magistrales"],
+                answer: 2,
+                feedback: "¡Así es! La metodología en Educación Infantil debe ser activa, basándose en las experiencias directas y, sobre todo, en el juego, ya que es la forma natural en que los niños aprenden.",
+                page: 119
+            },
+            {
+                question: "¿Qué es el 'oído relativo' que desarrolla el método Kodály?",
+                options: ["La capacidad de reconocer una nota sin referencia", "La capacidad de entender las relaciones tonales entre los sonidos", "La capacidad de oír sonidos muy lejanos", "Una forma de sordera musical"],
+                answer: 1,
+                feedback: "¡Muy bien! A diferencia del oído absoluto (reconocer notas aisladas), el oído relativo se enfoca en comprender y entonar las distancias y relaciones entre las notas de una melodía.",
+                page: 102
+            },
+            {
+                question: "¿En qué área del currículo de Educación Infantil se encuadra la educación musical?",
+                options: ["Identidad y autonomía personal", "Descubrimiento del medio físico y social", "Comunicación y representación", "Es un área independiente"],
+                answer: 2,
+                feedback: "¡Correcto! La educación musical forma parte del área de 'Comunicación y representación', junto con el lenguaje verbal, corporal, plástico y matemático.",
+                page: 51
+            },
+            {
+                question: "¿Qué es un ostinato?",
+                options: ["Una forma musical que alterna un estribillo y estrofas", "Una repetición continuada de un fragmento musical", "Una imitación exacta de un fragmento", "Una forma musical con estructura A B A"],
+                answer: 1,
+                feedback: "¡Correcto! El ostinato es una de las formas musicales elementales y consiste en la repetición constante de un motivo rítmico o melódico que sirve como acompañamiento.",
+                page: 44
+            },
+            {
+                question: "El método Suzuky, también llamado 'método de la lengua materna', se basa en la analogía de aprender música como se aprende...",
+                options: ["A leer", "Las matemáticas", "El lenguaje natural", "A dibujar"],
+                answer: 2,
+                feedback: "¡Excelente! Suzuky basa su método en la idea de que, si todos los niños aprenden su lengua materna, también pueden aprender a tocar un instrumento desde muy pequeños con un método similar.",
+                page: 93
+            },
+             {
+                question: "La evaluación en Educación Infantil debe ser principalmente:",
+                options: ["Sumativa y calificadora", "Puntual y final", "Global, continua y formativa", "Basada únicamente en exámenes escritos"],
+                answer: 2,
+                feedback: "¡Correcto! La evaluación en esta etapa no busca calificar, sino observar el proceso de cada niño de manera integral (global), a lo largo del tiempo (continua) y para mejorar la enseñanza (formativa).",
+                page: 126
+            },
+            {
+                question: "¿Para qué sirve la clave al principio del pentagrama?",
+                options: ["Para indicar el ritmo", "Para dar el nombre y la altura a las notas", "Para decorar la partitura", "Para señalar el final de la obra"],
+                answer: 1,
+                feedback: "¡Muy bien! La clave es el signo que fija el nombre y la altura de una de las notas (por ejemplo, la clave de Sol en la segunda línea), y a partir de ella se nombran todas las demás.",
+                page: 27
+            },
+            {
+                question: "¿Qué es el 'pulso' en música?",
+                options: ["El ritmo principal de la batería", "El latido constante y regular de la música", "El silencio entre dos notas", "La nota más fuerte de un compás"],
+                answer: 1,
+                feedback: "¡Exacto! El pulso es el latido interno de la música, una sucesión de impulsos regulares y constantes que sirven como referencia para el ritmo. Es como el 'tic-tac' de un reloj.",
+                page: 30
+            },
+            {
+                question: "En las primeras etapas de la vida, la educación musical contribuye principalmente al desarrollo:",
+                options: ["Únicamente de la inteligencia musical", "Psicomotor, lingüístico, cognitivo y emocional", "Solamente del oído", "Solo de la capacidad de cantar"],
+                answer: 1,
+                feedback: "¡Correcto! La música tiene un valor educativo integral. Contribuye al desarrollo psicomotor (movimiento), lingüístico (canciones), cognitivo (memoria, atención) y emocional (expresión de sentimientos).",
+                page: 53
+            },
+            {
+                question: "La organización del aula en 'rincones' es una estrategia pedagógica que favorece:",
+                options: ["El trabajo individual y en silencio", "La enseñanza frontal y directa", "La participación activa del niño y la autonomía", "La estandarización del aprendizaje"],
+                answer: 2,
+                feedback: "¡Muy bien! Organizar la clase por rincones (como el rincón de música) permite que los niños trabajen en pequeños grupos, de forma autónoma, explorando diferentes actividades según sus intereses.",
+                page: 119
+            }
+        ];
+
+        // --- ELEMENTOS DEL DOM ---
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const questionCounterEl = document.getElementById('question-counter');
+        const scoreEl = document.getElementById('score');
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const feedbackEl = document.getElementById('feedback');
+
+        const finalScoreEl = document.getElementById('final-score');
+        const generalFeedbackEl = document.getElementById('general-feedback');
+
+        // --- VARIABLES DE ESTADO ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let shuffledQuestions = [];
+
+        // --- FUNCIONES ---
+
+        /**
+         * Baraja un array usando el algoritmo Fisher-Yates.
+         * @param {Array} array - El array a barajar.
+         * @returns {Array} - El array barajado.
+         */
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+        
+        /**
+         * Inicia o reinicia el cuestionario.
+         */
+        function startQuiz() {
+            // Reiniciar estado
+            score = 0;
+            currentQuestionIndex = 0;
+            shuffledQuestions = shuffleArray([...questions]);
+
+            // Actualizar UI
+            scoreEl.textContent = `Puntuación: 0`;
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            displayQuestion();
+        }
+
+        /**
+         * Muestra la pregunta actual y sus opciones.
+         */
+        function displayQuestion() {
+            feedbackEl.innerHTML = '';
+            feedbackEl.className = 'min-h-[100px] p-4 rounded-lg mt-4 text-left'; // Reset feedback style
+            
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                
+                questionCounterEl.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+                questionEl.textContent = currentQuestion.question;
+
+                optionsEl.innerHTML = '';
+                currentQuestion.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.dataset.index = index;
+                    button.className = 'option-btn w-full p-3 bg-gray-100 rounded-lg text-left transition duration-300 border border-gray-200';
+                    button.addEventListener('click', handleOptionClick);
+                    optionsEl.appendChild(button);
+                });
+            } else {
+                showResults();
+            }
+        }
+
+        /**
+         * Maneja el clic en una opción de respuesta.
+         * @param {Event} e - El evento de clic.
+         */
+        function handleOptionClick(e) {
+            const selectedOptionIndex = parseInt(e.target.dataset.index);
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+
+            // Deshabilitar botones para evitar múltiples clics
+            Array.from(optionsEl.children).forEach(button => {
+                button.disabled = true;
+                button.removeEventListener('click', handleOptionClick);
+                if (parseInt(button.dataset.index) === currentQuestion.answer) {
+                    button.classList.add('bg-green-500', 'text-white', 'border-green-600');
+                } else if (parseInt(button.dataset.index) === selectedOptionIndex) {
+                     button.classList.add('bg-red-500', 'text-white', 'border-red-600');
+                }
+            });
+
+            if (selectedOptionIndex === currentQuestion.answer) {
+                score += 4;
+                scoreEl.textContent = `Puntuación: ${score}`;
+                feedbackEl.innerHTML = `
+                    <p class="font-bold text-green-700">¡Correcto!</p>
+                    <p class="text-gray-600">${currentQuestion.feedback}</p>
+                    <p class="text-sm text-gray-500 mt-2">Referencia: Página ${currentQuestion.page}</p>
+                `;
+                feedbackEl.classList.add('bg-green-100', 'border', 'border-green-200', 'feedback-correct');
+            } else {
+                feedbackEl.innerHTML = `
+                    <p class="font-bold text-red-700">Incorrecto.</p>
+                    <p class="text-gray-600">${currentQuestion.feedback}</p>
+                    <p class="text-sm text-gray-500 mt-2">Referencia: Página ${currentQuestion.page}</p>
+                `;
+                 feedbackEl.classList.add('bg-red-100', 'border', 'border-red-200', 'feedback-incorrect');
+            }
+            
+            currentQuestionIndex++;
+            setTimeout(displayQuestion, 2500); // Esperar 2.5 segundos antes de la siguiente pregunta
+        }
+        
+        /**
+         * Muestra la pantalla de resultados finales.
+         */
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            finalScoreEl.textContent = `${score} / 100`;
+
+            let generalFeedbackText = '';
+            if (score >= 90) {
+                generalFeedbackText = '¡Excelente trabajo! Demuestras un conocimiento profundo de la didáctica musical para educación infantil. ¡Felicidades!';
+            } else if (score >= 70) {
+                generalFeedbackText = '¡Muy buen resultado! Tienes una sólida comprensión de los conceptos clave. Sigue repasando para afianzar los detalles.';
+            } else if (score >= 50) {
+                generalFeedbackText = '¡Buen intento! Has acertado en varios puntos importantes. Te recomendamos revisar el material para fortalecer las áreas más débiles.';
+            } else {
+                generalFeedbackText = 'No te desanimes. Este cuestionario es un buen punto de partida para identificar qué temas necesitas repasar. ¡Vuelve a intentarlo!';
+            }
+            generalFeedbackEl.textContent = generalFeedbackText;
+        }
+
+
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Ley N° 070</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            min-height: 500px; /* Ensure a minimum height for consistent layout */
+        }
+        .question-section {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .option-button {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            padding: 15px 20px;
+            border-radius: 0.75rem;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: left;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+        .option-button:hover:not(.selected):not(.correct):not(.incorrect) {
+            background-color: #cbd5e0;
+        }
+        .option-button.selected {
+            border-color: #4299e1;
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+        }
+        .option-button.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+            font-weight: 700;
+        }
+        .option-button.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+            font-weight: 700;
+        }
+        .feedback-section {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 0.75rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #28a745;
+        }
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #dc3545;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        .nav-button {
+            background-color: #4299e1;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            border: none;
+        }
+        .nav-button:hover {
+            background-color: #2b6cb0;
+        }
+        .nav-button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .results-section {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #333;
+        }
+        .score-display {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2b6cb0;
+            margin-bottom: 15px;
+        }
+        .general-feedback {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e6fffa;
+            border: 1px solid #81e6d9;
+            border-radius: 0.75rem;
+        }
+        .credits {
+            margin-top: auto; /* Pushes credits to the bottom */
+            padding-top: 20px;
+            font-size: 0.85rem;
+            color: #718096;
+            border-top: 1px solid #e2e8f0;
+            width: 100%;
+        }
+        @media (max-width: 640px) {
+            .question-text {
+                font-size: 1.2rem;
+            }
+            .option-button {
+                font-size: 0.9rem;
+                padding: 12px 15px;
+            }
+            .nav-button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .score-display {
+                font-size: 1.8rem;
+            }
+            .general-feedback {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="quiz-content" class="question-section">
+            <!-- Question and options will be loaded here -->
+        </div>
+        <div id="credits" class="credits">
+            PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál de los siguientes NO es un mandato constitucional de la educación según el Artículo 1 de la Ley N° 070?",
+                options: [
+                    "Es una función suprema y primera responsabilidad financiera del Estado.",
+                    "Toda persona tiene derecho a recibir educación en todos los niveles de manera universal, productiva, gratuita, integral e intercultural, sin discriminación.",
+                    "El sistema educativo comprende únicamente la educación regular y la educación superior de formación profesional.",
+                    "El Estado y la sociedad tienen tuición plena sobre el sistema educativo."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! El sistema educativo también comprende la educación alternativa y especial, no solo la regular y superior. (Art. 1, numeral 3)",
+                feedbackIncorrect: "Incorrecto. El sistema educativo comprende la educación regular, la alternativa y especial, y la educación superior de formación profesional. (Art. 1, numeral 3)",
+                page: 2
+            },
+            {
+                question: "¿Quién tiene la obligación indeclinable de sostener, garantizar y gestionar la educación, según el Artículo 1 de la Ley N° 070?",
+                options: [
+                    "Los gobiernos municipales y departamentales.",
+                    "El Estado y la sociedad en conjunto.",
+                    "El Estado Plurinacional.",
+                    "Las instituciones educativas privadas y de convenio."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! La educación constituye una función suprema y primera responsabilidad financiera del Estado. (Art. 1, numeral 2)",
+                feedbackIncorrect: "Incorrecto. Es el Estado quien tiene la obligación indeclinable de sostenerla, garantizarla y gestionarla. (Art. 1, numeral 2)",
+                page: 2
+            },
+            {
+                question: "Según el Artículo 2, numeral 1, ¿qué tipo de participación se reconoce y garantiza en el sistema educativo, incluyendo a madres y padres de familia?",
+                options: [
+                    "Participación administrativa y financiera.",
+                    "Participación social y comunitaria.",
+                    "Participación consultiva y de asesoramiento.",
+                    "Participación sindical y gremial."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se reconoce y garantiza la participación social, la participación comunitaria, de madres y padres de familia. (Art. 2, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La Ley enfatiza la participación social y comunitaria de madres y padres de familia. (Art. 2, numeral 1)",
+                page: 3
+            },
+            {
+                question: "¿Cuál es el instrumento normativo de vigencia plena que garantiza la carrera docente, administrativa y de servicio del Sistema Educativo Plurinacional, según el Artículo 2, numeral 7?",
+                options: [
+                    "El Código de la Educación Boliviana.",
+                    "El Reglamento de Convocatorias y Ascensos.",
+                    "El Reglamento del Escalafón Nacional del Servicio de Educación.",
+                    "La Ley de la Función Pública."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! El Reglamento del Escalafón Nacional del Servicio de Educación es el instrumento normativo clave. (Art. 2, numeral 7)",
+                feedbackIncorrect: "Incorrecto. Es el Reglamento del Escalafón Nacional del Servicio de Educación. (Art. 2, numeral 7)",
+                page: 3
+            },
+            {
+                question: "¿A qué estudiantes se les exceptúa el derecho a la sindicalización, según el Artículo 2, numeral 9?",
+                options: [
+                    "Estudiantes de educación alternativa y especial.",
+                    "Estudiantes de institutos técnicos y tecnológicos.",
+                    "Estudiantes de los institutos militares y policiales.",
+                    "Estudiantes de universidades privadas."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Los estudiantes de los institutos militares y policiales están sujetos a un régimen especial. (Art. 2, numeral 9)",
+                feedbackIncorrect: "Incorrecto. La excepción aplica a los estudiantes de los institutos militares y policiales. (Art. 2, numeral 9)",
+                page: 3
+            },
+            {
+                question: "La educación, según el Artículo 3, numeral 1, es descolonizadora, liberadora, revolucionaria, anti-imperialista, despatriarcalizadora y transformadora de las estructuras económicas y sociales; orientada a:",
+                options: [
+                    "La modernización de las estructuras educativas y la adaptación a modelos internacionales.",
+                    "La reafirmación cultural de las naciones y pueblos indígena originario campesinos, las comunidades interculturales y afrobolivianas en la construcción del Estado Plurinacional y el Vivir Bien.",
+                    "La promoción de un modelo económico capitalista y la libre competencia en el ámbito educativo.",
+                    "El desarrollo de una sociedad homogénea y unificada bajo una única identidad cultural."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Está orientada a la reafirmación cultural de las naciones y pueblos indígena originario campesinos, comunidades interculturales y afrobolivianas en la construcción del Estado Plurinacional y el Vivir Bien. (Art. 3, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La educación busca la reafirmación cultural de las naciones y pueblos indígena originario campesinos, comunidades interculturales y afrobolivianas. (Art. 3, numeral 1)",
+                page: 4
+            },
+            {
+                question: "¿Cuál de las siguientes afirmaciones sobre la base de 'única, diversa y plural' de la educación es INCORRECTA según el Artículo 3, numeral 4?",
+                options: [
+                    "Es única en cuanto a calidad, política educativa y currículo base.",
+                    "Erradica las diferencias entre lo fiscal y privado, lo urbano y rural.",
+                    "Es diversa y plural en su aplicación y pertinencia a cada contexto geográfico, social, cultural y lingüístico.",
+                    "Promueve la imposición de un currículo único sin adaptaciones regionales."
+                ],
+                correctAnswer: 3,
+                feedbackCorrect: "¡Correcto! La afirmación es incorrecta porque la educación sí permite adaptaciones regionales y es diversa en su aplicación. (Art. 3, numeral 4)",
+                feedbackIncorrect: "Incorrecto. La educación es única en calidad y currículo base, pero diversa y plural en su aplicación y pertinencia a cada contexto. (Art. 3, numeral 4)",
+                page: 4
+            },
+            {
+                question: "La educación es laica, pluralista y espiritual. ¿Qué fomenta en relación con las opciones religiosas, según el Artículo 3, numeral 6?",
+                options: [
+                    "La imposición de una religión oficial del Estado.",
+                    "El respeto y la convivencia mutua entre las personas con diversas opciones religiosas, sin imposición dogmática, y propiciando el diálogo interreligioso.",
+                    "La eliminación de toda enseñanza religiosa en el sistema educativo.",
+                    "La promoción exclusiva de la espiritualidad de las naciones y pueblos indígena originario campesinos."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Fomenta el respeto y la convivencia mutua entre las personas con diversas opciones religiosas, sin imposición dogmática, y propiciando el diálogo interreligioso. (Art. 3, numeral 6)",
+                feedbackIncorrect: "Incorrecto. La educación fomenta el respeto y la convivencia mutua entre diversas opciones religiosas, promoviendo el diálogo. (Art. 3, numeral 6)",
+                page: 5
+            },
+            {
+                question: "Los principios ético morales de la sociedad plural que asume y promueve la educación, según el Artículo 3, numeral 13, incluyen:",
+                options: [
+                    "Ama sua, ama llulla, ama qhilla y suma qamaña.",
+                    "Libertad de mercado y competencia individual.",
+                    "Jerarquía social y meritocracia exclusiva.",
+                    "Centralización del poder y uniformidad cultural."
+                ],
+                correctAnswer: 0,
+                feedbackCorrect: "¡Correcto! Los principios son ama qhilla, ama llulla, ama suwa (no seas flojo, no seas mentiroso ni seas ladrón), suma qamaña (Vivir Bien), ñandereko (vida armoniosa), teko kavi (vida buena), ivi maraei (tierra sin mal) y qhapaj ñan (camino o vida noble). (Art. 3, numeral 13)",
+                feedbackIncorrect: "Incorrecto. Los principios incluyen 'ama qhilla, ama llulla, ama suwa' y 'suma qamaña', entre otros. (Art. 3, numeral 13)",
+                page: 5
+            },
+            {
+                question: "¿Cuál es uno de los fines principales de la educación en relación con la Madre Tierra, según el Artículo 4, numeral 5?",
+                options: [
+                    "Promover la explotación ilimitada de los recursos naturales para el desarrollo económico.",
+                    "Contribuir a la convivencia armónica y equilibrada del ser humano con la Madre Tierra, frente a toda acción depredadora, respetando y recuperando las diversas cosmovisiones y culturas.",
+                    "Fomentar la urbanización masiva y el abandono de las prácticas agrícolas tradicionales.",
+                    "Establecer un sistema educativo que ignore las problemáticas ambientales."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! La educación busca la convivencia armónica y equilibrada con la Madre Tierra, respetando y recuperando cosmovisiones. (Art. 4, numeral 5)",
+                feedbackIncorrect: "Incorrecto. Un fin clave es la convivencia armónica y equilibrada del ser humano con la Madre Tierra. (Art. 4, numeral 5)",
+                page: 5
+            },
+            {
+                question: "Un fin de la educación es promover una sociedad despatriarcalizada, cimentada en:",
+                options: [
+                    "La preservación de los roles de género tradicionales.",
+                    "La equidad de género, la no diferencia de roles, la no violencia y la vigencia plena de los derechos humanos.",
+                    "La supremacía de un género sobre otro en el ámbito educativo.",
+                    "La segregación por género en las instituciones educativas."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se busca una sociedad despatriarcalizada cimentada en la equidad de género, la no diferencia de roles, la no violencia y la vigencia plena de los derechos humanos. (Art. 4, numeral 6)",
+                feedbackIncorrect: "Incorrecto. La sociedad despatriarcalizada se cimenta en la equidad de género, la no diferencia de roles, la no violencia y los derechos humanos. (Art. 4, numeral 6)",
+                page: 5
+            },
+            {
+                question: "¿Qué tipo de formación integral busca desarrollar la educación, vinculando la teoría con la práctica productiva, según el Artículo 5, numeral 1?",
+                options: [
+                    "Una formación que priorice únicamente el desarrollo intelectual y cognitivo.",
+                    "Una formación orientada a la especialización temprana en un único campo del saber.",
+                    "Una formación individual y colectiva, sin discriminación alguna, desarrollando potencialidades y capacidades físicas, intelectuales, afectivas, culturales, artísticas, deportivas, creativas e innovadoras, con vocación de servicio a la sociedad y al Estado Plurinacional.",
+                    "Una formación que se enfoque exclusivamente en la memorización de contenidos teóricos."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! La educación busca una formación integral que abarca diversas potencialidades y capacidades, con vocación de servicio. (Art. 5, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La educación busca una formación integral que vincula teoría y práctica productiva, desarrollando diversas potencialidades. (Art. 5, numeral 1)",
+                page: 6
+            },
+            {
+                question: "¿Cuál es el rol del Estado Plurinacional en la provisión de programas sociales para estudiantes con menos posibilidades económicas, según el Artículo 5, numeral 11?",
+                options: [
+                    "Delegar completamente esta responsabilidad a las organizaciones no gubernamentales.",
+                    "Formular e implementar programas sociales específicos que beneficien a las y los estudiantes con menos posibilidades económicas para que accedan y permanezcan en el sistema educativo, mediante recursos económicos, programas de alimentación, vestimenta, transporte y material escolar.",
+                    "Limitar el apoyo a becas para estudiantes con excelente aprovechamiento, sin considerar otras necesidades.",
+                    "Promover la autofinanciación de los estudiantes para cubrir sus necesidades básicas."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! El Estado debe formular e implementar programas sociales específicos para garantizar el acceso y permanencia de estudiantes con menos posibilidades económicas. (Art. 5, numeral 11)",
+                feedbackIncorrect: "Incorrecto. El Estado tiene la responsabilidad de formular e implementar programas sociales específicos para estudiantes con menos posibilidades económicas. (Art. 5, numeral 11)",
+                page: 7
+            },
+            {
+                question: "Según el Artículo 5, numeral 14, ¿qué promueven las políticas educativas respecto a personas con necesidades educativas asociadas a discapacidad?",
+                options: [
+                    "Su segregación en centros educativos especializados y aislados.",
+                    "Su inclusión en el sistema educativo regular, sin necesidad de sensibilización social.",
+                    "El acceso y la permanencia de personas con necesidades educativas asociadas a discapacidad en el sistema educativo y sensibilizar a la sociedad sobre su atención integral, sin discriminación alguna.",
+                    "La asignación de recursos mínimos sin programas específicos de apoyo."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Se promueve el acceso y permanencia de personas con discapacidad en el sistema educativo y la sensibilización social para su atención integral. (Art. 5, numeral 14)",
+                feedbackIncorrect: "Incorrecto. Las políticas educativas promueven el acceso y permanencia de personas con discapacidad y la sensibilización social para su atención integral. (Art. 5, numeral 14)",
+                page: 7
+            },
+            {
+                question: "La intraculturalidad, según el Artículo 6, numeral 1, promueve la recuperación, fortalecimiento, desarrollo y cohesión al interior de las culturas de las naciones y pueblos indígena originario campesinos, comunidades interculturales y afrobolivianas para la consolidación del Estado Plurinacional, basado en:",
+                options: [
+                    "La asimilación cultural y la homogeneización de identidades.",
+                    "La equidad, solidaridad, complementariedad, reciprocidad y justicia.",
+                    "La imposición de una cultura dominante sobre las demás.",
+                    "La fragmentación social y la desintegración de las comunidades."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! La intraculturalidad se basa en la equidad, solidaridad, complementariedad, reciprocidad y justicia. (Art. 6, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La intraculturalidad se basa en principios como la equidad, solidaridad, complementariedad, reciprocidad y justicia. (Art. 6, numeral 1)",
+                page: 8
+            },
+            {
+                question: "¿Qué se promueve en la interculturalidad, según el Artículo 6, numeral 2, para proyectar y universalizar la sabiduría propia?",
+                options: [
+                    "El aislamiento de las culturas y la preservación de conocimientos ancestrales sin interacción.",
+                    "Prácticas de interacción entre diferentes pueblos y culturas desarrollando actitudes de valoración, convivencia y diálogo entre distintas visiones del mundo.",
+                    "La imposición de conocimientos universales sobre los saberes propios de cada cultura.",
+                    "La creación de una cultura híbrida que diluya las identidades originales."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se promueven prácticas de interacción, valoración, convivencia y diálogo entre distintas visiones del mundo. (Art. 6, numeral 2)",
+                feedbackIncorrect: "Incorrecto. La interculturalidad promueve prácticas de interacción, valoración, convivencia y diálogo entre distintas culturas. (Art. 6, numeral 2)",
+                page: 8
+            },
+            {
+                question: "En poblaciones monolingües con predominio de la lengua originaria, ¿cómo se establece el uso de las lenguas según el Artículo 7, numeral 1?",
+                options: [
+                    "El castellano como primera lengua y la lengua originaria como segunda lengua.",
+                    "La lengua originaria como primera lengua y el castellano como segunda lengua.",
+                    "Solo se utiliza la lengua originaria, sin introducir el castellano.",
+                    "La elección de la lengua es libre y no está sujeta a ninguna norma."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! En este caso, la lengua originaria es la primera y el castellano la segunda. (Art. 7, numeral 1)",
+                feedbackIncorrect: "Incorrecto. En poblaciones monolingües con predominio de la lengua originaria, esta es la primera lengua y el castellano la segunda. (Art. 7, numeral 1)",
+                page: 9
+            },
+            {
+                question: "¿Cuál de los siguientes NO es un subsistema del Sistema Educativo Plurinacional según el Artículo 8?",
+                options: [
+                    "Subsistema de Educación Regular.",
+                    "Subsistema de Educación Técnica Vocacional.",
+                    "Subsistema de Educación Alternativa y Especial.",
+                    "Subsistema de Educación Superior de Formación Profesional."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Los subsistemas son Educación Regular, Educación Alternativa y Especial, y Educación Superior de Formación Profesional. (Art. 8)",
+                feedbackIncorrect: "Incorrecto. 'Educación Técnica Vocacional' no es un subsistema independiente; la formación técnica se integra en otros subsistemas. (Art. 8)",
+                page: 9
+            },
+            {
+                question: "¿Hasta qué nivel es obligatoria la Educación Regular según el Artículo 9?",
+                options: [
+                    "Hasta la Educación Primaria Comunitaria Vocacional.",
+                    "Hasta la Educación Inicial en Familia Comunitaria Escolarizada.",
+                    "Hasta el bachillerato.",
+                    "Hasta la Educación Secundaria Comunitaria Productiva."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! La Educación Regular es obligatoria hasta el bachillerato. (Art. 9)",
+                feedbackIncorrect: "Incorrecto. La Educación Regular es obligatoria hasta el bachillerato. (Art. 9)",
+                page: 10
+            },
+            {
+                question: "Un objetivo de la Educación Regular es formar integralmente a los estudiantes articulando la educación científica humanística y técnica-tecnológica con la producción, a través de:",
+                options: [
+                    "La memorización de contenidos teóricos sin aplicación práctica.",
+                    "La formación productiva de acuerdo a las vocaciones y potencialidades de las regiones, en el marco de la intraculturalidad, interculturalidad y plurilingüismo.",
+                    "La especialización temprana en áreas no relacionadas con el contexto productivo regional.",
+                    "La reproducción de conocimientos sin fomento a la innovación."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se busca la formación productiva de acuerdo a las vocaciones y potencialidades de las regiones. (Art. 10, numeral 1)",
+                feedbackIncorrect: "Incorrecto. El objetivo es articular la educación con la producción a través de la formación productiva regional. (Art. 10, numeral 1)",
+                page: 10
+            },
+            {
+                question: "La Educación Inicial en Familia Comunitaria no escolarizada tiene una duración de:",
+                options: [
+                    "Un año.",
+                    "Dos años.",
+                    "Tres años.",
+                    "Cuatro años."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! La duración es de tres años. (Art. 12, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La Educación Inicial en Familia Comunitaria no escolarizada tiene una duración de tres años. (Art. 12, numeral 1)",
+                page: 11
+            },
+            {
+                question: "¿Cuál es la responsabilidad compartida en la Educación Inicial en Familia Comunitaria no escolarizada, según el Artículo 12, numeral 1?",
+                options: [
+                    "Exclusivamente del Estado.",
+                    "Entre la familia y la comunidad.",
+                    "Entre la familia, la comunidad y el Estado.",
+                    "Solo de las instituciones educativas."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Es una responsabilidad compartida entre la familia, la comunidad y el Estado. (Art. 12, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La responsabilidad es compartida entre la familia, la comunidad y el Estado. (Art. 12, numeral 1)",
+                page: 11
+            },
+            {
+                question: "¿A qué tipo de población está destinada la Educación Alternativa y Especial, priorizando a quienes se encuentran en situación de exclusión, marginación o discriminación, según el Artículo 16, numeral 2?",
+                options: [
+                    "Únicamente a estudiantes con talentos extraordinarios.",
+                    "A personas adultas mayores de 60 años.",
+                    "A la población en situación de exclusión, marginación o discriminación.",
+                    "Exclusivamente a personas con discapacidad."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Se prioriza a la población en situación de exclusión, marginación o discriminación. (Art. 16, numeral 2)",
+                feedbackIncorrect: "Incorrecto. La Educación Alternativa y Especial prioriza a la población en situación de exclusión, marginación o discriminación. (Art. 16, numeral 2)",
+                page: 12
+            },
+            {
+                question: "¿Qué enfoques se desarrollan en el marco de la Educación Alternativa y Especial, según el Artículo 16, numeral 2?",
+                options: [
+                    "Enfoque tradicional y conductista.",
+                    "Enfoques de la Educación Popular y Comunitaria, Educación Inclusiva y Educación a lo largo de la vida.",
+                    "Enfoque de educación elitista y competitiva.",
+                    "Enfoque de educación exclusivamente formal y escolarizada."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se desarrolla en el marco de los enfoques de la Educación Popular y Comunitaria, Educación Inclusiva y Educación a lo largo de la vida. (Art. 16, numeral 2)",
+                feedbackIncorrect: "Incorrecto. Los enfoques son Educación Popular y Comunitaria, Educación Inclusiva y Educación a lo largo de la vida. (Art. 16, numeral 2)",
+                page: 12
+            },
+            {
+                question: "Un objetivo de la Educación Alternativa y Especial es democratizar el acceso y permanencia a una educación adecuada en lo cultural y relevante en lo social, mediante:",
+                options: [
+                    "La estandarización de un currículo único sin adaptaciones.",
+                    "Políticas y procesos educativos pertinentes a las necesidades, expectativas e intereses de las personas, familias, comunidades y organizaciones.",
+                    "La restricción del acceso a grupos específicos de la población.",
+                    "La centralización de todas las decisiones educativas sin participación social."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se busca la democratización mediante políticas y procesos educativos pertinentes a las necesidades de las personas y comunidades. (Art. 17, numeral 1)",
+                feedbackIncorrect: "Incorrecto. El objetivo es democratizar el acceso mediante políticas y procesos educativos pertinentes a las necesidades de las personas y comunidades. (Art. 17, numeral 1)",
+                page: 13
+            },
+            {
+                question: "¿Cómo se reconocerán y homologarán los saberes, conocimientos y experiencias adquiridos en la práctica cotidiana y comunitaria, según el Artículo 18?",
+                options: [
+                    "Únicamente a través de exámenes teóricos estandarizados.",
+                    "Mediante procesos de certificación académica formal.",
+                    "Serán reconocidos y homologados a niveles y modalidades que correspondan al Subsistema de Educación Alternativa y Especial.",
+                    "No serán reconocidos formalmente por el sistema educativo."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Serán reconocidos y homologados a niveles y modalidades del Subsistema de Educación Alternativa y Especial. (Art. 18)",
+                feedbackIncorrect: "Incorrecto. Los saberes y experiencias se reconocerán y homologarán en el Subsistema de Educación Alternativa y Especial. (Art. 18)",
+                page: 14
+            },
+            {
+                question: "La Educación de Personas Jóvenes y Adultas, según el Artículo 23, numeral I, está destinada a personas mayores de:",
+                options: [
+                    "12 años.",
+                    "15 años.",
+                    "18 años.",
+                    "21 años."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Está destinada a personas mayores de quince años. (Art. 23, numeral I)",
+                feedbackIncorrect: "Incorrecto. La Educación de Personas Jóvenes y Adultas está destinada a personas mayores de quince años. (Art. 23, numeral I)",
+                page: 15
+            },
+            {
+                question: "La Educación Especial comprende acciones destinadas a promover y consolidar la educación inclusiva para personas con:",
+                options: [
+                    "Únicamente personas con discapacidad física.",
+                    "Personas con discapacidad, personas con dificultades en el aprendizaje y personas con talento extraordinario en el Sistema Educativo Plurinacional.",
+                    "Solo personas con talento extraordinario en áreas específicas.",
+                    "Exclusivamente personas con dificultades de adaptación social."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Incluye a personas con discapacidad, dificultades en el aprendizaje y talento extraordinario. (Art. 25, numeral I)",
+                feedbackIncorrect: "Incorrecto. La Educación Especial abarca personas con discapacidad, dificultades en el aprendizaje y talento extraordinario. (Art. 25, numeral I)",
+                page: 16
+            },
+            {
+                question: "¿Cómo se define a las personas con talento extraordinario a efectos de la Ley N° 070, según el Artículo 25, numeral I?",
+                options: [
+                    "Estudiantes con alto rendimiento deportivo.",
+                    "Estudiantes con excelente aprovechamiento y toda niña, niño y adolescente con talento natural destacado.",
+                    "Personas con habilidades artísticas sobresalientes.",
+                    "Individuos con capacidades de liderazgo innatas."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se refiere a estudiantes con excelente aprovechamiento y talento natural destacado. (Art. 25, numeral I)",
+                feedbackIncorrect: "Incorrecto. Las personas con talento extraordinario se definen como estudiantes con excelente aprovechamiento y talento natural destacado. (Art. 25, numeral I)",
+                page: 16
+            },
+            {
+                question: "¿Dónde se realizará la atención a estudiantes con necesidades educativas específicas, según el Artículo 27, numeral 1?",
+                options: [
+                    "Exclusivamente en sus hogares.",
+                    "En centros integrales multisectoriales, a través de programas de valoración, detección, asesoramiento y atención directa.",
+                    "Solo en unidades educativas regulares, sin apoyo adicional.",
+                    "En instituciones privadas especializadas, sin intervención del Estado."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! La atención se realiza en centros integrales multisectoriales con programas específicos. (Art. 27, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La atención a estudiantes con necesidades educativas específicas se realizará en centros integrales multisectoriales. (Art. 27, numeral 1)",
+                page: 17
+            },
+            {
+                question: "La Educación Superior de Formación Profesional es el espacio educativo de formación profesional, de recuperación, generación y recreación de:",
+                options: [
+                    "Únicamente conocimientos teóricos y abstractos.",
+                    "Saberes y conocimientos ancestrales sin conexión con la ciencia moderna.",
+                    "Conocimientos, saberes, ciencia y tecnología, así como de la interacción social e innovación en las diferentes áreas del conocimiento y ámbitos de la realidad.",
+                    "Habilidades manuales y oficios sin base académica."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Abarca conocimientos, saberes, ciencia, tecnología, interacción social e innovación. (Art. 28)",
+                feedbackIncorrect: "Incorrecto. La Educación Superior de Formación Profesional abarca la recuperación, generación y recreación de conocimientos, saberes, ciencia y tecnología, entre otros. (Art. 28)",
+                page: 17
+            },
+            {
+                question: "¿Cuál de las siguientes NO es una característica de la Formación de Maestras y Maestros según el Artículo 32?",
+                options: [
+                    "Es única en cuanto a jerarquía profesional, calidad pedagógica, científica y con vocación de servicio.",
+                    "Es intracultural, intercultural y plurilingüe.",
+                    "Es fiscal y gratuita, porque el Estado asume la responsabilidad.",
+                    "Es exclusiva para la formación en el subsistema de Educación Regular."
+                ],
+                correctAnswer: 3,
+                feedbackCorrect: "¡Correcto! La formación de maestros es para los subsistemas de Educación Regular, y Educación Alternativa y Especial. (Art. 31 y 32)",
+                feedbackIncorrect: "Incorrecto. La Formación de Maestras y Maestros es también para Educación Alternativa y Especial, no solo para Regular. (Art. 31 y 32)",
+                page: 18
+            },
+            {
+                question: "La Formación de Maestras y Maestros es fiscal y gratuita porque:",
+                options: [
+                    "Es financiada por donaciones internacionales.",
+                    "El Estado asume la responsabilidad, por constituirse en una función suprema y primera responsabilidad financiera del Estado.",
+                    "Las instituciones privadas cubren los costos de formación.",
+                    "Los estudiantes pagan una matrícula simbólica para su sostenimiento."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! El Estado la asume como una función suprema y primera responsabilidad financiera. (Art. 32, numeral 3)",
+                feedbackIncorrect: "Incorrecto. Es fiscal y gratuita porque el Estado asume la responsabilidad financiera. (Art. 32, numeral 3)",
+                page: 18
+            },
+            {
+                question: "Las Escuelas Superiores de Formación de Maestras y Maestros son instituciones de carácter:",
+                options: [
+                    "Privado y autofinanciado.",
+                    "De convenio con organizaciones religiosas.",
+                    "Fiscal y gratuito dependientes del Ministerio de Educación, constituidas como centros de excelencia académica.",
+                    "Autónomo y no sujetas a la supervisión estatal."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Son de carácter fiscal y gratuito, dependientes del Ministerio de Educación. (Art. 35, numeral I)",
+                feedbackIncorrect: "Incorrecto. Son instituciones fiscales y gratuitas, dependientes del Ministerio de Educación. (Art. 35, numeral I)",
+                page: 19
+            },
+            {
+                question: "El currículo único de la formación de maestras y maestros comprende la formación general y especializada en cuántos años de estudio y con qué grado académico?",
+                options: [
+                    "Tres años con grado de Técnico Superior.",
+                    "Cuatro años con grado de Bachiller Pedagógico.",
+                    "Cinco años de estudio con grado académico de licenciatura.",
+                    "Seis años con grado de Maestría."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Son cinco años de estudio con grado académico de licenciatura. (Art. 35, numeral III)",
+                feedbackIncorrect: "Incorrecto. El currículo es de cinco años de estudio con grado académico de licenciatura. (Art. 35, numeral III)",
+                page: 19
+            },
+            {
+                question: "¿Qué instancia desarrollará la Formación Post gradual para maestras y maestros, con dependencia del Ministerio de Educación, según el Artículo 39, numeral II?",
+                options: [
+                    "Las Universidades Públicas Autónomas.",
+                    "La Universidad Pedagógica.",
+                    "El Instituto de Investigaciones Educativas Plurinacional.",
+                    "Los Centros de Capacitación Docente."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! La Formación Post gradual será desarrollada por la Universidad Pedagógica. (Art. 39, numeral II)",
+                feedbackIncorrect: "Incorrecto. La Universidad Pedagógica es la instancia encargada de la Formación Post gradual. (Art. 39, numeral II)",
+                page: 20
+            },
+            {
+                question: "La formación continua de maestras y maestros es un derecho y un deber orientado a:",
+                options: [
+                    "La obtención de ascensos automáticos sin evaluación.",
+                    "Su actualización y capacitación para mejorar la calidad de la gestión, de los procesos, de los resultados y del ambiente educativo, fortaleciendo las capacidades innovadoras de los educadores.",
+                    "La acumulación de títulos académicos sin impacto en la práctica pedagógica.",
+                    "La reducción de la carga horaria laboral sin mejora de competencias."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Está orientada a la actualización y capacitación para mejorar la calidad educativa y fortalecer capacidades innovadoras. (Art. 40, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La formación continua busca la actualización y capacitación para mejorar la calidad educativa. (Art. 40, numeral 1)",
+                page: 20
+            },
+            {
+                question: "¿Cuáles son las instituciones educativas que desarrollan programas de formación profesional a nivel técnico, según el Artículo 43, numeral 1?",
+                options: [
+                    "Escuelas Superiores Tecnológicas.",
+                    "Institutos Técnicos e Institutos Tecnológicos.",
+                    "Universidades Indígenas.",
+                    "Centros de Capacitación Artística."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Son los Institutos Técnicos e Institutos Tecnológicos. (Art. 43, numeral 1)",
+                feedbackIncorrect: "Incorrecto. Los Institutos Técnicos e Institutos Tecnológicos son los que desarrollan programas de formación profesional a nivel técnico. (Art. 43, numeral 1)",
+                page: 21
+            },
+            {
+                question: "Las Escuelas Superiores Tecnológicas, según el Artículo 43, numeral 2, desarrollan programas complementarios de formación especializada a nivel de:",
+                options: [
+                    "Técnico Medio.",
+                    "Licenciatura para profesionales del nivel técnico superior.",
+                    "Bachillerato Técnico Humanístico.",
+                    "Diplomado Técnico."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Desarrollan programas a nivel de licenciatura para profesionales del nivel técnico superior. (Art. 43, numeral 2)",
+                feedbackIncorrect: "Incorrecto. Las Escuelas Superiores Tecnológicas desarrollan programas complementarios de formación especializada a nivel de licenciatura. (Art. 43, numeral 2)",
+                page: 21
+            },
+            {
+                question: "¿Qué grado académico deben tener los docentes de los Institutos Superiores Técnicos e Institutos Tecnológicos, según el Artículo 46, numeral III?",
+                options: [
+                    "Bachiller en Humanidades.",
+                    "Técnico Medio o superior.",
+                    "Grado académico igual o superior a la oferta académica.",
+                    "Licenciatura en Educación."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Deben tener un grado académico igual o superior a la oferta académica. (Art. 46, numeral III)",
+                feedbackIncorrect: "Incorrecto. Los docentes deben tener un grado académico igual o superior a la oferta académica. (Art. 46, numeral III)",
+                page: 22
+            },
+            {
+                question: "La Formación Superior Artística está destinada al desarrollo de:",
+                options: [
+                    "Habilidades exclusivamente teóricas en historia del arte.",
+                    "Capacidades, competencias y destrezas artísticas, articulando teoría y práctica, para el fortalecimiento de las expresiones culturales y el desarrollo de las cualidades creativas de las bolivianas y los bolivianos.",
+                    "Técnicas de producción industrial en el ámbito artístico.",
+                    "La crítica de arte sin la práctica de ninguna disciplina."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Busca el desarrollo de capacidades, competencias y destrezas artísticas, articulando teoría y práctica. (Art. 47)",
+                feedbackIncorrect: "Incorrecto. La Formación Superior Artística busca el desarrollo de capacidades, competencias y destrezas artísticas, articulando teoría y práctica. (Art. 47)",
+                page: 22
+            },
+            {
+                question: "Un objetivo de la Formación Superior Artística es recuperar, desarrollar, recrear y difundir las expresiones culturales de:",
+                options: [
+                    "Únicamente las culturas europeas y occidentales.",
+                    "Las naciones y pueblos indígena originario campesinos, comunidades interculturales y afrobolivianas.",
+                    "Solo las culturas urbanas contemporáneas.",
+                    "Las expresiones artísticas de élite sin arraigo cultural."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se enfoca en las expresiones culturales de las naciones y pueblos indígena originario campesinos, comunidades interculturales y afrobolivianas. (Art. 48, numeral 2)",
+                feedbackIncorrect: "Incorrecto. Un objetivo es recuperar, desarrollar y difundir las expresiones culturales de las naciones y pueblos indígena originario campesinos, comunidades interculturales y afrobolivianas. (Art. 48, numeral 2)",
+                page: 22
+            },
+            {
+                question: "¿Cuál de los siguientes NO es un nivel de la Formación Artística según el Artículo 50?",
+                options: [
+                    "Nivel Capacitación.",
+                    "Nivel Técnico Medio.",
+                    "Nivel de Doctorado Artístico.",
+                    "Nivel Técnico Superior."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Los niveles son Capacitación, Técnico Medio, Técnico Superior y Escuelas Bolivianas Interculturales - Nivel Licenciatura. (Art. 50)",
+                feedbackIncorrect: "Incorrecto. 'Nivel de Doctorado Artístico' no es un nivel explícitamente mencionado en el Artículo 50. (Art. 50)",
+                page: 23
+            },
+            {
+                question: "¿Cuál de los siguientes NO es un nivel o grado académico de Postgrado reconocido según el Artículo 54, numeral II?",
+                options: [
+                    "Diplomado.",
+                    "Especialidad.",
+                    "Maestría.",
+                    "Técnico Medio y Superior."
+                ],
+                correctAnswer: 3,
+                feedbackCorrect: "¡Correcto! El bachillerato es un nivel de pregrado, no de postgrado. (Art. 54, numeral II)",
+                feedbackIncorrect: "Incorrecto. El Bachillerato es un nivel de pregrado. Los niveles de postgrado son Diplomado, Especialidad, Maestría, Doctorado y Post doctorado. (Art. 54, numeral II)",
+                page: 24
+            },
+            {
+                question: "¿Cuál de las siguientes NO es una Universidad reconocida por el Estado Plurinacional de Bolivia según el Artículo 55?",
+                options: [
+                    "Universidades Públicas Autónomas.",
+                    "Universidades Privadas.",
+                    "Universidades Extranjeras con sede permanente en Bolivia.",
+                    "Universidades Indígenas."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Las Universidades Extranjeras se rigen por convenios o deben cumplir requisitos de universidades privadas, pero no son una categoría de universidad reconocida *per se* en el listado principal. (Art. 55 y 66)",
+                feedbackIncorrect: "Incorrecto. Las Universidades Extranjeras no son una de las categorías de universidades reconocidas en el Artículo 55. (Art. 55)",
+                page: 24
+            },
+            {
+                question: "La apertura y funcionamiento institucional de las Universidades Privadas será autorizado mediante:",
+                options: [
+                    "Resolución Ministerial.",
+                    "Decreto Supremo.",
+                    "Acuerdo interinstitucional.",
+                    "Registro simple en el Ministerio de Educación."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Será autorizado mediante Decreto Supremo. (Art. 59, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La autorización para las Universidades Privadas es mediante Decreto Supremo. (Art. 59, numeral 1)",
+                page: 25
+            },
+            {
+                question: "Un objetivo de las Universidades Privadas es contribuir al desarrollo de la ciencia, investigación, tecnología e innovación en el marco de:",
+                options: [
+                    "Las demandas y tendencias del sector productivo y sociocultural en el ámbito local, regional y nacional del Estado Plurinacional.",
+                    "Únicamente las tendencias internacionales de investigación.",
+                    "La investigación básica sin aplicación práctica.",
+                    "Los intereses económicos de sus propietarios."
+                ],
+                correctAnswer: 0,
+                feedbackCorrect: "¡Correcto! Se enmarca en las demandas y tendencias del sector productivo y sociocultural a nivel local, regional y nacional. (Art. 58, numeral 3)",
+                feedbackIncorrect: "Incorrecto. Contribuyen al desarrollo de la ciencia, investigación, tecnología e innovación en el marco de las demandas y tendencias del sector productivo y sociocultural. (Art. 58, numeral 3)",
+                page: 25
+            },
+            {
+                question: "¿Qué instancia define las políticas institucionales en las Universidades Indígenas, según el Artículo 60, numeral 3?",
+                options: [
+                    "El Ministerio de Educación.",
+                    "Las Juntas Comunitarias, compuestas por organizaciones indígenas nacionales y departamentales.",
+                    "Los Consejos Académicos Universitarios.",
+                    "El Consejo Nacional de Acreditación."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Las Juntas Comunitarias son las encargadas de definir las políticas institucionales. (Art. 60, numeral 3)",
+                feedbackIncorrect: "Incorrecto. Las Juntas Comunitarias son las que definen las políticas institucionales en las Universidades Indígenas. (Art. 60, numeral 3)",
+                page: 26
+            },
+            {
+                question: "¿Cuáles son las Universidades de Régimen Especial según el Artículo 61, numeral 1?",
+                options: [
+                    "Universidad Pública y Universidad Privada.",
+                    "Universidad Militar y Universidad Policial.",
+                    "Universidad Indígena y Universidad de las Artes.",
+                    "Universidad Tecnológica y Universidad Pedagógica."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Son la Universidad Militar y la Universidad Policial. (Art. 61, numeral 1)",
+                feedbackIncorrect: "Incorrecto. Las Universidades de Régimen Especial son la Universidad Militar y la Universidad Policial. (Art. 61, numeral 1)",
+                page: 26
+            },
+            {
+                question: "Un objetivo de la Universidad Militar es desarrollar ciencia, tecnologías, investigaciones y producciones en:",
+                options: [
+                    "Únicamente en el ámbito civil.",
+                    "Los distintos niveles de la estructura de la formación militar.",
+                    "Exclusivamente en el área de la salud.",
+                    "Solo en el sector agrícola."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se enfoca en los distintos niveles de la estructura de la formación militar. (Art. 62, numeral 4)",
+                feedbackIncorrect: "Incorrecto. La Universidad Militar busca desarrollar ciencia, tecnologías, investigaciones y producciones en los distintos niveles de la estructura de la formación militar. (Art. 62, numeral 4)",
+                page: 27
+            },
+            {
+                question: "¿Qué tipo de formación imparte la Universidad Policial según el Artículo 63, numeral II, punto 1?",
+                options: [
+                    "Formación policial con visión integral de Patria, eliminando toda forma de discriminación en la admisión y los procesos formativos.",
+                    "Formación orientada exclusivamente a la represión ciudadana.",
+                    "Formación policial con énfasis en la militarización de la sociedad.",
+                    "Formación que promueve la discriminación por origen o etnia."
+                ],
+                correctAnswer: 0,
+                feedbackCorrect: "¡Correcto! Imparte formación policial con visión integral de Patria, eliminando la discriminación. (Art. 63, numeral II, punto 1)",
+                feedbackIncorrect: "Incorrecto. La Universidad Policial imparte formación policial con visión integral de Patria, eliminando toda forma de discriminación. (Art. 63, numeral II, punto 1)",
+                page: 27
+            },
+            {
+                question: "¿Qué instituciones son las únicas que podrán desarrollar programas de post grado para la especialización y desarrollo de la investigación, según el Artículo 65, numeral 2?",
+                options: [
+                    "Los Institutos Técnicos y Tecnológicos.",
+                    "Las Escuelas Superiores de Formación de Maestras y Maestros.",
+                    "Las Universidades.",
+                    "Los Centros de Capacitación Artística."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Las Universidades son las únicas instituciones autorizadas. (Art. 65, numeral 2)",
+                feedbackIncorrect: "Incorrecto. Las Universidades son las únicas instituciones que podrán desarrollar programas de postgrado. (Art. 65, numeral 2)",
+                page: 28
+            },
+            {
+                question: "La organización curricular establece los mecanismos de articulación entre:",
+                options: [
+                    "La administración y la gestión educativa.",
+                    "La teoría y la práctica educativa.",
+                    "Los subsistemas de educación regular y alternativa.",
+                    "El currículo base y los planes de estudio departamentales."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Establece los mecanismos de articulación entre la teoría y la práctica educativa. (Art. 69, numeral 2)",
+                feedbackIncorrect: "Incorrecto. La organización curricular articula la teoría y la práctica educativa. (Art. 69, numeral 2)",
+                page: 29
+            },
+            {
+                question: "¿Qué garantiza la complementariedad entre el currículo base intercultural y los currículos regionalizados y diversificados intraculturales, según el Artículo 69, numeral 2?",
+                options: [
+                    "La imposición de un modelo educativo único en todo el país.",
+                    "La fragmentación del sistema educativo en regiones autónomas.",
+                    "La unidad e integridad del Sistema Educativo Plurinacional, así como el respeto a la diversidad cultural y lingüística de Bolivia.",
+                    "La eliminación de las lenguas originarias en el ámbito educativo."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Garantiza la unidad e integridad del Sistema Educativo Plurinacional y el respeto a la diversidad cultural y lingüística. (Art. 69, numeral 2)",
+                feedbackIncorrect: "Incorrecto. La complementariedad garantiza la unidad e integridad del Sistema Educativo Plurinacional y el respeto a la diversidad cultural y lingüística. (Art. 69, numeral 2)",
+                page: 29
+            },
+            {
+                question: "¿Quién ejerce tuición sobre la administración y gestión del Sistema Educativo Plurinacional, según el Artículo 72, numeral I?",
+                options: [
+                    "Las Universidades Públicas Autónomas.",
+                    "Los Gobiernos Departamentales.",
+                    "El Estado Plurinacional, a través del Ministerio de Educación.",
+                    "Los Consejos Educativos Sociales Comunitarios."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! El Estado Plurinacional, a través del Ministerio de Educación, ejerce esta tuición. (Art. 72, numeral I)",
+                feedbackIncorrect: "Incorrecto. El Estado Plurinacional, a través del Ministerio de Educación, ejerce tuición sobre la administración y gestión del Sistema Educativo Plurinacional. (Art. 72, numeral I)",
+                page: 30
+            },
+            {
+                question: "La gestión del currículo regionalizado es una competencia concurrente entre:",
+                options: [
+                    "El Ministerio de Educación y las Universidades.",
+                    "El nivel central del Estado y las entidades territoriales autónomas.",
+                    "Las Direcciones Departamentales y las Direcciones Distritales.",
+                    "Los padres de familia y las organizaciones estudiantiles."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Es una competencia concurrente entre el nivel central del Estado y las entidades territoriales autónomas. (Art. 70, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La gestión del currículo regionalizado es una competencia concurrente entre el nivel central del Estado y las entidades territoriales autónomas. (Art. 70, numeral 1)",
+                page: 30
+            },
+            {
+                question: "¿Cuál de los siguientes NO es un principio de la administración y gestión educativa según el Artículo 73?",
+                options: [
+                    "Participación, democracia y comunitarismo.",
+                    "Transparencia y rendición de cuentas.",
+                    "Centralización absoluta de las decisiones.",
+                    "Eficiencia y calidad en la gestión."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! La administración y gestión educativa se basa en la participación y democracia, no en la centralización absoluta. (Art. 73, numeral 1)",
+                feedbackIncorrect: "Incorrecto. La administración y gestión educativa se basa en la participación, democracia y comunitarismo, no en la centralización absoluta. (Art. 73, numeral 1)",
+                page: 30
+            },
+            {
+                question: "Una función de la administración y gestión educativa es generar condiciones favorables de relación intercultural para que:",
+                options: [
+                    "Exista una única cultura dominante en el sistema.",
+                    "Se eliminen las diferencias culturales entre los actores.",
+                    "Todos los actores de la educación cumplan y desempeñen adecuadamente su rol.",
+                    "Se promueva la asimilación cultural de los pueblos indígenas."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! El objetivo es que todos los actores cumplan adecuadamente su rol en un ambiente intercultural. (Art. 74, numeral 3)",
+                feedbackIncorrect: "Incorrecto. Una función es generar condiciones favorables de relación intercultural para que todos los actores de la educación cumplan y desempeñen adecuadamente su rol. (Art. 74, numeral 3)",
+                page: 31
+            },
+            {
+                question: "La administración y gestión del Sistema Educativo Plurinacional se organiza en:",
+                options: [
+                    "Nivel Municipal y Nivel Regional.",
+                    "Nivel Central, Nivel Departamental y Nivel Autonómico.",
+                    "Nivel de Unidad Educativa y Nivel de Núcleo.",
+                    "Nivel de Planificación y Nivel de Ejecución."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se organiza en Nivel Central, Nivel Departamental y Nivel Autonómico. (Art. 76)",
+                feedbackIncorrect: "Incorrecto. La administración y gestión se organiza en Nivel Central, Nivel Departamental y Nivel Autonómico. (Art. 76)",
+                page: 31
+            },
+            {
+                question: "¿Qué subdirección NO forma parte de las Direcciones Departamentales de Educación según el Artículo 78, numeral 2?",
+                options: [
+                    "Subdirección de Educación Regular.",
+                    "Subdirección de Educación Superior de Formación Profesional.",
+                    "Subdirección de Educación Técnica Vocacional.",
+                    "Subdirección Educación Alternativa y Especial."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! No existe una 'Subdirección de Educación Técnica Vocacional' como tal en la estructura departamental. (Art. 78, numeral 2)",
+                feedbackIncorrect: "Incorrecto. La 'Subdirección de Educación Técnica Vocacional' no es una de las subdirecciones mencionadas. (Art. 78, numeral 2)",
+                page: 32
+            },
+            {
+                question: "¿Cuál es la responsabilidad de los Gobiernos Departamentales en relación con los Institutos Técnicos y Tecnológicos, según el Artículo 80, numeral 1, literal a)?",
+                options: [
+                    "Financiar la totalidad de su funcionamiento.",
+                    "Dotar, financiar y garantizar la infraestructura, mobiliario, material educativo y equipamiento.",
+                    "Definir sus planes y programas de estudio.",
+                    "Designar a todo el personal docente y administrativo."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Es su responsabilidad dotar, financiar y garantizar infraestructura, mobiliario, material y equipamiento. (Art. 80, numeral 1, literal a)",
+                feedbackIncorrect: "Incorrecto. La responsabilidad de los Gobiernos Departamentales es dotar, financiar y garantizar la infraestructura, mobiliario, material educativo y equipamiento de los Institutos Técnicos y Tecnológicos. (Art. 80, numeral 1, literal a)",
+                page: 32
+            },
+            {
+                question: "¿Qué responsabilidad tienen los Gobiernos Municipales respecto a las Unidades Educativas de Educación Regular, Alternativa y Especial, según el Artículo 80, numeral 2, literal a)?",
+                options: [
+                    "La gestión curricular y pedagógica.",
+                    "La designación de los directores de unidad educativa.",
+                    "Dotar, financiar y garantizar los servicios básicos, infraestructura, mobiliario, material educativo y equipamiento.",
+                    "La evaluación y acreditación de la calidad educativa."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Son responsables de dotar, financiar y garantizar servicios básicos, infraestructura, mobiliario, material y equipamiento. (Art. 80, numeral 2, literal a)",
+                feedbackIncorrect: "Incorrecto. Los Gobiernos Municipales son responsables de dotar, financiar y garantizar los servicios básicos, infraestructura, mobiliario, material educativo y equipamiento de las Unidades Educativas. (Art. 80, numeral 2, literal a)",
+                page: 32
+            },
+            {
+                question: "¿Quién otorgará gratuitamente el Diploma de Bachiller y a la culminación de qué estudios, según el Artículo 81?",
+                options: [
+                    "Las Direcciones Distritales de Educación, al finalizar la Educación Primaria.",
+                    "El Ministerio de Educación a través de las Direcciones Departamentales de Educación, a la culminación de los estudios del nivel de Educación Secundaria Comunitaria Productiva y Educación Secundaria de Adultos.",
+                    "Las Unidades Educativas, al finalizar el último año de secundaria.",
+                    "Las Universidades, al ingresar al nivel superior."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! El Ministerio de Educación, a través de las Direcciones Departamentales, lo otorga al culminar Secundaria Comunitaria Productiva y Secundaria de Adultos. (Art. 81)",
+                feedbackIncorrect: "Incorrecto. El Ministerio de Educación, a través de las Direcciones Departamentales de Educación, otorga el Diploma de Bachiller al culminar la Educación Secundaria Comunitaria Productiva y Educación Secundaria de Adultos. (Art. 81)",
+                page: 33
+            },
+            {
+                question: "¿Qué institución pública descentralizada, técnica, especializada e independiente se crea para la calidad educativa, según el Artículo 83?",
+                options: [
+                    "El Consejo Nacional de Educación.",
+                    "El Observatorio Plurinacional de la Calidad Educativa.",
+                    "El Instituto de Evaluación Educativa.",
+                    "La Superintendencia de Educación."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se crea el Observatorio Plurinacional de la Calidad Educativa. (Art. 83, numeral 1)",
+                feedbackIncorrect: "Incorrecto. Se crea el Observatorio Plurinacional de la Calidad Educativa para la calidad educativa. (Art. 83, numeral 1)",
+                page: 33
+            },
+            {
+                question: "¿Qué institución se crea para diseñar y desarrollar estrategias de apoyo a las políticas de transformación del Sistema Educativo Plurinacional, dependiente del Ministerio de Educación, según el Artículo 87?",
+                options: [
+                    "El Instituto Nacional de Estadísticas Educativas.",
+                    "El Instituto de Investigaciones Educativas Plurinacional.",
+                    "El Centro de Innovación Pedagógica.",
+                    "La Dirección General de Planificación Educativa."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Es el Instituto de Investigaciones Educativas Plurinacional. (Art. 87)",
+                feedbackIncorrect: "Incorrecto. El Instituto de Investigaciones Educativas Plurinacional es el encargado de diseñar y desarrollar estrategias de apoyo a las políticas de transformación. (Art. 87)",
+                page: 34
+            },
+            {
+                question: "El Instituto Plurinacional de Estudio de Lenguas y Culturas, como entidad descentralizada del Ministerio de Educación, ¿qué procesos desarrollará, según el Artículo 88, numeral 1?",
+                options: [
+                    "Únicamente la traducción de documentos oficiales.",
+                    "Procesos de investigación lingüística y cultural.",
+                    "La enseñanza exclusiva de lenguas extranjeras.",
+                    "La promoción de una única lengua oficial en el país."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Desarrollará procesos de investigación lingüística y cultural. (Art. 88, numeral 1)",
+                feedbackIncorrect: "Incorrecto. El Instituto Plurinacional de Estudio de Lenguas y Culturas desarrollará procesos de investigación lingüística y cultural. (Art. 88, numeral 1)",
+                page: 34
+            },
+            {
+                question: "¿Cuál de los siguientes NO es un principio de la Participación Social Comunitaria, según el Artículo 90?",
+                options: [
+                    "Garantizar el respeto a las atribuciones, roles y responsabilidades educativas específicas.",
+                    "Promover la imposición de decisiones sin consulta previa.",
+                    "Consolidar el carácter comunitario y democrático de la Participación Social Comunitaria.",
+                    "Promover consensos entre los diferentes actores de la educación."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! La participación social comunitaria promueve consensos y democracia, no la imposición de decisiones. (Art. 90, numeral 4)",
+                feedbackIncorrect: "Incorrecto. La Participación Social Comunitaria no promueve la imposición de decisiones sin consulta previa; busca consensos y democracia. (Art. 90, numeral 4)",
+                page: 35
+            },
+            {
+                question: "Un principio de la Participación Social Comunitaria es promover consensos entre los diferentes actores de la educación, comprendiendo que la educación es:",
+                options: [
+                    "Un servicio privado de lucro.",
+                    "Un bien común y corresponsabilidad de todas y todos.",
+                    "Una herramienta de control social.",
+                    "Una actividad exclusiva del Estado."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! La educación es un bien común y corresponsabilidad de todas y todos. (Art. 90, numeral 4)",
+                feedbackIncorrect: "Incorrecto. La educación es un bien común y corresponsabilidad de todas y todos. (Art. 90, numeral 4)",
+                page: 35
+            },
+            {
+                question: "¿Cuál de los siguientes NO forma parte de la estructura de la Participación Social Comunitaria, según el Artículo 91?",
+                options: [
+                    "El Ministerio de Educación.",
+                    "El Congreso Plurinacional de Educación.",
+                    "Consejos Educativos de Naciones y Pueblos Indígena Originario Campesinos.",
+                    "Consejos Educativos Social Comunitarios."
+                ],
+                correctAnswer: 0,
+                feedbackCorrect: "¡Correcto! El Ministerio de Educación es la autoridad, no una parte de la estructura de participación social comunitaria en este listado. (Art. 91)",
+                feedbackIncorrect: "Incorrecto. El Ministerio de Educación es la autoridad central, no una parte de la estructura de Participación Social Comunitaria en este listado específico. (Art. 91)",
+                page: 36
+            },
+            {
+                question: "¿En qué plazo el Observatorio de la Calidad Educativa adecuará su estructura y funcionamiento a lo establecido en la Constitución Política del Estado y la presente Ley, según la Disposición Transitoria Primera?",
+                options: [
+                    "En el plazo de sesenta días.",
+                    "En el plazo de noventa días.",
+                    "En el plazo de ciento veinte días.",
+                    "En el plazo de un año."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! El plazo es de noventa días. (Disposición Transitoria Primera)",
+                feedbackIncorrect: "Incorrecto. El plazo para la adecuación del Observatorio de la Calidad Educativa es de noventa días. (Disposición Transitoria Primera)",
+                page: 37
+            },
+            {
+                question: "¿Qué sucederá con los Institutos, Academias y Escuelas de Bellas Artes de carácter fiscal existentes en el país, según la Disposición Transitoria Segunda?",
+                options: [
+                    "Serán privatizados y dejarán de ser fiscalizados.",
+                    "Pasarán a depender de los Gobiernos Municipales.",
+                    "Pasarán a depender del Ministerio de Educación.",
+                    "Serán cerrados y sus funciones transferidas a las universidades."
+                ],
+                correctAnswer: 2,
+                feedbackCorrect: "¡Correcto! Pasarán a depender del Ministerio de Educación. (Disposición Transitoria Segunda)",
+                feedbackIncorrect: "Incorrecto. Pasarán a depender del Ministerio de Educación. (Disposición Transitoria Segunda)",
+                page: 37
+            },
+            {
+                question: "Las escuelas de frontera son prioridad del Estado y recibirán atención en personal, infraestructura y equipamiento sobre la base de:",
+                options: [
+                    "Las necesidades específicas de cada comunidad fronteriza sin un marco general.",
+                    "Las Políticas y Programas Educativos extraordinarios definidos por el Ministerio de Educación.",
+                    "Los acuerdos bilaterales con países vecinos.",
+                    "La autogestión de las comunidades locales."
+                ],
+                correctAnswer: 1,
+                feedbackCorrect: "¡Correcto! Se basarán en las Políticas y Programas Educativos extraordinarios definidos por el Ministerio de Educación. (Disposición Transitoria Décima segunda)",
+                feedbackIncorrect: "Incorrecto. La atención a las escuelas de frontera se basa en las Políticas y Programas Educativos extraordinarios definidos por el Ministerio de Educación. (Disposición Transitoria Décima segunda)",
+                page: 39
+            },
+            {
+                question: "¿Qué leyes se abrogan con la única Disposición Abrogatoria de la Ley N° 070?",
+                options: [
+                    "La Ley 1565 de Reforma Educativa y la Ley 3009 del Consejo Nacional de Acreditación.",
+                    "Solo la Ley de Reforma Educativa de 1994.",
+                    "Todas las leyes educativas anteriores a 2010.",
+                    "Ninguna ley anterior es abrogada, solo se complementan."
+                ],
+                correctAnswer: 0,
+                feedbackCorrect: "¡Correcto! Se abrogan la Ley 1565 de Reforma Educativa y la Ley 3009 del Consejo Nacional de Acreditación. (Disposición Abrogatoria Única)",
+                feedbackIncorrect: "Incorrecto. Se abrogan la Ley 1565 de Reforma Educativa y la Ley 3009 del Consejo Nacional de Acreditación. (Disposición Abrogatoria Única)",
+                page: 39
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredQuestions = 0;
+        let selectedOptionIndex = null;
+        let shuffledQuestions = [];
+
+        const quizContent = document.getElementById('quiz-content');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const q = shuffledQuestions[currentQuestionIndex];
+                selectedOptionIndex = null; // Reset selection for new question
+
+                quizContent.innerHTML = `
+                    <div class="question-display">
+                        <p class="question-text">${currentQuestionIndex + 1}. ${q.question}</p>
+                        <div class="options-container">
+                            ${q.options.map((option, index) => `
+                                <button class="option-button" data-index="${index}">${option}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div id="feedback" class="feedback-section hidden"></div>
+                    <div class="navigation-buttons">
+                        <button id="check-answer-button" class="nav-button">Verificar Respuesta</button>
+                        <button id="next-question-button" class="nav-button" disabled>Siguiente Pregunta</button>
+                    </div>
+                `;
+
+                document.querySelectorAll('.option-button').forEach(button => {
+                    button.addEventListener('click', selectOption);
+                });
+                document.getElementById('check-answer-button').addEventListener('click', checkAnswer);
+                document.getElementById('next-question-button').addEventListener('click', nextQuestion);
+            } else {
+                showResults();
+            }
+        }
+
+        function selectOption(event) {
+            document.querySelectorAll('.option-button').forEach(button => {
+                button.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            selectedOptionIndex = parseInt(event.target.dataset.index);
+        }
+
+        function checkAnswer() {
+            if (selectedOptionIndex === null) {
+                alert('Por favor, selecciona una opción antes de verificar.');
+                return;
+            }
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            const feedbackDiv = document.getElementById('feedback');
+            const optionButtons = document.querySelectorAll('.option-button');
+
+            optionButtons.forEach((button, index) => {
+                button.disabled = true; // Disable all options after checking
+                if (index === q.correctAnswer) {
+                    button.classList.add('correct');
+                } else if (index === selectedOptionIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+
+            if (selectedOptionIndex === q.correctAnswer) {
+                score += 2;
+                feedbackDiv.className = 'feedback-section feedback-correct';
+                feedbackDiv.innerHTML = q.feedbackCorrect;
+            } else {
+                feedbackDiv.className = 'feedback-section feedback-incorrect';
+                feedbackDiv.innerHTML = q.feedbackIncorrect;
+            }
+            feedbackDiv.classList.remove('hidden');
+
+            document.getElementById('check-answer-button').disabled = true;
+            document.getElementById('next-question-button').disabled = false;
+            answeredQuestions++;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function showResults() {
+            let generalFeedback = '';
+            const percentage = (score / (questions.length * 2)) * 100;
+
+            if (percentage >= 90) {
+                generalFeedback = "¡Felicidades! Tienes un conocimiento excepcional de la Ley N° 070. Estás muy bien preparado(a).";
+            } else if (percentage >= 70) {
+                generalFeedback = "¡Buen trabajo! Tienes un conocimiento sólido de la Ley N° 070. Revisa las áreas donde tuviste dificultades para reforzar tu preparación.";
+            } else if (percentage >= 50) {
+                generalFeedback = "Estás en el camino correcto. Necesitas repasar más a fondo la Ley N° 070 para mejorar tu puntuación. Concéntrate en las áreas clave.";
+            } else {
+                generalFeedback = "Necesitas un repaso intensivo de la Ley N° 070. Te sugiero leer el documento completo y enfocarte en los artículos fundamentales.";
+            }
+
+            quizContent.innerHTML = `
+                <div class="results-section">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Cuestionario Finalizado</h2>
+                    <p class="text-xl text-gray-700">Tu puntuación total es:</p>
+                    <p class="score-display">${score} / ${questions.length * 2} puntos</p>
+                    <p class="text-lg text-gray-700">(${percentage.toFixed(2)}%)</p>
+                    <div class="general-feedback">
+                        <p>${generalFeedback}</p>
+                        <p class="mt-4">¡Sigue estudiando y practicando para alcanzar tus metas!</p>
+                    </div>
+                    <button id="restart-quiz-button" class="nav-button mt-8">Reiniciar Cuestionario</button>
+                </div>
+            `;
+            document.getElementById('restart-quiz-button').addEventListener('click', restartQuiz);
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            answeredQuestions = 0;
+            selectedOptionIndex = null;
+            shuffledQuestions = shuffleArray([...questions]); // Reshuffle for a new game
+            loadQuestion();
+        }
+
+        // Initialize the quiz
+        window.onload = () => {
+            restartQuiz(); // Start the quiz
+        };
+    </script>
+</body>
+</html>

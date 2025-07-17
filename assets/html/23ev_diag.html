@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo: Comprensión Lectora</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Clase del <p> que contiene el texto de la pregunta */
+        .question-container {
+            min-height: 50px; /* Reducido para disminuir espacio vertical */
+            /* margin-bottom: 1rem; /* Espacio entre el texto de la pregunta y las opciones */
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .correct-feedback {
+            background-color: #d1fae5; /* Tailwind green-100 */
+            color: #065f46; /* Tailwind green-800 */
+            border: 1px solid #6ee7b7; /* Tailwind green-300 */
+        }
+        .incorrect-feedback {
+            background-color: #fee2e2; /* Tailwind red-100 */
+            color: #991b1b; /* Tailwind red-800 */
+            border: 1px solid #fca5a5; /* Tailwind red-300 */
+        }
+        .option-label {
+            display: block;
+            padding: 12px;
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .option-label:hover:not(.disabled-option) { /* No hover effect if options are disabled */
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+        }
+        
+        /* Estilo para la opción correcta después de la selección */
+        .option-label.is-correct-answer {
+            background-color: #dcfce7 !important; 
+            border-color: #86efac !important;
+            color: #15803d; 
+            font-weight: bold;
+        }
+        /* Estilo para la opción incorrecta seleccionada por el usuario */
+        .option-label.is-user-incorrect-choice {
+            background-color: #fee2e2 !important;
+            border-color: #fca5a5 !important;
+            color: #b91c1c; 
+        }
+        .disabled-option { /* Clase para cuando las opciones están deshabilitadas */
+            cursor: not-allowed;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #3b82f6; /* Tailwind blue-500 */
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl">
+        <h1 class="text-2xl sm:text-3xl font-bold text-center text-slate-700 mb-6">Cuestionario Interactivo: Comprensión Lectora</h1>
+
+        <div id="quiz-container">
+            <div id="progress-bar-container" class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div id="question-area" class="mb-6">
+                <p id="question-text" class="text-lg sm:text-xl text-slate-800 font-semibold question-container"></p>
+                <div id="options-container" class="mt-4 space-y-3"></div>
+            </div>
+            <div id="feedback-area" class="feedback-container"></div>
+            <button id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mt-6">
+                Siguiente Pregunta
+            </button>
+        </div>
+
+        <div id="results-container" class="hidden text-center">
+            <h2 class="text-2xl font-bold text-slate-700 mb-4">Cuestionario Desarrollado por VictorCrespo-Resultados del Cuestionario</h2>
+            <p id="score-text" class="text-xl text-slate-600 mb-2"></p>
+            <p id="final-feedback-text" class="text-md text-slate-500 mb-6"></p>
+            <button id="restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                Intentar de Nuevo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Según el documento, ¿cuál fue el objetivo principal de la Evaluación Diagnóstica OPCE 2021?",
+                options: [
+                    "Medir la calidad general del sistema educativo boliviano.",
+                    "Evaluar el logro de aprendizajes y capacidades básicas de estudiantes de 3er y 4to año de primaria en un contexto de pandemia.",
+                    "Comparar el rendimiento de Bolivia con otros países de Latinoamérica.",
+                    "Diseñar nuevos materiales educativos para el nivel primario."
+                ],
+                answer: 1,
+                feedback: "Correcto. La respuesta se encuentra en la página 14 (sección 2) y página 16 (sección 2.2), donde se explica que el objetivo era evaluar el logro de aprendizajes en el contexto de la pandemia y los ajustes curriculares."
+            },
+            {
+                question: "El documento menciona que PIRLS evalúa cuatro procesos de lectura. ¿Cuál de los siguientes NO es uno de esos procesos según la página 23?",
+                options: [
+                    "Enfocarse en la información explícitamente declarada y recuperarla.",
+                    "Realizar inferencias sencillas.",
+                    "Memorizar el texto palabra por palabra.",
+                    "Interpretar e integrar ideas e información."
+                ],
+                answer: 2,
+                feedback: "Correcto. Los cuatro procesos mencionados por PIRLS son: Enfocarse en la información explícitamente declarada y recuperarla, Realizar inferencias sencillas, Interpretar e integrar ideas e información, y Evaluar y criticar contenido y elementos textuales (Página 23, sección 1.2)."
+            },
+            {
+                question: "¿Cuál es una característica fundamental de un abordaje explícito de la enseñanza de la comprensión lectora, tal como se describe en la página 37?",
+                options: [
+                    "Dejar que los estudiantes descubran las estrategias por sí mismos a través de la lectura libre.",
+                    "Una instrucción sistemática con pasos manejables de lo simple a lo complejo y retroalimentación inmediata.",
+                    "Enfocarse únicamente en la lectura oral fluida y la velocidad lectora.",
+                    "Evaluar la comprensión lectora solo al final del año escolar con pruebas estandarizadas."
+                ],
+                answer: 1,
+                feedback: "Correcto. La página 37, sección '1. Características de un abordaje explícito...', destaca la instrucción sistemática, actividades secuenciales y retroalimentación inmediata."
+            },
+            {
+                question: "La estrategia oral 'La Mano Habladora' (página 38) tiene como uno de sus propósitos principales ayudar a los niños a:",
+                options: [
+                    "Mejorar la caligrafía y la ortografía de palabras complejas.",
+                    "Enseñar a los niños a contar chistes y anécdotas de forma entretenida.",
+                    "Ordenar los elementos o componentes de una idea y consolidar la forma lógica de su lengua.",
+                    "Fomentar la competencia de lectura rápida y la memorización de textos cortos."
+                ],
+                answer: 2,
+                feedback: "Correcto. Según la página 38, 'La Mano Habladora' permite a los niños ordenar los elementos de la idea que exponen y con ello, adquirir y consolidar la forma lógica de su lengua."
+            },
+            {
+                question: "Al seleccionar textos cuidando el nivel de dificultad, ¿cuál de los siguientes NO es uno de los siete criterios mencionados en la página 44 del documento?",
+                options: [
+                    "Longitud o extensión del texto y Vocabulario.",
+                    "Popularidad del autor del texto y número de ediciones publicadas.",
+                    "Sintaxis y Estilo del texto.",
+                    "Ilustraciones, Presentación y Contenido del texto."
+                ],
+                answer: 1,
+                feedback: "Correcto. Los siete criterios listados en la página 44 son: Presentación, Ilustraciones, Longitud o extensión del texto, Vocabulario, Sintaxis, Estilo del texto y Contenido del texto. La popularidad del autor no es un criterio mencionado allí."
+            },
+            {
+                question: "El documento \"Recomendaciones para el mejoramiento de aprendizajes en Comprensión Lectora\" surge como resultado directo de la Evaluación Diagnóstica OPCE 2021. ¿Cuál fue la principal *motivación contextual* para realizar dicha evaluación, según se desprende de los antecedentes (págs. 13-14)?",
+                options: [
+                    "La necesidad de actualizar el currículo nacional de primaria para alinearlo con estándares internacionales.",
+                    "La preocupación por el impacto del confinamiento y la clausura de la gestión escolar 2020 en los aprendizajes de los estudiantes.",
+                    "El deseo de Bolivia de participar activamente en estudios internacionales comparativos de educación y mejorar su ranking.",
+                    "La solicitud expresa de los maestros de primaria para tener más herramientas de diagnóstico y planificación en el aula."
+                ],
+                answer: 1,
+                feedback: "Correcto. La motivación contextual se explica en las páginas 13 y 14, particularmente en la sección '1. Antecedentes' y el inicio de '2. Acerca de la Evaluación Diagnóstica, OPCE 2021', donde se menciona el impacto del Covid-19 y la clausura escolar como factores clave."
+            },
+            {
+                question: "Al describir los procesos de lectura evaluados por PIRLS (págs. 24-25), ¿cuál es la diferencia fundamental que el texto establece entre 'Realizar inferencias sencillas' e 'Interpretar e integrar ideas e información' en términos de la *construcción de significado*?",
+                options: [
+                    "Las inferencias sencillas se basan en información global del texto, mientras que la interpretación se enfoca en detalles locales y específicos.",
+                    "La interpretación y la integración permiten una construcción del significado más específica y completa, conectando el texto con el conocimiento y la experiencia personal del lector, yendo más allá de las inferencias directas.",
+                    "Las inferencias sencillas son exclusivas de textos narrativos y cuentos, mientras que la interpretación se aplica principalmente a textos informativos y científicos.",
+                    "'Realizar inferencias sencillas' es un proceso automático que no requiere instrucción, mientras que 'interpretar e integrar' necesita enseñanza explícita y modelado."
+                ],
+                answer: 1,
+                feedback: "Correcto. La diferencia se detalla en las páginas 24 y 25. Se enfatiza que la interpretación e integración van más allá de las inferencias directas al conectar la información del texto con el conocimiento y la experiencia personal del lector para una construcción más completa del significado."
+            },
+            {
+                question: "¿Cuál de las siguientes acciones docentes NO se alinearía directamente con las características de un abordaje explícito de la enseñanza de la comprensión lectora, tal como se describe en la página 37?",
+                options: [
+                    "Modelar estrategias de comprensión lectora paso a paso, mostrando cómo aplicarlas.",
+                    "Proporcionar retroalimentación correctiva inmediata y específica durante la práctica de las estrategias.",
+                    "Esperar que los estudiantes deduzcan las estrategias más efectivas principalmente a través de la lectura libre y abundante, sin una intervención directa y estructurada.",
+                    "Presentar actividades de lectura secuenciadas que progresen de manera lógica desde lo simple hacia lo complejo."
+                ],
+                answer: 2,
+                feedback: "Correcto. Las características de un abordaje explícito se encuentran en la página 37. La opción 'c' contradice la idea de instrucción sistemática, directa y con retroalimentación, que son pilares de este enfoque."
+            },
+            {
+                question: "¿De qué manera la estrategia 'La Mano Habladora' (página 38) contribuye indirectamente, pero de forma fundamental, al desarrollo posterior de la comprensión lectora?",
+                options: [
+                    "Al mejorar significativamente la memoria a corto plazo y la capacidad de retención de información de los niños.",
+                    "Al enseñar la estructura sintáctica y lógica de la lengua, lo cual es base para el pensamiento ordenado necesario en la comprensión de textos escritos.",
+                    "Al familiarizar a los niños con una amplia variedad de géneros discursivos orales y sus convenciones.",
+                    "Al aumentar la velocidad con la que los niños pueden procesar información auditiva y responder preguntas oralmente."
+                ],
+                answer: 1,
+                feedback: "Correcto. La página 38 explica que la estrategia ayuda a 'adquirir y consolidar la forma lógica de su lengua materna... pensar en su lengua... de manera lógica y clara', lo cual es fundamental para la posterior comprensión de textos escritos que también requieren un procesamiento lógico y estructurado."
+            },
+            {
+                question: "Al discutir los criterios para seleccionar textos (página 44), se mencionan las 'Ilustraciones'. ¿En qué estadio de adquisición de la lectura las ilustraciones juegan un rol más crucial y estrechamente vinculado al texto, y en cuál tienden a volverse más accesorias según las páginas 44-45?",
+                options: [
+                    "Son cruciales en la 'Lectura Corriente' para explicar conceptos complejos y se vuelven accesorias en la 'Lectura Emergente' donde prima el texto.",
+                    "Son cruciales en la 'Lectura Emergente' (con ilustraciones estrechamente vinculadas al texto) y se vuelven más accesorias en la 'Lectura Corriente' (donde juegan un rol accesorio y son menos numerosas).",
+                    "Las ilustraciones mantienen un nivel de importancia similar en todos los estadios de lectura, sirviendo siempre como apoyo principal.",
+                    "Las ilustraciones son importantes para la motivación general, pero el documento no las considera un criterio determinante para la dificultad del texto en ningún estadio."
+                ],
+                answer: 1,
+                feedback: "Correcto. Las características de los textos para cada estadio se describen entre las páginas 44 y 45. Para la 'Lectura Emergente' se indica 'ilustraciones estrechamente vinculadas al texto', y para la 'Lectura Corriente', 'ilustraciones que juegan un rol accesorio y son menos numerosas'."
+            },
+            {
+                question: "¿Cuál de las siguientes actividades es MENOS característica de la etapa de Prelectura, según la Tabla 4 (página 47)?",
+                options: [
+                    "Anticipar el contenido del texto formulando hipótesis a partir del título, subtítulos o ilustraciones.",
+                    "Discutir sobre la intención de la lectura y los propósitos que se persiguen al leer el texto.",
+                    "Repetir en sus propias palabras lo que se va comprendiendo del texto durante una pausa en la lectura.",
+                    "Hacer uso de los conocimientos y experiencias previas que los estudiantes tienen en relación al tema del texto."
+                ],
+                answer: 2,
+                feedback: "Correcto. La Tabla 4 en la página 47 detalla las actividades de cada etapa. 'Repetir en sus propias palabras lo que va comprendiendo del texto' es una actividad característica de la etapa de 'Lectura (durante)'."
+            },
+            {
+                question: "En la sección sobre 'Situaciones de lectura' (Tabla 5, págs. 52-53), ¿cuál es el principal diferenciador de la 'Lectura guiada' en términos del *nivel de dificultad del texto* y el *apoyo del maestro* en comparación con la 'Lectura compartida'?",
+                options: [
+                    "En la lectura guiada, el texto es significativamente más fácil y el apoyo del maestro es mínimo; en la compartida, el texto es muy difícil y el apoyo es constante y directivo.",
+                    "En la lectura guiada, el texto tiene numerosos puntos de referencia conocidos y algunos retos, y el maestro ayuda a usar estrategias; en la compartida, el texto incluye muchos retos que el grupo está listo para superar con lectura dirigida por el maestro.",
+                    "Ambos utilizan textos del mismo nivel de dificultad y complejidad, pero la lectura guiada se realiza de forma individual y silenciosa, mientras que la compartida es siempre grupal y en voz alta.",
+                    "La lectura guiada se enfoca primordialmente en desarrollar la fluidez y velocidad lectora, mientras que la lectura compartida se centra exclusivamente en la comprensión profunda de ideas complejas."
+                ],
+                answer: 1,
+                feedback: "Correcto. La Tabla 5 en las páginas 52-53 describe las características. La 'Lectura guiada' usa textos con 'numerosos puntos de referencia conocidos y algunos retos' y el maestro 'ayuda (...) para favorecer el uso de estrategias apropiadas'. La 'Lectura compartida' usa textos que 'incluyen muchos retos que el grupo está listo para superar' con 'lectura dirigida por la maestra o el maestro'."
+            },
+            {
+                question: "Según el análisis presentado en la página 27 (sección 1.3), ¿cuál es una noción central para desarrollar la lectura inferencial que el texto indica que *no existe explícitamente* en el currículo boliviano en comparación con LLECE y PIRLS?",
+                options: [
+                    "La capacidad de comprender relaciones de causa y consecuencia dentro de un texto narrativo.",
+                    "La habilidad para identificar sinónimos y antónimos con el fin de parafrasear ideas complejas.",
+                    "La noción de relacionar o conectar información dispersa al interior de un texto o de este con el mundo real y los conocimientos previos del lector.",
+                    "El análisis detallado de la idea central o tema principal de un texto informativo o expositivo."
+                ],
+                answer: 2,
+                feedback: "Correcto. En la página 27, sección '1.3. Niveles de procesamiento...', se afirma: 'Por ejemplo, la noción de relacionar o conectar información al interior de un texto o con el mundo real no existe en el currículo boliviano (noción central para desarrollar la lectura inferencial...)'."
+            },
+            {
+                question: "Respecto a los resultados de la Evaluación Diagnóstica 2021 en lectura (págs. 31-33), ¿cuál fue una de las *mayores dificultades* identificadas consistentemente en los estudiantes de 3er y 4to año de EPCV, más allá de la extracción de información literal?",
+                options: [
+                    "La decodificación básica de palabras desconocidas y el reconocimiento de letras.",
+                    "La identificación del significado de palabras familiares y de uso frecuente a partir de claves contextuales simples.",
+                    "Establecer conexiones entre secciones amplias de información, vincular el contenido del texto con la experiencia previa y discernir el mensaje general (interpretar e integrar información).",
+                    "La comprensión de la secuencia temporal de acciones en textos narrativos simples y lineales."
+                ],
+                answer: 2,
+                feedback: "Correcto. En la página 32, se indica: 'De la misma manera, se encuentran dificultades a la hora de establecer conexiones entre secciones más amplias de información en un texto, vincular el contenido del texto con la experiencia previa en acciones como el discernir el mensaje general o el tema... esto es: interpretar e integrar información, cuyos ítems o preguntas reciben los porcentajes más bajos de respuesta correcta.'"
+            },
+            {
+                question: "La 'Estrategia 13: Reconocer la idea principal explícita en un texto' (página 79) parece sencilla. Sin embargo, ¿qué complejidad adicional introduce el documento al sugerir que el maestro debe guiar a los estudiantes a *distinguir* la idea principal de otros elementos textuales?",
+                options: [
+                    "Distinguirla de los personajes secundarios o elementos del escenario que no son protagónicos.",
+                    "Distinguirla de las opiniones personales o juicios de valor que el lector pueda tener sobre el texto.",
+                    "Distinguirla de los detalles de apoyo, ejemplos, información secundaria o ideas subordinadas que, aunque relacionados y relevantes, no constituyen la esencia del mensaje principal del párrafo o texto.",
+                    "Distinguirla del título del texto, que a veces puede ser engañoso o no reflejar completamente el contenido."
+                ],
+                answer: 2,
+                feedback: "Correcto. La página 79, aunque no lo explicita con esas palabras, implica que reconocer la idea principal va más allá de solo encontrar una frase; requiere discernimiento para separarla de la información que la sustenta (detalles, ejemplos) pero no es la idea central en sí misma. Esto es clave para la comprensión profunda y evitar la confusión con información de apoyo."
+            },
+            {
+                question: "En la 'Estrategia 17: Resumir elementos de una narración [...] en un organizador gráfico' (página 84), se sugiere un organizador con elementos como 'Personajes', 'Escenario', 'Problema', 'Eventos principales' y 'Solución/Resultado'. ¿Cuál es el beneficio cognitivo principal de usar este tipo de organizador para la comprensión lectora?",
+                options: [
+                    "Ayuda a los estudiantes a memorizar los detalles específicos del cuento para recordarlos en una evaluación posterior.",
+                    "Fomenta la creatividad y las habilidades artísticas al permitirles dibujar los elementos del cuento en el organizador.",
+                    "Obliga a los estudiantes a identificar la estructura narrativa subyacente del texto, analizar las relaciones causales y temporales entre sus componentes clave, y sintetizar la información esencial, promoviendo así una comprensión más profunda y organizada.",
+                    "Sirve principalmente como una actividad de escritura para que los estudiantes practiquen la ortografía, la gramática y la redacción de frases cortas."
+                ],
+                answer: 2,
+                feedback: "Correcto. La página 84 introduce la estrategia. El uso de organizadores gráficos para resumir ayuda a los estudiantes a procesar y estructurar la información, identificando las partes esenciales de una narración y cómo se interrelacionan, lo cual es un proceso cognitivo superior que implica análisis y síntesis, fundamental para una comprensión profunda."
+            },
+            {
+                question: "El documento aboga por enseñar estrategias metacognitivas (página 93). La 'Estrategia 23: Reflexionar sobre la manera como leemos un texto' incluye preguntas como '¿Entendí lo que acabo de leer?'. ¿Cuál es el propósito fundamental de fomentar este tipo de autointerrogación en los estudiantes?",
+                options: [
+                    "Reducir la velocidad de lectura para asegurar una mayor atención a los detalles y evitar errores de decodificación.",
+                    "Desarrollar la autoconciencia sobre sus propios procesos de comprensión, permitiéndoles monitorear activamente su entendimiento, identificar cuándo se pierde la comprensión y regular sus estrategias de lectura para mejorarla.",
+                    "Prepararlos específicamente para responder preguntas de comprensión formuladas por el maestro al final de la lectura.",
+                    "Incrementar su confianza general como lectores y su autoestima, independientemente de su nivel de comprensión real del texto."
+                ],
+                answer: 1,
+                feedback: "Correcto. La página 93 introduce la importancia de las estrategias metacognitivas. El objetivo de estas preguntas es que el estudiante se vuelva un lector activo y consciente de su propio proceso de comprensión, capaz de identificar cuándo no entiende y qué hacer al respecto (monitoreo y regulación)."
+            },
+            {
+                question: "El documento, en sus 'Consideraciones finales' (página 95 en adelante), reitera la necesidad de una enseñanza explícita y continua de estrategias. Si un maestro aplica una estrategia de comprensión lectora solo una o dos veces durante el año escolar, ¿por qué esto sería insuficiente según los principios generales del documento?",
+                options: [
+                    "Porque los estudiantes se aburrirían rápidamente de la misma estrategia si se repite con frecuencia.",
+                    "Porque no todas las estrategias son adecuadas para todos los tipos de texto, por lo que es mejor variar constantemente.",
+                    "Porque la apropiación, internalización y el uso autónomo y flexible de una estrategia de comprensión lectora requieren práctica continua, guiada, sistemática y variada hasta que se convierta en una herramienta que el estudiante pueda aplicar por sí mismo en diferentes contextos.",
+                    "Porque el currículo oficial exige cubrir un número mínimo de estrategias diferentes cada trimestre escolar."
+                ],
+                answer: 2,
+                feedback: "Correcto. Aunque no hay una frase exacta, la insistencia en la enseñanza 'continua' (página 9) y 'sistemática' (página 37) y la idea de que los estudiantes deben 'apropiarse' de las estrategias para 'elegir por sí mismos cuál o cuáles podrán aplicar y combinar' (página 9) implican que la aplicación esporádica es insuficiente para una internalización y uso efectivo y autónomo."
+            },
+            {
+                question: "El documento menciona que la comunicación oral es un 'pilar fundamental' para el aprendizaje de la lectura (página 37). ¿Cuál de las siguientes afirmaciones explica MEJOR esta relación fundamental, considerando el desarrollo cognitivo del niño?",
+                options: [
+                    "Los niños que hablan mucho y con fluidez tienden a ser más extrovertidos y, por lo tanto, más dispuestos a participar activamente en actividades de lectura grupal.",
+                    "Las habilidades de escucha activa y seguimiento de instrucciones, desarrolladas en la comunicación oral, son directamente transferibles a la comprensión de consignas escritas y textos instructivos.",
+                    "El desarrollo del vocabulario, la comprensión de estructuras sintácticas complejas, la capacidad de organizar el pensamiento de manera lógica y la habilidad para construir significados compartidos, que se cultivan a través de la oralidad, sientan las bases cognitivas y lingüísticas necesarias para decodificar y comprender el lenguaje escrito.",
+                    "La práctica frecuente de la lectura en voz alta mejora la pronunciación y la entonación, lo que a su vez facilita una comunicación oral más efectiva y clara en otras áreas."
+                ],
+                answer: 2,
+                feedback: "Correcto. La sección 2.1 (página 37) y las estrategias orales (páginas 38-41) subrayan cómo la oralidad desarrolla el pensamiento lógico, la estructura del lenguaje y el vocabulario, que son prerrequisitos esenciales para la comprensión lectora. El lenguaje oral es la base sobre la cual se construye el lenguaje escrito."
+            },
+            {
+                question: "El documento, al hablar de los niveles de lectura (págs. 23-26), describe el proceso de 'Evaluar y criticar contenido y elementos textuales'. ¿Qué diferencia fundamental existe entre este proceso y el de 'Interpretar e integrar ideas e información'?",
+                options: [
+                    "Interpretar es un proceso completamente subjetivo basado en opiniones personales, mientras que evaluar y criticar es un proceso objetivo basado únicamente en hechos verificables del texto.",
+                    "Evaluar y criticar implica emitir un juicio sobre el texto (su veracidad, calidad, las elecciones del autor, etc.), a menudo apoyado en justificaciones y comparaciones con el conocimiento del mundo o criterios externos, mientras que interpretar se centra más en construir el significado del texto en sí mismo, incluso conectándolo con la experiencia personal para una comprensión más profunda.",
+                    "Interpretar e integrar ideas se aplica exclusivamente a textos literarios y narrativos, mientras que evaluar y criticar contenido es específico para textos informativos y científicos.",
+                    "Evaluar y criticar es considerado el primer nivel de comprensión lectora, enfocado en aspectos superficiales, mientras que interpretar e integrar ideas es el nivel más avanzado y complejo."
+                ],
+                answer: 1,
+                feedback: "Correcto. Las descripciones en las páginas 24-26 muestran que 'Interpretar e integrar' se enfoca en la construcción de significado (Mullis & Martin, 2019: 15), mientras que 'Evaluar y criticar' implica 'pasar de la construcción de significado a evaluar y criticar' y 'apoyar su juicio con una justificación' (Mullis & Martin, 2019: 15). Este último requiere un distanciamiento crítico del texto."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let shuffledQuestions = [];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionTextElement = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackArea = document.getElementById('feedback-area');
+        const submitButton = document.getElementById('submit-btn');
+        const scoreTextElement = document.getElementById('score-text');
+        const finalFeedbackTextElement = document.getElementById('final-feedback-text');
+        const restartButton = document.getElementById('restart-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            shuffledQuestions = shuffleArray([...questions]);
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            submitButton.textContent = 'Siguiente Pregunta';
+            submitButton.disabled = true; 
+            feedbackArea.innerHTML = '';
+            loadQuestion();
+            updateProgressBar();
+        }
+
+        function loadQuestion() {
+            feedbackArea.innerHTML = ''; // Limpiar retroalimentación anterior
+            submitButton.disabled = true; // Deshabilitar botón hasta que se seleccione una opción
+
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                questionTextElement.textContent = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+                optionsContainer.innerHTML = ''; // Limpiar opciones anteriores
+                
+                currentQuestion.options.forEach((option, index) => {
+                    const optionId = `option-${index}`;
+                    const optionLabel = document.createElement('label');
+                    optionLabel.htmlFor = optionId;
+                    optionLabel.classList.add('option-label');
+                    // Limpiar clases de resaltado de la carga anterior
+                    optionLabel.classList.remove('is-correct-answer', 'is-user-incorrect-choice');
+                    
+                    const optionInput = document.createElement('input');
+                    optionInput.type = 'radio';
+                    optionInput.id = optionId;
+                    optionInput.name = 'option'; // Nombre común para agrupar los radio buttons
+                    optionInput.value = index;
+                    optionInput.classList.add('mr-3', 'accent-blue-500'); 
+                    
+                    optionInput.addEventListener('change', () => {
+                        handleOptionSelection(optionInput, currentQuestion, index, optionLabel);
+                    });
+
+                    optionLabel.appendChild(optionInput);
+                    optionLabel.appendChild(document.createTextNode(option));
+                    optionsContainer.appendChild(optionLabel);
+                });
+            } else {
+                showResults();
+            }
+        }
+
+        function handleOptionSelection(selectedInput, currentQuestion, selectedAnswerIndex, selectedLabelElement) {
+            // Deshabilitar todas las opciones para evitar cambios
+            const allRadioInputs = optionsContainer.querySelectorAll('input[name="option"]');
+            allRadioInputs.forEach(input => input.disabled = true);
+            optionsContainer.querySelectorAll('.option-label').forEach(label => label.classList.add('disabled-option'));
+
+
+            const correctAnswerIndex = currentQuestion.answer;
+            let feedbackHTML = '';
+
+            // Limpiar resaltados previos de todas las etiquetas de opción
+            const allOptionLabels = optionsContainer.querySelectorAll('.option-label');
+            allOptionLabels.forEach(label => {
+                label.classList.remove('is-correct-answer', 'is-user-incorrect-choice');
+            });
+
+            if (selectedAnswerIndex === correctAnswerIndex) {
+                score += 5; 
+                feedbackHTML = `<div class="correct-feedback"><strong>¡Correcto!</strong> ${currentQuestion.feedback}</div>`;
+                selectedLabelElement.classList.add('is-correct-answer');
+            } else {
+                feedbackHTML = `<div class="incorrect-feedback"><strong>Incorrecto.</strong> La respuesta correcta era: "${currentQuestion.options[correctAnswerIndex]}". <br>${currentQuestion.feedback}</div>`;
+                selectedLabelElement.classList.add('is-user-incorrect-choice');
+                // Resaltar también la respuesta correcta
+                if (allOptionLabels[correctAnswerIndex]) {
+                    allOptionLabels[correctAnswerIndex].classList.add('is-correct-answer');
+                }
+            }
+            feedbackArea.innerHTML = feedbackHTML;
+            submitButton.disabled = false; // Habilitar botón para pasar a la siguiente pregunta
+        }
+        
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        submitButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            updateProgressBar(); 
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            scoreTextElement.textContent = `Tu puntuación final es: ${score} de ${shuffledQuestions.length * 5} puntos.`;
+
+            let finalFeedback = '';
+            const percentage = (score / (shuffledQuestions.length * 5)) * 100; 
+            if (percentage >= 80) {
+                finalFeedback = "¡Excelente trabajo! Demuestras una comprensión profunda del documento.";
+            } else if (percentage >= 60) {
+                finalFeedback = "¡Buen trabajo! Tienes una buena comprensión de los temas clave. Sigue repasando para afianzar los detalles.";
+            } else if (percentage >= 40) {
+                finalFeedback = "Has logrado comprender algunos aspectos. Te recomendamos revisar nuevamente el documento para mejorar tu entendimiento.";
+            } else {
+                finalFeedback = "Parece que necesitas repasar el documento con más detenimiento. ¡No te desanimes y vuelve a intentarlo!";
+            }
+            finalFeedbackTextElement.textContent = finalFeedback;
+            progressBar.style.width = `100%`; 
+        }
+
+        restartButton.addEventListener('click', startQuiz);
+
+        // Initialize quiz
+        startQuiz();
+    </script>
+</body>
+</html>

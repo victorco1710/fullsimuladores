@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo: Ley N° 004</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .feedback-correct {
+            border-left: 5px solid #22c55e; /* green-500 */
+        }
+        .feedback-incorrect {
+            border-left: 5px solid #ef4444; /* red-500 */
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .correct-answer {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .incorrect-answer {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex flex-col min-h-screen">
+    <div id="quiz-container" class="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
+        <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+            <div id="start-screen">
+                <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-4">Cuestionario Interactivo: Ley N° 004</h1>
+                <p class="text-center text-gray-600 mb-8">Pon a prueba tu conocimiento sobre la Ley de Lucha contra la Corrupción, Enriquecimiento Ilícito e Investigación de Fortunas.</p>
+                <div class="text-center">
+                    <button id="start-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                        Comenzar Cuestionario
+                    </button>
+                </div>
+            </div>
+
+            <div id="quiz-screen" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <div id="question-counter" class="text-lg font-semibold text-blue-700"></div>
+                    <div id="score" class="text-lg font-semibold text-gray-700">Puntuación: 0</div>
+                </div>
+                <div id="progress-bar-container" class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <h2 id="question-text" class="text-xl sm:text-2xl font-bold mb-6 text-gray-900"></h2>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="feedback-container" class="mt-6 p-4 rounded-lg hidden"></div>
+                <div class="mt-8 text-right">
+                    <button id="next-btn" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-6 rounded-lg hidden">Siguiente</button>
+                </div>
+            </div>
+
+            <div id="result-screen" class="hidden text-center">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">¡Cuestionario Completado!</h1>
+                <p class="text-2xl text-gray-700 mb-2">Tu puntuación final es:</p>
+                <p id="final-score" class="text-6xl font-bold text-blue-600 mb-6"></p>
+                <p id="final-feedback" class="text-lg text-gray-600 mb-8"></p>
+                <button id="restart-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                    Intentar de Nuevo
+                </button>
+            </div>
+        </div>
+    </div>
+    <footer class="text-center py-4 text-gray-600 text-sm">
+        <p>PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025.</p>
+        <p>© Victor</p>
+    </footer>
+
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es la consecuencia específica para la máxima autoridad ejecutiva que omite constituirse en parte querellante en delitos de corrupción?",
+                options: [
+                    "Una multa de 30 días.",
+                    "Incurrir en el delito de incumplimiento de deberes.",
+                    "La suspensión temporal de sus funciones.",
+                    "Ser sometido a un proceso administrativo interno únicamente."
+                ],
+                answer: "Incurrir en el delito de incumplimiento de deberes.",
+                feedback: "Correcto. El Artículo 14 establece que la omisión de constituirse como parte querellante importa incurrir en el delito de incumplimiento de deberes y otros que correspondan.",
+                page: 5
+            },
+            {
+                question: "Según el Artículo 19, ¿qué entidades pueden requerir información exenta de secreto o confidencialidad sin necesidad de orden judicial o requerimiento fiscal?",
+                options: [
+                    "Solo el Ministerio Público y la Policía Boliviana.",
+                    "La Unidad de Investigaciones Financieras, Ministerio de Transparencia, Ministerio Público y la Procuraduría General del Estado.",
+                    "Cualquier juez o tribunal anticorrupción.",
+                    "Únicamente la Contraloría General del Estado en auditorías especiales."
+                ],
+                answer: "La Unidad de Investigaciones Financieras, Ministerio de Transparencia, Ministerio Público y la Procuraduría General del Estado.",
+                feedback: "Correcto. El Artículo 19 especifica que estas cuatro entidades pueden requerir información exenta de secreto o confidencialidad para el cumplimiento de sus funciones sin trámite previo.",
+                page: 7
+            },
+            {
+                question: "¿En qué circunstancia específica la ley permite levantar la reserva de identidad de un denunciante de hechos de corrupción?",
+                options: [
+                    "Cuando el denunciado es un ex servidor público.",
+                    "A solicitud del Ministerio de Transparencia para fines estadísticos.",
+                    "Cuando se pronuncia sentencia absolutoria ejecutoriada y a solicitud de la parte interesada.",
+                    "Nunca, la reserva de identidad es absoluta e irrevocable."
+                ],
+                answer: "Cuando se pronuncia sentencia absolutoria ejecutoriada y a solicitud de la parte interesada.",
+                feedback: "Correcto. El Artículo 17, parágrafo IV, detalla que la reserva de identidad se puede levantar solo si hay una sentencia absolutoria ejecutoriada y la parte interesada (el acusado absuelto) lo solicita.",
+                page: 6
+            },
+            {
+                question: "¿Cuál es la sanción adicional para una persona jurídica cuyo representante legal comete enriquecimiento ilícito con afectación al Estado?",
+                options: [
+                    "La disolución inmediata de la persona jurídica.",
+                    "La inhabilitación permanente para contratar con el Estado.",
+                    "Una multa del 25% de su patrimonio.",
+                    "La intervención judicial de la empresa por 5 años."
+                ],
+                answer: "Una multa del 25% de su patrimonio.",
+                feedback: "Correcto. El Artículo 28, segundo párrafo, establece que además de la restitución de bienes, la persona jurídica será sancionada con una multa del 25% de su patrimonio.",
+                page: 10
+            },
+            {
+                question: "En el delito de Obstrucción de la Justicia (Art. 32), ¿en qué caso se agrava la sanción en una mitad?",
+                options: [
+                    "Si el soborno ofrecido supera un monto específico.",
+                    "Si el proceso obstaculizado es de connotación internacional.",
+                    "Si se utiliza fuerza física, amenazas o intimidación contra jueces, fiscales, policías u otros servidores responsables de la lucha anticorrupción.",
+                    "Si el falso testimonio es prestado por un servidor público."
+                ],
+                answer: "Si se utiliza fuerza física, amenazas o intimidación contra jueces, fiscales, policías u otros servidores responsables de la lucha anticorrupción.",
+                feedback: "Correcto. El segundo párrafo del Artículo 32 agrava la pena en una mitad cuando se usa violencia o intimidación para obstaculizar las funciones de los operadores de justicia y otros servidores en la lucha anticorrupción.",
+                page: 11
+            },
+            {
+                question: "¿Qué sucede con la prescripción de la pena para delitos de corrupción según la modificación al Artículo 105 del Código Penal?",
+                options: [
+                    "Se duplican los plazos de prescripción.",
+                    "No procederá la prescripción de la pena, bajo ninguna circunstancia.",
+                    "La prescripción se interrumpe solo si el condenado se da a la fuga.",
+                    "Prescribe en un plazo único de 20 años."
+                ],
+                answer: "No procederá la prescripción de la pena, bajo ninguna circunstancia.",
+                feedback: "Correcto. La modificación al Artículo 105 del Código Penal es categórica al establecer que la prescripción de la pena no procede en delitos de corrupción.",
+                page: 12
+            },
+            {
+                question: "Según el Artículo 91 Bis del Código de Procedimiento Penal, ¿qué medida excepcional se toma cuando se declara en rebeldía a un imputado por delitos de corrupción?",
+                options: [
+                    "El proceso se suspende hasta su captura.",
+                    "Se emite una orden de captura internacional y se archiva el caso temporalmente.",
+                    "El proceso no se suspende y el imputado es juzgado en rebeldía con un defensor de oficio.",
+                    "Se concede un plazo de 90 días para que el imputado se presente voluntariamente."
+                ],
+                answer: "El proceso no se suspende y el imputado es juzgado en rebeldía con un defensor de oficio.",
+                feedback: "Correcto. El Artículo 91 Bis establece la prosecución del juicio en rebeldía para delitos de corrupción, designando un defensor de oficio y continuando el proceso sin la presencia del imputado.",
+                page: 18
+            },
+            {
+                question: "El delito de 'Beneficios en Razón del Cargo' (Art. 147) se diferencia del cohecho porque:",
+                options: [
+                    "Requiere que el servidor público realice un acto contrario a sus deberes.",
+                    "Implica un acuerdo previo entre el servidor y un particular.",
+                    "El servidor admite regalos u otros beneficios 'en consideración a su cargo', sin necesidad de una contraprestación específica.",
+                    "Solo puede ser cometido por autoridades de alto rango."
+                ],
+                answer: "El servidor admite regalos u otros beneficios 'en consideración a su cargo', sin necesidad de una contraprestación específica.",
+                feedback: "Correcto. A diferencia del cohecho, que implica un 'a cambio de', el delito de beneficios en razón del cargo sanciona la simple aceptación de beneficios por el hecho de ocupar una posición pública, lo cual compromete la imparcialidad.",
+                page: 13
+            },
+            {
+                question: "¿Cuál es el beneficio para un instigador, cómplice o encubridor que denuncia voluntariamente y colabora en la investigación de delitos de corrupción, según el Art. 35?",
+                options: [
+                    "El perdón judicial completo.",
+                    "La reducción de dos tercios de la pena que le correspondiere.",
+                    "La suspensión condicional de la pena, sin importar el monto.",
+                    "Convertirse en testigo protegido con inmunidad total."
+                ],
+                answer: "La reducción de dos tercios de la pena que le correspondiere.",
+                feedback: "Correcto. El Artículo 35 sobre la 'Denuncia Voluntaria' establece específicamente la reducción de dos tercios de la pena como beneficio por la colaboración efectiva.",
+                page: 17
+            },
+            {
+                question: "El Artículo 224 (Conducta Antieconómica) sanciona a un servidor público o directivo que causa daño al patrimonio del Estado por mala administración. ¿Qué pena se aplica si actúa culposamente (sin intención)?",
+                options: [
+                    "Solo una sanción administrativa.",
+                    "La mitad de la pena principal.",
+                    "Privación de libertad de uno a cuatro años.",
+                    "Una multa económica y la restitución del daño."
+                ],
+                answer: "Privación de libertad de uno a cuatro años.",
+                feedback: "Correcto. El segundo párrafo del Artículo 224 establece una pena de 1 a 4 años de privación de libertad para la conducta antieconómica cometida de forma culposa.",
+                page: 16
+            },
+            {
+                question: "¿Qué entidad es la responsable principal de centralizar la información en el Sistema Integrado de Información Anticorrupción y de Recuperación de Bienes del Estado (SIIARBE)?",
+                options: [
+                    "La Contraloría General del Estado.",
+                    "El Ministerio Público.",
+                    "El Ministerio de Transparencia Institucional y Lucha Contra la Corrupción.",
+                    "El Consejo de la Magistratura."
+                ],
+                answer: "El Ministerio de Transparencia Institucional y Lucha Contra la Corrupción.",
+                feedback: "Correcto. El Artículo 23 establece que el SIIARBE está a cargo del Ministerio de Transparencia Institucional y Lucha Contra la Corrupción.",
+                page: 8
+            },
+            {
+                question: "En el delito de Cohecho Pasivo Transnacional (Art. 31), ¿quién es el sujeto activo del delito?",
+                options: [
+                    "Un empresario boliviano que soborna a un funcionario extranjero.",
+                    "Un funcionario público extranjero o de una organización internacional pública.",
+                    "Cualquier persona que actúe como intermediario.",
+                    "Una empresa transnacional que opera en Bolivia."
+                ],
+                answer: "Un funcionario público extranjero o de una organización internacional pública.",
+                feedback: "Correcto. El Artículo 31 define al sujeto activo como el funcionario extranjero o de una organización internacional que solicita o acepta el soborno.",
+                page: 11
+            },
+            {
+                question: "Según el Art. 172 Bis, ¿en qué consiste el delito de 'Receptación Proveniente de Delitos de Corrupción'?",
+                options: [
+                    "En recibir un soborno para alterar una investigación.",
+                    "En denunciar falsamente un delito de corrupción.",
+                    "En ayudar al autor de un delito de corrupción a asegurar el beneficio o recibir/ocultar las ganancias del mismo.",
+                    "En utilizar información privilegiada para beneficio propio."
+                ],
+                answer: "En ayudar al autor de un delito de corrupción a asegurar el beneficio o recibir/ocultar las ganancias del mismo.",
+                feedback: "Correcto. Este artículo sanciona a quien, sin haber participado en el delito principal, ayuda posteriormente al autor a disfrutar de los resultados o ganancias ilícitas.",
+                page: 14
+            },
+            {
+                question: "¿Cuál es la duración de la caducidad de una anotación preventiva a favor del Estado, y por cuánto tiempo puede ser prorrogada, según la modificación al Art. 1553 del Código Civil?",
+                options: [
+                    "Caduca a los 2 años, prorrogable por 1 año más.",
+                    "Caduca a los 5 años, sin prórroga.",
+                    "Caduca a los 4 años, prorrogables a dos más.",
+                    "No tiene caducidad por ser a favor del Estado."
+                ],
+                answer: "Caduca a los 4 años, prorrogables a dos más.",
+                feedback: "Correcto. El parágrafo III del Artículo 1553, añadido por la Ley 004, establece este plazo especial para las anotaciones preventivas a favor del Estado, diferenciándolo del plazo general.",
+                page: 21
+            },
+            {
+                question: "El delito de 'Resoluciones Contrarias a la Constitución y a las Leyes' (Art. 153) tiene una pena agravada en un tercio cuando:",
+                options: [
+                    "La resolución es emitida por un fiscal.",
+                    "El delito ocasionare daño económico al Estado.",
+                    "La autoridad es reincidente.",
+                    "La resolución afecta a una alta autoridad del Estado."
+                ],
+                answer: "El delito ocasionare daño económico al Estado.",
+                feedback: "Correcto. El último párrafo del Artículo 153 establece que la pena se agrava en un tercio si el delito causa daño económico al Estado.",
+                page: 14
+            },
+            {
+                question: "¿Qué principio rige la obligación de todo boliviano de proteger y denunciar actos de corrupción sobre el patrimonio del Estado?",
+                options: [
+                    "Principio de Celeridad.",
+                    "Principio de Suma Qamaña.",
+                    "Principio de Defensa del Patrimonio del Estado.",
+                    "Principio de Cooperación Amplia."
+                ],
+                answer: "Principio de Defensa del Patrimonio del Estado.",
+                feedback: "Correcto. El Artículo 4 define este principio como la obligación constitucional de precautelar y resguardar el patrimonio del Estado, denunciando todo acto de corrupción.",
+                page: 2
+            },
+             {
+                question: "En el delito de 'Uso Indebido de Bienes y Servicios Públicos' (Art. 26), ¿cuál es la pena si el bien sufriere deterioro, destrozos o pereciere?",
+                options: [
+                    "De uno a cuatro años de privación de libertad.",
+                    "Se mantiene la misma pena pero se añade una multa mayor.",
+                    "De tres a ocho años de privación de libertad y reparación del daño.",
+                    "Inhabilitación perpetua para el ejercicio de la función pública."
+                ],
+                answer: "De tres a ocho años de privación de libertad y reparación del daño.",
+                feedback: "Correcto. El segundo párrafo del Artículo 26 agrava la pena a 3-8 años y añade la reparación del daño cuando el uso indebido causa un perjuicio material al bien.",
+                page: 10
+            },
+            {
+                question: "¿Cuál de las siguientes entidades NO forma parte del Consejo Nacional de Lucha Contra la Corrupción, Enriquecimiento Ilícito y Legitimación de Ganancias Ilícitas?",
+                options: [
+                    "Ministerio de Gobierno.",
+                    "Defensoría del Pueblo.",
+                    "Unidad de Investigaciones Financieras.",
+                    "Procuraduría General del Estado."
+                ],
+                answer: "Defensoría del Pueblo.",
+                feedback: "Correcto. El Artículo 6 detalla la composición del Consejo, y aunque la Defensoría del Pueblo es una entidad importante del Estado, no está listada como miembro integrante del mismo.",
+                page: 3
+            },
+            {
+                question: "El delito de 'Legitimación de Ganancias Ilícitas' (Art. 185 Bis) es autónomo. ¿Qué implica esta autonomía?",
+                options: [
+                    "Que solo puede ser investigado por la Unidad de Investigaciones Financieras.",
+                    "Que requiere que el delito de origen (ej. narcotráfico) sea cometido en territorio boliviano.",
+                    "Que puede ser investigado, enjuiciado y sentenciado sin necesidad de una sentencia condenatoria previa sobre el delito que generó las ganancias.",
+                    "Que solo se aplica a ganancias que superen un millón de bolivianos."
+                ],
+                answer: "Que puede ser investigado, enjuiciado y sentenciado sin necesidad de una sentencia condenatoria previa sobre el delito que generó las ganancias.",
+                feedback: "Correcto. El último párrafo del Art. 185 Bis ratifica explícitamente que el delito es autónomo, lo que significa que no se necesita probar judicialmente el delito de origen para procesar y condenar por la legitimación.",
+                page: 16
+            },
+            {
+                question: "Según el Art. 150 Bis, el delito de 'Negociaciones Incompatibles con el Ejercicio de Funciones Públicas' se extiende a particulares como árbitros, peritos y auditores. ¿En qué contexto cometen este delito?",
+                options: [
+                    "Cuando asesoran a empresas que contratan con el Estado.",
+                    "Cuando se interesan y obtienen un beneficio en actos en los que intervienen por razón de su oficio.",
+                    "Cuando omiten declarar sus bienes y rentas.",
+                    "Cuando no pagan sus impuestos correspondientes."
+                ],
+                answer: "Cuando se interesan y obtienen un beneficio en actos en los que intervienen por razón de su oficio.",
+                feedback: "Correcto. El Art. 150 Bis extiende la responsabilidad a estos profesionales cuando se benefician indebidamente de los actos en los que participan debido a su función específica (ej. un perito en una valoración, un síndico en una quiebra).",
+                page: 13
+            },
+            {
+                question: "La modificación al Art. 366 del Código de Procedimiento Penal establece una prohibición específica para la 'Suspensión Condicional de la Pena'. ¿Cuál es?",
+                options: [
+                    "No procede si el condenado es reincidente.",
+                    "No procede en delitos de corrupción.",
+                    "No procede si la pena es mayor a 2 años.",
+                    "No procede si el daño económico no ha sido reparado."
+                ],
+                answer: "No procede en delitos de corrupción.",
+                feedback: "Correcto. El último párrafo del Art. 366 modificado establece de manera explícita que la suspensión condicional de la pena no procede en delitos de corrupción, sin importar el monto de la pena.",
+                page: 19
+            },
+            {
+                question: "El delito de 'Falsedad en la Declaración Jurada de Bienes y Rentas' (Art. 33) se comete por:",
+                options: [
+                    "Presentar la declaración fuera del plazo establecido.",
+                    "Falsear u omitir insertar los datos económicos, financieros o patrimoniales.",
+                    "No actualizar la declaración anualmente.",
+                    "Tener un patrimonio que no corresponde a los ingresos."
+                ],
+                answer: "Falsear u omitir insertar los datos económicos, financieros o patrimoniales.",
+                feedback: "Correcto. El tipo penal del Art. 33 se centra en la acción de falsear u omitir información, que es diferente a la no presentación (Art. 149) o al enriquecimiento ilícito (Art. 27).",
+                page: 11
+            },
+            {
+                question: "De acuerdo con el Artículo 5, ¿la Ley 004 reconoce algún tipo de inmunidad, fuero o privilegio para alguna autoridad?",
+                options: [
+                    "Sí, para altas autoridades de los Órganos del Estado.",
+                    "Sí, para personal diplomático extranjero en Bolivia.",
+                    "No, no reconoce inmunidad, fuero o privilegio alguno, debiendo ser de aplicación preferente.",
+                    "Solo reconoce la inmunidad parlamentaria para delitos cometidos en el ejercicio de sus funciones."
+                ],
+                answer: "No, no reconoce inmunidad, fuero o privilegio alguno, debiendo ser de aplicación preferente.",
+                feedback: "Correcto. El parágrafo II del Artículo 5 es taxativo al señalar que la ley no reconoce inmunidad, fuero o privilegio, y que es de aplicación preferente.",
+                page: 3
+            },
+            {
+                question: "Según el Art. 21, ¿cuál de las siguientes entidades tiene el deber de informar de oficio a la Unidad de Investigaciones Financieras si detecta posibles hechos de corrupción?",
+                options: [
+                    "Únicamente las entidades bancarias y financieras.",
+                    "Solo las notarías de fe pública.",
+                    "Partidos políticos, ONGs, inmobiliarias, joyerías, entre otros.",
+                    "Exclusivamente las empresas públicas estratégicas."
+                ],
+                answer: "Partidos políticos, ONGs, inmobiliarias, joyerías, entre otros.",
+                feedback: "Correcto. El Artículo 21 lista una amplia gama de entidades y sujetos (incisos a-l) que tienen la obligación de informar de oficio a la UIF sobre operaciones sospechosas de corrupción.",
+                page: 7-8
+            },
+            {
+                question: "¿Cuál es la finalidad principal de la Ley 004 según su Artículo 3?",
+                options: [
+                    "Unificar toda la legislación penal boliviana.",
+                    "Crear nuevas entidades burocráticas para el control estatal.",
+                    "Establecer un sistema de delación premiada para todos los delitos.",
+                    "La prevención, acabar con la impunidad, y la recuperación y protección del patrimonio del Estado."
+                ],
+                answer: "La prevención, acabar con la impunidad, y la recuperación y protección del patrimonio del Estado.",
+                feedback: "Correcto. El Artículo 3 resume la finalidad de la ley en tres pilares: prevenir la corrupción, luchar contra la impunidad en estos hechos y proteger/recuperar el patrimonio estatal.",
+                page: 2
+            }
+        ];
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const questionCounter = document.getElementById('question-counter');
+        const scoreEl = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const nextBtn = document.getElementById('next-btn');
+        const finalScore = document.getElementById('final-score');
+        const finalFeedback = document.getElementById('final-feedback');
+        const restartBtn = document.getElementById('restart-btn');
+
+        let shuffledQuestions, currentQuestionIndex, score;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            shuffledQuestions = shuffleArray([...quizData]);
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreEl.textContent = `Puntuación: 0`;
+            
+            setNextQuestion();
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                showQuestion(shuffledQuestions[currentQuestionIndex]);
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            const progressPercentage = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        function showQuestion(question) {
+            questionCounter.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+            questionText.textContent = question.question;
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-btn', 'w-full', 'p-4', 'border-2', 'border-gray-300', 'rounded-lg', 'text-left', 'hover:bg-blue-100', 'hover:border-blue-400');
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackContainer.classList.add('hidden');
+            feedbackContainer.innerHTML = '';
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const correct = selectedBtn.textContent === shuffledQuestions[currentQuestionIndex].answer;
+
+            if (correct) {
+                score += 4;
+                scoreEl.textContent = `Puntuación: ${score}`;
+            }
+
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button.textContent === shuffledQuestions[currentQuestionIndex].answer) {
+                    button.classList.add('correct-answer');
+                } else {
+                    button.classList.add('incorrect-answer');
+                }
+            });
+            
+            showFeedback(correct);
+            nextBtn.classList.remove('hidden');
+
+            // Update progress bar after answering
+            const progressPercentage = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+        
+        function showFeedback(isCorrect) {
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            feedbackContainer.innerHTML = `
+                <p class="font-bold text-lg mb-2">${isCorrect ? '¡Correcto!' : 'Incorrecto.'}</p>
+                <p>${questionData.feedback}</p>
+                <p class="text-sm text-gray-600 mt-2">Referencia: PDF Página ${questionData.page}</p>
+            `;
+            feedbackContainer.classList.remove('hidden');
+            feedbackContainer.classList.add(isCorrect ? 'feedback-correct' : 'feedback-incorrect');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScore.textContent = `${score} / 100`;
+
+            let feedbackText = '';
+            const percentage = (score / 100) * 100;
+            if (percentage >= 90) {
+                feedbackText = '¡Excelente! Tienes un conocimiento profundo y detallado de la Ley 004. ¡Felicidades!';
+            } else if (percentage >= 70) {
+                feedbackText = '¡Muy bien! Demuestras un sólido conocimiento de la ley. Sigue repasando los detalles para perfeccionar tu dominio.';
+            } else if (percentage >= 50) {
+                feedbackText = '¡Buen esfuerzo! Has comprendido los conceptos básicos. Te recomendamos un repaso de los artículos más complejos.';
+            } else {
+                feedbackText = 'Necesitas estudiar más a fondo la Ley 004. ¡No te desanimes! Utiliza este cuestionario como guía para tu preparación.';
+            }
+            finalFeedback.textContent = feedbackText;
+        }
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

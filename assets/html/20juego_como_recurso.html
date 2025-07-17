@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: El Juego como Recurso Didáctico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-button {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+        }
+        .correct {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+        }
+        .incorrect {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+        }
+        .selected {
+            background-color: #3b82f6 !important; /* blue-500 */
+            color: white !important;
+            border-color: #2563eb !important; /* blue-600 */
+        }
+        .progress-bar-fill {
+            transition: width 0.5s ease-in-out;
+        }
+        /* Custom modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 50; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="quiz-container" class="bg-slate-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">Cuestionario Interactivo</h1>
+            <p class="mb-4 text-lg text-slate-300">El Juego como Recurso Didáctico en el Aula de Matemáticas</p>
+            <p class="mb-8 text-slate-400">Pon a prueba tus conocimientos sobre el documento. Son 10 preguntas desafiantes. ¡Mucha suerte!</p>
+            <button id="start-button" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg text-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <div id="question-screen" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-sm font-medium text-sky-400">Pregunta <span id="question-number"></span> de 10</p>
+                    <p class="text-sm font-medium text-slate-400">Puntuación: <span id="score">0</span></p>
+                </div>
+                <div class="w-full bg-slate-700 rounded-full h-2.5 mb-4">
+                    <div id="progress-bar" class="bg-sky-500 h-2.5 rounded-full progress-bar-fill" style="width: 0%"></div>
+                </div>
+                <h2 id="question-text" class="text-xl sm:text-2xl font-semibold mb-6 text-slate-100 min-h-[6rem] flex items-center"></h2>
+            </div>
+
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                </div>
+
+            <div id="feedback-section" class="p-4 rounded-lg mb-6 min-h-[6rem] text-slate-300">
+                </div>
+
+            <button id="next-button" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg text-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 hidden">
+                Siguiente Pregunta
+            </button>
+        </div>
+
+        <div id="results-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">¡Cuestionario Completado!</h2>
+            <p class="text-xl mb-2 text-slate-200">Tu puntuación final es:</p>
+            <p id="final-score" class="text-5xl font-bold mb-6 text-yellow-400"></p>
+            <p id="final-feedback" class="text-lg mb-8 text-slate-300"></p>
+            <button id="restart-button" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg text-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                Intentar de Nuevo
+            </button>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" class="modal">
+        <div class="modal-content bg-slate-700 text-slate-100 shadow-xl">
+            <p id="custom-alert-message" class="mb-4 text-lg"></p>
+            <button id="custom-alert-ok-button" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es una diferencia fundamental o un complemento entre las perspectivas de Piaget y Vygotsky sobre el juego, según el documento?",
+                options: [
+                    "Piaget se enfoca en la asimilación de la realidad por el yo, mientras Vygotsky destaca el juego como una zona de desarrollo potencial y conocimiento de objetos.",
+                    "Ambos autores coinciden en que el juego es exclusivamente una actividad para el desarrollo social, sin impacto en el desarrollo intelectual.",
+                    "Piaget considera el juego estructurado más importante, mientras Vygotsky prioriza el juego libre.",
+                    "Vygotsky critica la idea de Piaget de que el juego ayuda a dominar la realidad, proponiendo que solo la distorsiona."
+                ],
+                answer: 0,
+                feedbackText: "Correcto. Piaget (pág. 8) ve el juego como esencialmente de asimilación de la realidad por el yo. Vygotsky (pág. 9) introduce la idea de un espacio intermedio que supone una zona de desarrollo potencial y menciona que el juego promueve el conocimiento de los objetos.",
+                pageReference: "Págs. 8-9"
+            },
+            {
+                question: "¿Cuál es la esencia del pensamiento de Miguel de Guzmán sobre la matemática y el juego, según se cita en el texto?",
+                options: [
+                    "La matemática es inherentemente seria y el juego solo debe usarse como una recompensa ocasional.",
+                    "El juego y la belleza son elementos accesorios, pero no fundamentales, en el origen de la matemática.",
+                    "Dado que los matemáticos disfrutan jugando y contemplando la belleza en su ciencia, se debería aprender matemáticas a través de estos mismos elementos.",
+                    "La componente lúdica es importante solo en las etapas iniciales del aprendizaje matemático, perdiendo relevancia en niveles avanzados."
+                ],
+                answer: 2,
+                feedbackText: "Correcto. En la página 10, se cita a Miguel de Guzmán: \"¿por qué no tratar de aprender la matemática a través del juego y de la belleza?\". La página 11 refuerza esto con \"La matemática ha sido y es arte y juego...\".",
+                pageReference: "Págs. 10-11"
+            },
+            {
+                question: "El documento enfatiza que \"se puede jugar sin aprender nada\". ¿Cuál es la implicación más importante de esta afirmación para el rol del profesorado?",
+                options: [
+                    "El profesor debe evitar los juegos complejos que puedan llevar a la frustración y a no aprender.",
+                    "El profesor debe seleccionar juegos que sean puramente divertidos, ya que el aprendizaje es secundario.",
+                    "El profesor actúa como un agente orientador crucial, responsable de extraer el potencial de aprendizaje del juego.",
+                    "El profesor debe intervenir mínimamente, permitiendo que el aprendizaje surja espontáneamente del juego libre."
+                ],
+                answer: 2,
+                feedbackText: "Correcto. La página 16 destaca: \"Es importante destacar el papel del profesorado durante el juego como agente orientador de los procesos de aprendizaje... Lo importante es saber sacar partido de las ventajas del juego para el aprendizaje.\"",
+                pageReference: "Pág. 16"
+            },
+            {
+                question: "Al analizar las definiciones de \"juego\" de la Real Academia y la Gran Enciclopedia Larousse, ¿cuál de los siguientes elementos NO es consistentemente identificado como una característica central del juego en ambas?",
+                options: [
+                    "Es una actividad recreativa o que busca diversión.",
+                    "Implica la existencia de reglas a las que atenerse.",
+                    "No busca un fin utilitario directo.",
+                    "Siempre implica una competencia donde se gana o se pierde."
+                ],
+                answer: 3,
+                feedbackText: "Correcto. La definición de la Real Academia (pág. 24) menciona \"en el que se gana o se pierde\", pero la de Larousse (pág. 25) se enfoca en \"divertirse y obtener placer\" sin enfatizar la ganancia/pérdida como universal. La página 26 resume los elementos comunes.",
+                pageReference: "Págs. 24-26"
+            },
+            {
+                question: "El documento establece un paralelismo entre las fases de un juego y las fases de resolución de problemas. ¿Cuál de las siguientes acciones corresponde más directamente a la fase de \"Concebir un plan\" en la resolución de problemas, cuando se aplica al contexto de un juego?",
+                options: [
+                    "Entender cómo se gana y los movimientos permitidos en el juego.",
+                    "Preguntarse si se ha jugado un juego similar y seleccionar posibles estrategias.",
+                    "Determinar qué movimientos de ataque u oposición hacen progresar al jugador.",
+                    "Evaluar si la estrategia seleccionada es la mejor posible después de jugar."
+                ],
+                answer: 1,
+                feedbackText: "Correcto. En la página 32, bajo \"2.- Concebir un plan\", para un juego se lista: \"¿He jugado algún juego similar? Seleccionar posibles estrategias.\"",
+                pageReference: "Pág. 32"
+            },
+            {
+                question: "En el análisis del \"Juego de la Rana\", después de que los alumnos encuentran la secuencia de movimientos (3, 8, 15, 24, 35,...), ¿cuál es el siguiente paso crucial en el proceso de generalización matemática, según el texto?",
+                options: [
+                    "Jugar con un número aún mayor de fichas para confirmar la secuencia.",
+                    "Representar gráficamente los movimientos para encontrar patrones visuales.",
+                    "Buscar una fórmula que generalice el resultado (an=n²+2n) e intentar probarla.",
+                    "Modificar las reglas del juego para explorar nuevas posibilidades."
+                ],
+                answer: 2,
+                feedbackText: "Correcto. La página 44 indica: \"En la siguiente fase deben buscar una fórmula que generalice el resultado e intentar probarla. Hacen la conjetura de que la fórmula buscada es: an=n²+2n.\"",
+                pageReference: "Pág. 44"
+            },
+            {
+                question: "Más allá de la resolución de problemas y sucesiones, ¿cómo se utiliza el \"Juego de la Rana\" para motivar otros contenidos del currículo matemático, según el ejemplo proporcionado?",
+                options: [
+                    "Introduciendo conceptos de probabilidad al analizar los movimientos aleatorios.",
+                    "Aplicando conceptos de geometría como par ordenado, coordenadas y simetría al representar los movimientos.",
+                    "Desarrollando algoritmos de teoría de grafos para encontrar la solución óptima.",
+                    "Explorando la teoría de números a través de las propiedades de la secuencia de movimientos."
+                ],
+                answer: 1,
+                feedbackText: "Correcto. Las páginas 47 y 48 describen cómo al representar los pares ordenados de los movimientos se aplican conceptos como par ordenado, abscisa, ordenada, ejes de coordenadas, y se observan simetrías.",
+                pageReference: "Págs. 47-48"
+            },
+            {
+                question: "En el juego \"Llegar a cien\", ¿qué caracteriza la \"tercera fase de situación de juego simbólico\" que el profesor solicita a los alumnos?",
+                options: [
+                    "Jugar libremente para entender las reglas básicas y la dinámica del juego.",
+                    "Particularizar el juego, simplificándolo para analizar estrategias en casos más sencillos.",
+                    "Hacer una conjetura, describir una regla para ganar siempre y comprobarla, convenciendo a otros de su validez.",
+                    "Modificar las reglas del juego original para crear y explorar nuevas variantes."
+                ],
+                answer: 2,
+                feedbackText: "Correcto. La página 57 describe la tercera fase: \"comienza solicitando a los alumnos y alumnas que hagan una conjetura, que escriban una descripción de una regla que permita ganar siempre la partida y comprueben la regla...\".",
+                pageReference: "Pág. 57"
+            },
+            {
+                question: "El documento resalta múltiples ventajas del uso de juegos. ¿Cuál de las siguientes opciones describe mejor la interconexión entre los beneficios cognitivos y afectivos del juego en el aprendizaje de las matemáticas?",
+                options: [
+                    "Los juegos mejoran principalmente las habilidades de cálculo (cognitivo) y secundariamente reducen la ansiedad (afectivo).",
+                    "Los aspectos lúdicos y de desinhibición (afectivo) son fuente de motivación, lo que facilita la experimentación, investigación y construcción del conocimiento (cognitivo).",
+                    "El principal beneficio cognitivo es la memorización de fórmulas, mientras que el afectivo es la competencia sana.",
+                    "Los juegos son solo una herramienta afectiva para mejorar el ambiente de clase, sin un impacto directo en los procesos cognitivos superiores."
+                ],
+                answer: 1,
+                feedbackText: "Correcto. La página 15 afirma: \"Las implicaciones de tipo emocional, el carácter lúdico... son fuente de motivación... Todo esto puede ser conducido a la construcción del conocimiento...\".",
+                pageReference: "Pág. 15"
+            },
+            {
+                question: "Según el texto, ¿cuál es la percepción o tratamiento que tradicionalmente ha dado el sistema educativo al juego en el contexto del aprendizaje?",
+                options: [
+                    "Lo ha integrado plenamente como una herramienta metodológica fundamental en todas las asignaturas.",
+                    "Lo considera una actividad \"poco seria\" y no adecuada para los procesos de aprendizaje formales en el aula.",
+                    "Lo valora principalmente por su capacidad para desarrollar habilidades físicas, descuidando su potencial cognitivo.",
+                    "Lo promueve activamente, pero solo en los niveles de educación infantil, considerándolo inapropiado para secundaria y superior."
+                ],
+                answer: 1,
+                feedbackText: "Correcto. La página 13 menciona: \"Sin embargo, nuestro sistema educativo lo considera una actividad poco 'seria', no adecuada para los procesos de aprendizaje que tienen lugar en el aula.\"",
+                pageReference: "Pág. 13"
+            }
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answerSelected = false;
+
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const startButton = document.getElementById('start-button');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const scoreEl = document.getElementById('score');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackSectionEl = document.getElementById('feedback-section');
+        
+        const finalScoreEl = document.getElementById('final-score');
+        const finalFeedbackEl = document.getElementById('final-feedback');
+
+        // Custom Alert Modal Elements
+        const customAlertModal = document.getElementById('custom-alert-modal');
+        const customAlertMessage = document.getElementById('custom-alert-message');
+        const customAlertOkButton = document.getElementById('custom-alert-ok-button');
+
+        function showCustomAlert(message) {
+            customAlertMessage.textContent = message;
+            customAlertModal.style.display = 'flex';
+        }
+
+        customAlertOkButton.addEventListener('click', () => {
+            customAlertModal.style.display = 'none';
+        });
+
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startGame() {
+            shuffledQuestions = [...questions];
+            shuffleArray(shuffledQuestions);
+            currentQuestionIndex = 0;
+            score = 0;
+            answerSelected = false;
+            scoreEl.textContent = score;
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            nextButton.classList.add('hidden');
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            answerSelected = false;
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            questionNumberEl.textContent = currentQuestionIndex + 1;
+            questionTextEl.textContent = currentQuestion.question;
+            
+            const progressPercentage = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBarEl.style.width = `${progressPercentage}%`;
+
+            optionsContainerEl.innerHTML = '';
+            feedbackSectionEl.innerHTML = '';
+            feedbackSectionEl.className = 'p-4 rounded-lg mb-6 min-h-[6rem] text-slate-300'; // Reset class
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button', 'w-full', 'bg-slate-700', 'hover:bg-slate-600', 'text-slate-200', 'font-medium', 'py-3', 'px-4', 'rounded-lg', 'text-left', 'border-2', 'border-slate-600');
+                button.addEventListener('click', () => selectAnswer(index, button));
+                optionsContainerEl.appendChild(button);
+            });
+            nextButton.classList.add('hidden');
+        }
+
+        function selectAnswer(selectedIndex, selectedButton) {
+            if (answerSelected) return; // Prevent multiple selections
+            answerSelected = true;
+
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const isCorrect = selectedIndex === currentQuestion.answer;
+
+            // Visually mark all options
+            Array.from(optionsContainerEl.children).forEach((btn, idx) => {
+                btn.disabled = true; // Disable all buttons after an answer
+                if (idx === currentQuestion.answer) {
+                    btn.classList.add('correct');
+                    btn.classList.remove('hover:bg-slate-600', 'bg-slate-700');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.add('incorrect');
+                    btn.classList.remove('hover:bg-slate-600', 'bg-slate-700');
+                } else {
+                     btn.classList.remove('hover:bg-slate-600'); // Keep other non-selected, non-correct as is or slightly dimmed
+                     btn.classList.add('opacity-70');
+                }
+            });
+            
+            // Highlight the selected button specifically if it wasn't correct/incorrect already styled
+            if (!selectedButton.classList.contains('correct') && !selectedButton.classList.contains('incorrect')) {
+                 selectedButton.classList.add('selected');
+            }
+
+
+            if (isCorrect) {
+                score += 10;
+                scoreEl.textContent = score;
+                feedbackSectionEl.innerHTML = `<p class="font-semibold text-green-400">¡Correcto!</p><p>${currentQuestion.feedbackText}</p><p class="text-sm text-slate-400 mt-1">Referencia: ${currentQuestion.pageReference}</p>`;
+                feedbackSectionEl.classList.add('bg-green-900', 'border', 'border-green-700');
+            } else {
+                feedbackSectionEl.innerHTML = `<p class="font-semibold text-red-400">Incorrecto.</p><p>La respuesta correcta era: "${currentQuestion.options[currentQuestion.answer]}"</p><p>${currentQuestion.feedbackText}</p><p class="text-sm text-slate-400 mt-1">Referencia: ${currentQuestion.pageReference}</p>`;
+                feedbackSectionEl.classList.add('bg-red-900', 'border', 'border-red-700');
+            }
+            
+            nextButton.classList.remove('hidden');
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                nextButton.textContent = 'Ver Resultados';
+            } else {
+                nextButton.textContent = 'Siguiente Pregunta';
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            questionScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            finalScoreEl.textContent = `${score} / ${shuffledQuestions.length * 10}`;
+            
+            let feedbackMessage = '';
+            const percentage = (score / (shuffledQuestions.length * 10)) * 100;
+            if (percentage >= 80) {
+                feedbackMessage = "¡Excelente! Tienes un profundo entendimiento del uso de juegos como recurso didáctico. ¡Sigue así!";
+            } else if (percentage >= 50) {
+                feedbackMessage = "¡Buen trabajo! Has captado muchas ideas clave. Hay espacio para profundizar, ¡sigue explorando el tema!";
+            } else {
+                feedbackMessage = "Hay conceptos importantes que revisar. Te animo a releer el documento para afianzar tu comprensión. ¡No te desanimes!";
+            }
+            finalFeedbackEl.textContent = feedbackMessage;
+        }
+
+        startButton.addEventListener('click', startGame);
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex === shuffledQuestions.length - 1 && answerSelected) {
+                 showResults();
+            } else if (answerSelected) {
+                 nextQuestion();
+            } else {
+                showCustomAlert('Por favor, selecciona una respuesta antes de continuar.');
+            }
+        });
+        restartButton.addEventListener('click', startGame);
+
+    </script>
+</body>
+</html>

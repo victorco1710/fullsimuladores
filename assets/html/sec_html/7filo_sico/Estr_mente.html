@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Estructura de la Mente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Verde muy claro para el fondo */
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .question-card {
+            background-color: #d4f5db; /* Verde claro para las tarjetas de pregunta */
+            border-left: 5px solid #34d399; /* Verde más oscuro para el borde izquierdo */
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: #f5faf7; /* Verde aún más claro para los botones */
+            color: #111312; /* Verde texto */
+            border: 2px solid #a7f3d0; /* Borde verde claro */
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+            font-weight: 500;
+        }
+        .option-button:hover:not(.correct):not(.incorrect) {
+            background-color: #75e7b2; /* Verde medio en hover */
+            border-color: #f3faf8;
+            transform: translateY(-2px);
+        }
+        .option-button.correct {
+            background-color: #088d5c; /* Verde fuerte para correcta */
+            color: rgb(239, 248, 248);
+            border-color: #065f46;
+        }
+        .option-button.incorrect {
+            background-color: #ef4444; /* Rojo para incorrecta */
+            color: white;
+            border-color: #991b1b;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .feedback.correct {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .feedback.incorrect {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            padding: 10px 20px;
+            background-color: #10b981; /* Verde principal */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .nav-button:hover {
+            background-color: #059669; /* Verde más oscuro en hover */
+            transform: translateY(-2px);
+        }
+        .nav-button:disabled {
+            background-color: #a7f3d0;
+            cursor: not-allowed;
+        }
+        .results-card {
+            background-color: #ecfdf5;
+            padding: 30px;
+            text-align: center;
+            border-radius: 15px;
+            border: 5px solid #34d399;
+        }
+        .credits {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #4b5563;
+        }
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed; /* Permanece en la posición, incluso si se desplaza la página */
+            z-index: 1000; /* Se sitúa por encima de todo lo demás */
+            left: 0;
+            top: 0;
+            width: 100%; /* Ancho completo */
+            height: 100%; /* Altura completa */
+            overflow: auto; /* Habilita el desplazamiento si es necesario */
+            background-color: rgba(0,0,0,0.4); /* Fondo semi-transparente */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-green-50">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-green-700 mb-8">Cuestionario: Estructura de la Mente</h1>
+
+        <div id="quiz-container">
+            <!-- Las preguntas se cargarán aquí -->
+        </div>
+
+        <div class="navigation-buttons">
+            <button id="prev-button" class="nav-button" disabled>Anterior</button>
+            <button id="next-button" class="nav-button">Siguiente</button>
+            <button id="submit-button" class="nav-button hidden">Finalizar Cuestionario</button>
+        </div>
+
+        <div id="results" class="hidden results-card mt-8">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Resultados del Cuestionario</h2>
+            <p class="text-xl text-gray-800 mb-2">Puntuación Total: <span id="total-score" class="font-bold text-green-600"></span> / 100</p>
+            <p id="overall-feedback" class="text-lg text-gray-700"></p>
+        </div>
+
+        <div class="credits">
+            PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor
+        </div>
+    </div>
+
+    
+    </div>
+
+    <script>
+        // Preguntas del cuestionario con sus opciones, respuesta correcta y página de referencia
+        const questions = [
+            {
+                question: "¿Cuál es la definición de inteligencia propuesta por Howard Gardner en 'Estructuras de la mente'?",
+                options: [
+                    "La capacidad de memorizar grandes cantidades de información.",
+                    "La capacidad de resolver problemas o de crear productos que sean valiosos en uno o más ambientes culturales.",
+                    "La habilidad para adaptarse a nuevas situaciones de forma rápida.",
+                    "El coeficiente intelectual medido por pruebas estandarizadas."
+                ],
+                answer: "La capacidad de resolver problemas o de crear productos que sean valiosos en uno o más ambientes culturales.",
+                page: 11
+            },
+            {
+                question: "¿Qué tipos de inteligencia gozan de 'tantos privilegios en las escuelas hoy en día' según Gardner?",
+                options: [
+                    "Musical y espacial.",
+                    "Cinestesicocorporal y personal.",
+                    "Lingüística y logicomatemática.",
+                    "Naturalista e interpersonal."
+                ],
+                answer: "Lingüística y logicomatemática.",
+                page: 11
+            },
+            {
+                question: "¿Cuál de los siguientes no es un criterio para definir una inteligencia según Gardner?",
+                options: [
+                    "Aislamiento de una facultad como resultado de una lesión cerebral.",
+                    "Susceptibilidad para codificar en un sistema simbólico.",
+                    "Ser altamente correlacionada con todas las demás inteligencias.",
+                    "Tener una historia identificable de desarrollo."
+                ],
+                answer: "Ser altamente correlacionada con todas las demás inteligencias.",
+                page: 11
+            },
+            {
+                question: "¿Qué disciplina antigua propuso que las variaciones en los cráneos reflejan diferencias en el tamaño y forma del cerebro, subordinadas a funciones discretas?",
+                options: [
+                    "Psicología del desarrollo.",
+                    "Neuropsicología.",
+                    "Frenología.",
+                    "Psicometría."
+                ],
+                answer: "Frenología.",
+                page: 36
+            },
+            {
+                question: "¿Quién diseñó las primeras pruebas de inteligencia a principios del siglo XX para identificar a niños con retraso?",
+                options: [
+                    "Francis Galton.",
+                    "Charles Spearman.",
+                    "Alfred Binet.",
+                    "Louis Leon Thurstone."
+                ],
+                answer: "Alfred Binet.",
+                page: 39
+            },
+            {
+                question: "¿Según Piaget, de dónde se deriva todo el conocimiento, especialmente el entendimiento logicomatemático?",
+                options: [
+                    "De la memorización de hechos.",
+                    "De las acciones propias sobre el mundo.",
+                    "De la interacción social con adultos.",
+                    "De la instrucción formal en la escuela."
+                ],
+                answer: "De las acciones propias sobre el mundo.",
+                page: 141
+            },
+            {
+                question: "¿Qué es una característica principal de la inteligencia lingüística ejemplificada por los poetas?",
+                options: [
+                    "La memorización de poemas largos.",
+                    "La sensibilidad a los matices de los significados de una palabra y el dominio de la sintaxis.",
+                    "La habilidad para hablar varios idiomas fluidamente.",
+                    "La capacidad de escribir discursos persuasivos sin preparación."
+                ],
+                answer: "La sensibilidad a los matices de los significados de una palabra y el dominio de la sintaxis.",
+                page: 92
+            },
+            {
+                question: "¿Qué aspecto de la música se menciona que puede existir aparte de toda realización auditiva, siendo un punto de entrada a las experiencias musicales para individuos sordos?",
+                options: [
+                    "El timbre.",
+                    "La melodía.",
+                    "La organización rítmica.",
+                    "La armonía."
+                ],
+                answer: "La organización rítmica.",
+                page: 119
+            },
+            {
+                question: "¿Cuál es una de las características más importantes y menos reemplazables del don del matemático, según el texto?",
+                options: [
+                    "La habilidad para memorizar números primos.",
+                    "La capacidad para realizar cálculos mentales rápidos.",
+                    "La habilidad para formar con destreza largas cadenas de razonamiento.",
+                    "La destreza en el uso de instrumentos de medición."
+                ],
+                answer: "La habilidad para formar con destreza largas cadenas de razonamiento.",
+                page: 150
+            },
+            {
+                question: "¿Qué se requiere para resolver problemas espaciales como la rotación de formas tridimensionales?",
+                options: [
+                    "Habilidad lingüística avanzada.",
+                    "Memoria auditiva aguda.",
+                    "Poder de crear una imagen mental y manipularla.",
+                    "Conocimiento de geometría euclidiana."
+                ],
+                answer: "Poder de crear una imagen mental y manipularla.",
+                page: 182
+            },
+            {
+                question: "¿Qué tipo de inteligencia se asocia con la habilidad para emplear el cuerpo en formas muy diferenciadas y hábiles, tanto para propósitos expresivos como orientados a metas?",
+                options: [
+                    "Inteligencia interpersonal.",
+                    "Inteligencia naturalista.",
+                    "Inteligencia cinestesicocorporal.",
+                    "Inteligencia musical."
+                ],
+                answer: "Inteligencia cinestesicocorporal.",
+                page: 210
+            },
+            {
+                question: "¿Qué es una 'visión distribuida' de la inteligencia, según el libro?",
+                options: [
+                    "La inteligencia es una capacidad única contenida en la cabeza de cada individuo.",
+                    "La inteligencia es resultado de la interacción entre individuos en un grupo.",
+                    "La inteligencia individual es tan inherente a los artefactos y a los individuos que la rodean como al cráneo que la contiene.",
+                    "La inteligencia se distribuye aleatoriamente en la población."
+                ],
+                answer: "La inteligencia individual es tan inherente a los artefactos y a los individuos que la rodean como al cráneo que la contiene.",
+                page: 13
+            },
+            {
+                question: "¿Qué tipo de experiencia se menciona como crucial para el desarrollo normal del sistema visual de un gato, y por extensión, del sistema nervioso en general?",
+                options: [
+                    "Exposición a patrones de luz y movimiento activo en su ambiente.",
+                    "Consumo de una dieta rica en vitaminas.",
+                    "Interacción temprana con otros gatos.",
+                    "Escucha de sonidos de alta frecuencia."
+                ],
+                answer: "Exposición a patrones de luz y movimiento activo en su ambiente.",
+                page: 62
+            },
+            {
+                question: "¿Cuál de las siguientes afirmaciones describe mejor la relación entre las tradiciones de investigación 'dura' (neurológica y genética) y 'moderada' (social y cultural) en el estudio de la inteligencia?",
+                options: [
+                    "Son mutuamente excluyentes y no pueden ambas tener la razón.",
+                    "Son necesariamente opuestas y una debe prevalecer sobre la otra.",
+                    "No se oponen necesariamente; ambas pueden ser correctas en diferentes aspectos de la inteligencia.",
+                    "La tradición 'dura' ha sido completamente refutada por la 'moderada'."
+                ],
+                answer: "No se oponen necesariamente; ambas pueden ser correctas en diferentes aspectos de la inteligencia.",
+                page: 15
+            },
+            {
+                question: "¿Qué fenómeno, observable en el desarrollo temprano, se asocia con un exceso de fibras nerviosas y puede conducir a la aparición pasajera de propiedades funcionales y conductistas asociadas con conexiones excedentes?",
+                options: [
+                    "Atrofia cerebral.",
+                    "Décalage.",
+                    "Fenómenos en forma de U.",
+                    "Plasticidad cerebral tardía."
+                ],
+                answer: "Fenómenos en forma de U.",
+                page: 65
+            },
+            {
+                question: "¿Según Gardner, por qué es preferible hablar de la inteligencia espacial sin relacionarla confusamente con ninguna modalidad sensorial particular?",
+                options: [
+                    "Porque la inteligencia espacial es una construcción puramente abstracta.",
+                    "Porque puede desarrollarse incluso en un individuo ciego.",
+                    "Porque su estudio se basa principalmente en datos auditivos.",
+                    "Porque solo se manifiesta en la manipulación de objetos físicos."
+                ],
+                answer: "Porque puede desarrollarse incluso en un individuo ciego.",
+                page: 181
+            },
+            {
+                question: "¿Qué habilidad motora se menciona como una de las más importantes y restringidas a la especie humana, asociada con el potencial de que una mitad del cuerpo asuma el predominio?",
+                options: [
+                    "La capacidad de correr largas distancias.",
+                    "La destreza manual fina.",
+                    "El predominio (lateralidad).",
+                    "La capacidad de imitar movimientos complejos."
+                ],
+                answer: "El predominio (lateralidad).",
+                page: 215
+            },
+            {
+                question: "¿Qué es una característica distintiva del enfoque de la teoría de las Inteligencias Múltiples, según Gardner, en contraste con otras listas de capacidades?",
+                options: [
+                    "Se basa en correlaciones entre los resultados de las pruebas.",
+                    "Establece los tipos de inteligencia a partir de la síntesis de pruebas científicas acerca del desarrollo, colapso, organización cerebral, evolución, entre otros.",
+                    "Se deriva de observaciones empíricas de estudiantes en una escuela.",
+                    "Prioriza la memoria y la atención como facultades horizontales."
+                ],
+                answer: "Establece los tipos de inteligencia a partir de la síntesis de pruebas científicas acerca del desarrollo, colapso, organización cerebral, evolución, entre otros.",
+                page: 16
+            },
+            {
+                question: "¿Qué tipo de afasia, asociada con la lesión al área de Wernicke, se describe con un lenguaje repleto de formas sintácticas complejas pero a menudo difícil de extraer el mensaje sustantivo?",
+                options: [
+                    "Afasia de Broca.",
+                    "Afasia anómica.",
+                    "Afasia de Wernicke.",
+                    "Afasia global."
+                ],
+                answer: "Afasia de Wernicke.",
+                page: 105
+            },
+            {
+                question: "¿Cuál es una de las virtudes sin la cual no se da la poesía, además de la sensibilidad al significado de las palabras?",
+                options: [
+                    "Dominio de la taquigrafía.",
+                    "Uso exclusivo de rima consonante.",
+                    "Dominio de la sintaxis y apreciación de las funciones pragmáticas del lenguaje.",
+                    "Habilidad para recitar de memoria sin errores."
+                ],
+                answer: "Dominio de la sintaxis y apreciación de las funciones pragmáticas del lenguaje.",
+                page: 93
+            },
+            {
+                question: "¿Qué se ha demostrado que es una de las principales dificultades para los pacientes con daño en el hemisferio derecho en tareas espaciales?",
+                options: [
+                    "Dificultad para hablar con fluidez.",
+                    "Dificultad para comprender el lenguaje escrito.",
+                    "Dificultad para transformar arreglos visuales y anticipar cómo se apreciarán desde distintos puntos de vista.",
+                    "Dificultad para recordar nombres de objetos."
+                ],
+                answer: "Dificultad para transformar arreglos visuales y anticipar cómo se apreciarán desde distintos puntos de vista.",
+                page: 188
+            },
+            {
+                question: "¿Qué ejemplo se utiliza para ilustrar la inteligencia cinestesicocorporal de forma sumamente evolucionada, destacando la habilidad para emplear el cuerpo para propósitos expresivos y orientados a metas?",
+                options: [
+                    "Un ajedrecista profesional.",
+                    "Un compositor de música clásica.",
+                    "Un mimo como Marcel Marceau.",
+                    "Un científico de laboratorio."
+                ],
+                answer: "Un mimo como Marcel Marceau.",
+                page: 210
+            },
+            {
+                question: "¿Qué postula Piaget sobre la aplicación de sus diversas operaciones que descubrió?",
+                options: [
+                    "Que se aplican solo a contenidos lingüísticos.",
+                    "Que se aplican a cualquier forma de contenido.",
+                    "Que están restringidas a la inteligencia musical.",
+                    "Que solo se observan en la resolución de problemas lógicos."
+                ],
+                answer: "Que se aplican a cualquier forma de contenido.",
+                page: 44
+            },
+            {
+                question: "¿Qué tipo de inteligencia se ha demostrado que está más localizada en el hemisferio derecho en la mayoría de los individuos normales diestros, incluida la sensibilidad al tono?",
+                options: [
+                    "Lingüística.",
+                    "Logicomatemática.",
+                    "Espacial.",
+                    "Musical."
+                ],
+                answer: "Musical.",
+                page: 131
+            },
+            {
+                question: "¿Quién, según el texto, afirmaba que 'La pintura es poesía y casi siempre se escribe en verso con ritmos propios', resaltando la cualidad rítmica del dibujo y el color?",
+                options: [
+                    "Leonardo da Vinci.",
+                    "Vincent van Gogh.",
+                    "Pablo Picasso.",
+                    "Paul Cézanne."
+                ],
+                answer: "Pablo Picasso.",
+                page: 202
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(questions.length).fill(null); // Para guardar las respuestas del usuario
+        let questionOrder = [];
+
+        // Función para mezclar un array (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Inicializar el orden de las preguntas y mezclar
+        function initializeQuiz() {
+            questionOrder = Array.from({ length: questions.length }, (_, i) => i);
+            shuffleArray(questionOrder);
+            loadQuestion(currentQuestionIndex);
+        }
+
+        function loadQuestion(index) {
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = ''; // Limpiar el contenido anterior
+
+            if (index >= 0 && index < questions.length) {
+                const questionData = questions[questionOrder[index]];
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+
+                const questionNumber = document.createElement('p');
+                questionNumber.className = 'text-xl font-semibold text-gray-800 mb-4';
+                questionNumber.textContent = `Pregunta ${index + 1} de ${questions.length}`;
+                questionCard.appendChild(questionNumber);
+
+                const questionText = document.createElement('p');
+                questionText.className = 'text-lg text-gray-700 mb-4';
+                questionText.textContent = questionData.question;
+                questionCard.appendChild(questionText);
+
+                const optionsDiv = document.createElement('div');
+                optionsDiv.id = `options-${index}`;
+                questionData.options.forEach((option, i) => {
+                    const button = document.createElement('button');
+                    button.className = 'option-button';
+                    button.textContent = option;
+                    button.onclick = () => selectOption(index, option, questionData.answer, questionData.page);
+                    optionsDiv.appendChild(button);
+                });
+                questionCard.appendChild(optionsDiv);
+
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.id = `feedback-${index}`;
+                feedbackDiv.className = 'feedback hidden';
+                questionCard.appendChild(feedbackDiv);
+
+                quizContainer.appendChild(questionCard);
+
+                // Restaurar la respuesta del usuario si ya fue seleccionada
+                if (userAnswers[index]) {
+                    disableOptions(index);
+                    const selectedButton = Array.from(optionsDiv.children).find(btn => btn.textContent === userAnswers[index].selectedOption);
+                    if (selectedButton) {
+                        if (userAnswers[index].isCorrect) {
+                            selectedButton.classList.add('correct');
+                        } else {
+                            selectedButton.classList.add('incorrect');
+                        }
+                    }
+                    feedbackDiv.classList.remove('hidden');
+                    feedbackDiv.innerHTML = userAnswers[index].feedbackHtml;
+                    feedbackDiv.className = `feedback ${userAnswers[index].isCorrect ? 'correct' : 'incorrect'}`;
+                }
+
+                updateNavigationButtons();
+            } else {
+                showResults();
+            }
+        }
+
+        function selectOption(questionIndex, selectedOption, correctAnswer, page) {
+            const optionsDiv = document.getElementById(`options-${questionIndex}`);
+            const feedbackDiv = document.getElementById(`feedback-${questionIndex}`);
+            let isCorrect = (selectedOption === correctAnswer);
+            let feedbackText = '';
+
+            if (isCorrect) {
+                feedbackText = `¡Correcto! La respuesta está en la página ${page} del PDF.`;
+                feedbackDiv.className = 'feedback correct';
+            } else {
+                feedbackText = `Incorrecto. La respuesta correcta era: "${correctAnswer}". Puedes encontrar la información en la página ${page} del PDF.`;
+                feedbackDiv.className = 'feedback incorrect';
+            }
+            
+            feedbackDiv.innerHTML = feedbackText;
+            feedbackDiv.classList.remove('hidden');
+
+            userAnswers[questionIndex] = {
+                selectedOption: selectedOption,
+                isCorrect: isCorrect,
+                feedbackHtml: feedbackText
+            };
+
+            // Marcar la opción seleccionada
+            Array.from(optionsDiv.children).forEach(button => {
+                if (button.textContent === selectedOption) {
+                    if (isCorrect) {
+                        button.classList.add('correct');
+                    } else {
+                        button.classList.add('incorrect');
+                    }
+                }
+                button.disabled = true; // Deshabilitar todas las opciones después de una selección
+            });
+        }
+
+        function disableOptions(questionIndex) {
+            const optionsDiv = document.getElementById(`options-${questionIndex}`);
+            Array.from(optionsDiv.children).forEach(button => {
+                button.disabled = true;
+            });
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prev-button').disabled = (currentQuestionIndex === 0);
+            document.getElementById('next-button').disabled = (currentQuestionIndex === questions.length - 1 && userAnswers[currentQuestionIndex] !== null);
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                document.getElementById('next-button').classList.add('hidden');
+                document.getElementById('submit-button').classList.remove('hidden');
+                document.getElementById('submit-button').disabled = (userAnswers[currentQuestionIndex] === null);
+            } else {
+                document.getElementById('next-button').classList.remove('hidden');
+                document.getElementById('submit-button').classList.add('hidden');
+            }
+        }
+
+        document.getElementById('prev-button').addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion(currentQuestionIndex);
+            }
+        });
+
+        document.getElementById('next-button').addEventListener('click', () => {
+            if (userAnswers[currentQuestionIndex] === null) {
+                showMessage("Por favor, selecciona una opción antes de pasar a la siguiente pregunta.");
+                return;
+            }
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion(currentQuestionIndex);
+            }
+        });
+
+        document.getElementById('submit-button').addEventListener('click', () => {
+            if (userAnswers[currentQuestionIndex] === null) {
+                showMessage("Por favor, selecciona una opción antes de finalizar el cuestionario.");
+                return;
+            }
+            showResults();
+        });
+
+        function showResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('navigation-buttons').classList.add('hidden');
+            document.getElementById('prev-button').classList.add('hidden');
+            document.getElementById('next-button').classList.add('hidden');
+            document.getElementById('submit-button').classList.add('hidden');
+
+            score = 0;
+            userAnswers.forEach(answer => {
+                if (answer && answer.isCorrect) {
+                    score += 4;
+                }
+            });
+
+            document.getElementById('total-score').textContent = score;
+            const overallFeedback = document.getElementById('overall-feedback');
+            if (score >= 90) {
+                overallFeedback.textContent = "¡Excelente trabajo! Has demostrado un conocimiento profundo del tema.";
+                overallFeedback.classList.add('text-green-600');
+            } else if (score >= 70) {
+                overallFeedback.textContent = "¡Muy bien! Tienes un buen entendimiento de las ideas clave.";
+                overallFeedback.classList.add('text-green-500');
+            } else if (score >= 50) {
+                overallFeedback.textContent = "Necesitas repasar algunas áreas, pero vas por buen camino.";
+                overallFeedback.classList.add('text-yellow-600');
+            } else {
+                overallFeedback.textContent = "Te sugiero revisar el documento para mejorar tu comprensión.";
+                overallFeedback.classList.add('text-red-600');
+            }
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        function showMessage(message) {
+            const modal = document.getElementById('messageModal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
+        // Iniciar el cuestionario al cargar la página
+        initializeQuiz();
+    </script>
+</body>
+</html>

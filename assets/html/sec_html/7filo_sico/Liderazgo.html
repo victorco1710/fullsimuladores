@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Liderazgo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #334155;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        .question-card {
+            background-color: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            background-color: #cbd5e1;
+            color: #1e293b;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .option-button:hover:not(.correct):not(.incorrect):not(:disabled) {
+            background-color: #94a3b8;
+            transform: translateY(-2px);
+        }
+        .option-button:disabled {
+            cursor: not-allowed;
+        }
+        .option-button.correct {
+            background-color: #bbf7d0; /* green-200 */
+            border-color: #22c55e; /* green-500 */
+            color: #166534; /* green-900 */
+            font-weight: 600;
+        }
+        .option-button.incorrect {
+            background-color: #fecaca; /* red-200 */
+            border-color: #ef4444; /* red-500 */
+            color: #7f1d1d; /* red-900 */
+            font-weight: 600;
+        }
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            word-wrap: break-word;
+        }
+        .feedback.correct {
+            background-color: #d1fae5; /* green-100 */
+            color: #065f46; /* green-700 */
+        }
+        .feedback.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            color: #991b1b; /* red-700 */
+        }
+        .navigation-buttons button {
+            padding: 0.75rem 1.5rem;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            margin: 0 0.5rem;
+        }
+        .navigation-buttons button:hover {
+            background-color: #1d4ed8;
+        }
+        .navigation-buttons button:disabled {
+            background-color: #93c5fd; /* blue-300 */
+            cursor: not-allowed;
+        }
+        .final-results {
+            margin-top: 2rem;
+            padding: 2rem;
+            background-color: #ecfeff; /* cyan-50 */
+            border: 2px solid #06b6d4; /* cyan-500 */
+            border-radius: 1rem;
+        }
+        .final-results h2 {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700;
+            color: #0e7490; /* cyan-700 */
+            margin-bottom: 1rem;
+        }
+        .final-results p {
+            font-size: 1.25rem; /* text-xl */
+            color: #155e75; /* cyan-800 */
+            margin-bottom: 0.5rem;
+        }
+        .credits {
+            margin-top: 2rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div id="app" class="quiz-container">
+        <h1 class="text-4xl font-bold mb-8 text-blue-800">Cuestionario de Liderazgo</h1>
+
+        <div id="quiz-screen">
+            <div id="question-area" class="question-card">
+                <p id="question-text" class="text-lg font-semibold mb-4"></p>
+                <div id="options-container"></div>
+            </div>
+            <div id="feedback-area" class="feedback hidden"></div>
+            <div class="navigation-buttons mt-6 flex justify-between">
+                <button id="prev-button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50" disabled>Anterior</button>
+                <button id="next-button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Siguiente</button>
+            </div>
+            <p class="text-sm text-gray-500 mt-4">Pregunta <span id="current-question-number">1</span> de <span id="total-questions">25</span></p>
+            <div class="credits">PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor</div>
+        </div>
+
+        <div id="results-screen" class="final-results hidden">
+            <h2>Resultados del Cuestionario</h2>
+            <p>Puntuación Total: <span id="final-score"></span> puntos / 100</p>
+            <p id="general-feedback"></p>
+            <button id="restart-button" class="mt-6 px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">Reiniciar Cuestionario</button>
+            <div class="credits">PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Desarrollado por Victor</div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el concepto clave que se propone como la condición indispensable para ejercer el liderazgo, más allá del coeficiente intelectual y las habilidades técnicas?",
+                options: [
+                    { text: "La capacidad de memorización", isCorrect: false },
+                    { text: "La inteligencia emocional", isCorrect: true },
+                    { text: "La experiencia laboral acumulada", isCorrect: false },
+                    { text: "El nivel educativo formal", isCorrect: false }
+                ],
+                feedback: "La inteligencia emocional es la condición indispensable para un liderazgo efectivo, según Daniel Goleman. Sin ella, las otras capacidades no son suficientes. (Página 21)",
+                page: 21
+            },
+            {
+                question: "¿Qué porcentaje de las competencias que distinguen a los trabajadores estrella en puestos de liderazgo son atribuibles a factores de inteligencia emocional, según las investigaciones mencionadas en el texto?",
+                options: [
+                    { text: "Alrededor del 50%", isCorrect: false },
+                    { text: "Casi el 70%", isCorrect: false },
+                    { text: "Casi el 90%", isCorrect: true },
+                    { text: "Menos del 30%", isCorrect: false }
+                ],
+                feedback: "Casi el 90% de las competencias que distinguen a los líderes sobresalientes se basan en la inteligencia emocional. (Página 23)",
+                page: 23
+            },
+            {
+                question: "¿Cuál de las siguientes no es una de las cuatro dimensiones principales de la inteligencia emocional que se mencionan en el texto?",
+                options: [
+                    { text: "Autoconciencia", isCorrect: false },
+                    { text: "Autorregulación", isCorrect: false },
+                    { text: "Conciencia política", isCorrect: true },
+                    { text: "Empatía", isCorrect: false }
+                ],
+                feedback: "Las cuatro dimensiones son autoconciencia, autorregulación, empatía y capacidad social (o gestión de relaciones). La conciencia política no es una de ellas. (Página 22)",
+                page: 22
+            },
+            {
+                question: "¿Cómo se manifiesta la autoconciencia en un líder, según el texto?",
+                options: [
+                    { text: "Como una tendencia a culpar a los demás por los errores.", isCorrect: false },
+                    { text: "Como franqueza y capacidad de autoevaluación realista.", isCorrect: true },
+                    { text: "Como un exceso de optimismo irrealista.", isCorrect: false },
+                    { text: "Como la capacidad de ocultar las propias debilidades.", isCorrect: false }
+                ],
+                feedback: "La autoconciencia se manifiesta como franqueza y capacidad de autoevaluación realista. Los líderes autoconscientes reconocen sus errores y limitaciones. (Página 24)",
+                page: 24
+            },
+            {
+                question: "¿Cuál es la principal ventaja de la autorregulación para los líderes?",
+                options: [
+                    { text: "Permite ignorar los sentimientos de los subordinados.", isCorrect: false },
+                    { text: "Ayuda a tomar decisiones impulsivas rápidamente.", isCorrect: false },
+                    { text: "Fomenta la integridad y la capacidad de avanzar con los cambios.", isCorrect: true },
+                    { text: "Garantiza que siempre se obtenga el máximo beneficio a corto plazo.", isCorrect: false }
+                ],
+                feedback: "La autorregulación fomenta la integridad, la confianza y la capacidad de adaptarse a la ambigüedad y el cambio. (Página 27)",
+                page: 27
+            },
+            {
+                question: "¿Qué indica la investigación sobre la motivación en líderes, según el texto?",
+                options: [
+                    { text: "Que están motivados principalmente por el dinero y la posición social.", isCorrect: false },
+                    { text: "Que extraen su motivación de un deseo arraigado de lograr resultados por satisfacción personal.", isCorrect: true },
+                    { text: "Que prefieren el status quo y evitan los desafíos creativos.", isCorrect: false },
+                    { text: "Que se desaniman fácilmente ante los contratiempos.", isCorrect: false }
+                ],
+                feedback: "Los líderes motivados extraen su impulso de un deseo profundo de obtener resultados por la satisfacción de haberlos logrado, más allá de las recompensas externas. (Página 29)",
+                page: 29
+            },
+            {
+                question: "¿Por qué es la empatía especialmente importante hoy en día en el liderazgo?",
+                options: [
+                    { text: "Porque permite a los líderes ser sensibleros y complacer a todo el mundo.", isCorrect: false },
+                    { text: "Por el aumento de equipos, la globalización y la necesidad de retener buenos trabajadores.", isCorrect: true },
+                    { text: "Porque fomenta la toma de decisiones impulsivas.", isCorrect: false },
+                    { text: "Debido a que reduce la necesidad de comunicación directa.", isCorrect: false }
+                ],
+                feedback: "La empatía es crucial por el incremento de equipos, el avance de la globalización y la creciente necesidad de retener a los buenos trabajadores. (Página 31)",
+                page: 31
+            },
+            {
+                question: "¿Qué no es la capacidad social según el texto?",
+                options: [
+                    { text: "Una simpatía con un objetivo determinado.", isCorrect: false },
+                    { text: "La culminación de las demás dimensiones de la inteligencia emocional.", isCorrect: false },
+                    { text: "Una simple cuestión de simpatía sin propósito.", isCorrect: true },
+                    { text: "La habilidad para gestionar relaciones y hacer avanzar a los demás.", isCorrect: false }
+                ],
+                feedback: "La capacidad social no es una simple cuestión de simpatía, sino una simpatía con un objetivo determinado: hacer avanzar a los demás en la dirección deseada. (Página 33)",
+                page: 33
+            },
+            {
+                question: "¿Cuál es el estilo de liderazgo más eficaz, según la investigación, que mejora todos los aspectos del clima laboral?",
+                options: [
+                    { text: "El estilo ejemplarizante", isCorrect: false },
+                    { text: "El estilo coach", isCorrect: false },
+                    { text: "El estilo autoritario (o visionario)", isCorrect: true },
+                    { text: "El estilo coercitivo", isCorrect: false }
+                ],
+                feedback: "El estilo autoritario (o visionario) es el más eficaz, ya que mejora todos los aspectos del clima laboral. (Página 40)",
+                page: 40
+            },
+            {
+                question: "¿En qué situaciones el estilo coercitivo puede ser útil, aunque deba usarse con mucho cuidado?",
+                options: [
+                    { text: "Para fomentar la innovación y la responsabilidad.", isCorrect: false },
+                    { text: "Para aumentar la moral y el compromiso del equipo.", isCorrect: false },
+                    { text: "Durante un cambio radical de rumbo, una adquisición hostil o una emergencia real.", isCorrect: true },
+                    { text: "Para mejorar la comunicación y la armonía entre los trabajadores.", isCorrect: false }
+                ],
+                feedback: "El estilo coercitivo es adecuado en situaciones de crisis o cambio radical, pero debe usarse con extrema precaución. (Página 51)",
+                page: 51
+            },
+            {
+                question: "¿Qué aspecto del liderazgo se destaca como el arte de convencer a la gente de que colabore para alcanzar un objetivo común?",
+                options: [
+                    { text: "La dominación", isCorrect: false },
+                    { text: "El liderazgo", isCorrect: true },
+                    { text: "La coerción", isCorrect: false },
+                    { text: "La manipulación", isCorrect: false }
+                ],
+                feedback: "El liderazgo se define como el arte de convencer a la gente para que colabore en un objetivo común, no como dominación. (Página 13)",
+                page: 13
+            },
+            {
+                question: "¿Qué efecto tiene el estrés en la capacidad cognitiva de las personas, según el texto?",
+                options: [
+                    { text: "La mejora de la concentración.", isCorrect: false },
+                    { text: "El aumento de la creatividad.", isCorrect: false },
+                    { text: "La incapacitación de las zonas prefrontales del cerebro (donde se ubican la comprensión, concentración, aprendizaje y creatividad).", isCorrect: true },
+                    { text: "La optimización del aprendizaje.", isCorrect: false }
+                ],
+                feedback: "El estrés y la sobrecarga incapacitan las zonas prefrontales del cerebro, afectando la comprensión, concentración, aprendizaje y creatividad. (Página 8)",
+                page: 8
+            },
+            {
+                question: "¿Cuál es la peor forma de motivar a alguien, según el capítulo 'El arte de la crítica'?",
+                options: [
+                    { text: "Elogiar en exceso.", isCorrect: false },
+                    { text: "Criticar de forma concreta y con una solución.", isCorrect: false },
+                    { text: "Lanzar críticas generalizadas e indiscriminadas con tono agresivo, sarcástico e irritado.", isCorrect: true },
+                    { text: "Retrasar los comentarios sobre el rendimiento.", isCorrect: false }
+                ],
+                feedback: "La peor forma de motivar es lanzar críticas destructivas, generalizadas e indiscriminadas, que atacan personalmente y no ofrecen soluciones. (Página 15)",
+                page: 15
+            },
+            {
+                question: "¿Qué característica esencial de la crítica con mano izquierda se menciona?",
+                options: [
+                    { text: "Atribuir una mala actuación a un rasgo de la personalidad del individuo.", isCorrect: false },
+                    { text: "Centrarse en lo que ha hecho el individuo y en lo que puede hacer, en lugar de en su personalidad.", isCorrect: true },
+                    { text: "Ser ambigua para evitar herir sentimientos.", isCorrect: false },
+                    { text: "Evitar dar soluciones para que el individuo las descubra por sí mismo.", isCorrect: false }
+                ],
+                feedback: "La crítica con mano izquierda se centra en la acción del individuo y en cómo mejorar, no en su carácter personal. (Página 17)",
+                page: 17
+            },
+            {
+                question: "¿Qué estilo de liderazgo se centra en la gente, valora a los individuos y sus emociones por encima de las tareas y los objetivos?",
+                options: [
+                    { text: "El estilo autoritario", isCorrect: false },
+                    { text: "El estilo coercitivo", isCorrect: false },
+                    { text: "El estilo conciliador", isCorrect: true },
+                    { text: "El estilo ejemplarizante", isCorrect: false }
+                ],
+                feedback: "El estilo conciliador se enfoca en las personas, valorando sus emociones y buscando la armonía y la lealtad. (Página 44)",
+                page: 44
+            },
+            {
+                question: "¿Cuál es la principal desventaja del estilo democrático de liderazgo?",
+                options: [
+                    { text: "Fomenta la flexibilidad y la responsabilidad.", isCorrect: false },
+                    { text: "Puede conducir a reuniones interminables sin consenso ni dirección clara.", isCorrect: true },
+                    { text: "Genera confianza y respeto en el equipo.", isCorrect: false },
+                    { text: "Es ideal cuando el líder tiene una visión muy clara y no necesita opiniones.", isCorrect: false }
+                ],
+                feedback: "El estilo democrático puede llevar a reuniones interminables y falta de dirección si no se gestiona bien. (Página 47)",
+                page: 47
+            },
+            {
+                question: "¿Por qué el estilo ejemplarizante tiende a destruir el clima laboral, a pesar de sus características aparentemente admirables?",
+                options: [
+                    { text: "Porque fomenta la innovación y la experimentación.", isCorrect: false },
+                    { text: "Porque el líder comunica claramente las pautas y confía en los demás.", isCorrect: false },
+                    { text: "Porque los trabajadores se sienten abrumados, desmoralizados y sin confianza en sus iniciativas.", isCorrect: true },
+                    { text: "Porque promueve el compromiso y el sentido de importancia individual.", isCorrect: false }
+                ],
+                feedback: "El estilo ejemplarizante puede ser destructivo porque las altas exigencias abruman a los trabajadores y no se sienten confiados. (Página 48)",
+                page: 48
+            },
+            {
+                question: "¿Qué tipo de líderes logran el mejor clima laboral y el mejor rendimiento, según las investigaciones?",
+                options: [
+                    { text: "Los que se basan exclusivamente en un solo estilo de liderazgo.", isCorrect: false },
+                    { text: "Los que dominan cuatro o más estilos (autoritario, democrático, conciliador y coach).", isCorrect: true },
+                    { text: "Los que solo utilizan el estilo coercitivo en todas las situaciones.", isCorrect: false },
+                    { text: "Los que se enfocan únicamente en el coeficiente intelectual y la pericia técnica.", isCorrect: false }
+                ],
+                feedback: "Los líderes más eficientes dominan y cambian con flexibilidad entre al menos cuatro estilos: autoritario, democrático, conciliador y coach. (Página 51)",
+                page: 51
+            },
+            {
+                question: "¿Qué es el coeficiente intelectual colectivo, según el texto?",
+                options: [
+                    { text: "La suma de las capacidades técnicas de todos los miembros del equipo.", isCorrect: false },
+                    { text: "El promedio de los coeficientes intelectuales individuales de un equipo.", isCorrect: false },
+                    { text: "La suma total de las mejores aptitudes de todos los miembros del equipo en su máxima capacidad.", isCorrect: true },
+                    { text: "La habilidad para manipular a los demás en un equipo.", isCorrect: false }
+                ],
+                feedback: "El coeficiente intelectual colectivo es la suma de las mejores aptitudes de todos los miembros del equipo en su máxima capacidad. (Página 8)",
+                page: 8
+            },
+            {
+                question: "¿Cuál es la función esencial del líder en relación con la 'zona de flujo' cerebral?",
+                options: [
+                    { text: "Mantener a la gente bajo estrés constante.", isCorrect: false },
+                    { text: "Ayudar a la gente a alcanzar la zona cerebral donde puede dar lo mejor de sí y a permanecer en ella.", isCorrect: true },
+                    { text: "Ignorar el estado emocional de los empleados.", isCorrect: false },
+                    { text: "Asegurarse de que el trabajo sea siempre rutinario y predecible.", isCorrect: false }
+                ],
+                feedback: "La labor esencial del líder es ayudar a la gente a alcanzar y permanecer en la zona cerebral donde pueden rendir al máximo (zona de flujo). (Página 8)",
+                page: 8
+            },
+            {
+                question: "¿Qué se requiere para desarrollar la inteligencia emocional en un líder?",
+                options: [
+                    { text: "Nacer con ella, ya que no puede aprenderse.", isCorrect: false },
+                    { text: "Exclusivamente un alto coeficiente intelectual.", isCorrect: false },
+                    { text: "Tiempo, compromiso y un proceso de aprendizaje sistemático.", isCorrect: true },
+                    { text: "Evitar cualquier crítica constructiva.", isCorrect: false }
+                ],
+                feedback: "La inteligencia emocional puede aprenderse y desarrollarse a lo largo de la vida con tiempo, compromiso y un proceso de aprendizaje sistemático. (Página 9 y 35)",
+                page: 9
+            },
+            {
+                question: "¿Cómo se define la 'reacción' (feedback) en el contexto empresarial, según el texto?",
+                options: [
+                    { text: "Un ataque personal para corregir errores.", isCorrect: false },
+                    { text: "El intercambio de información sobre el funcionamiento de una parte del sistema que afecta a todas las demás.", isCorrect: true },
+                    { text: "La evitación de problemas y conflictos.", isCorrect: false },
+                    { text: "Un elogio indiscriminado para motivar.", isCorrect: false }
+                ],
+                feedback: "La reacción (feedback) es el intercambio de información vital para que los individuos sepan si su trabajo va bien y si necesitan ajustes. (Página 14)",
+                page: 14
+            },
+            {
+                question: "¿Cuál es una de las recomendaciones para ofrecer una crítica con mano izquierda?",
+                options: [
+                    { text: "Ser generalizado y ambiguo.", isCorrect: false },
+                    { text: "Centrarse en el carácter de la persona, no en sus acciones.", isCorrect: false },
+                    { text: "Ser concreto y ofrecer una solución.", isCorrect: true },
+                    { text: "Transmitirla por escrito para evitar el contacto personal.", isCorrect: false }
+                ],
+                feedback: "Una crítica efectiva debe ser concreta, centrarse en el comportamiento y ofrecer una solución al problema. (Página 18)",
+                page: 18
+            },
+            {
+                question: "¿Qué estilo de liderazgo tiene el riesgo de permitir que un mal rendimiento quede sin corregir si se usa en solitario, por centrarse exclusivamente en el elogio?",
+                options: [
+                    { text: "El estilo coercitivo", isCorrect: false },
+                    { text: "El estilo autoritario", isCorrect: false },
+                    { text: "El estilo conciliador", isCorrect: true },
+                    { text: "El estilo coach", isCorrect: false }
+                ],
+                feedback: "El estilo conciliador, si se utiliza en solitario, puede pasar por alto el bajo rendimiento al enfocarse demasiado en el elogio y la armonía. (Página 45)",
+                page: 45
+            },
+            {
+                question: "¿Cuál es el propósito del estilo 'coach' de liderazgo?",
+                options: [
+                    { text: "Exigir sumisión inmediata.", isCorrect: false },
+                    { text: "Identificar y reemplazar rápidamente a los que rinden poco.", isCorrect: false },
+                    { text: "Contribuir al desarrollo de la gente para el futuro, identificando sus puntos fuertes y débiles y ayudándoles a alcanzar objetivos de desarrollo.", isCorrect: true },
+                    { text: "Mantener un control estricto sobre cada detalle del trabajo de los subordinados.", isCorrect: false }
+                ],
+                feedback: "El estilo coach se enfoca en el desarrollo a largo plazo de los subordinados, ayudándoles a identificar y mejorar sus habilidades. (Página 42)",
+                page: 42
+            }
+        ].sort(() => Math.random() - 0.5); // Shuffle questions
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const userAnswers = new Array(questions.length).fill(null); // To store user's selected option index for each question
+        const questionStatus = new Array(questions.length).fill(null); // To store if question was answered correctly or incorrectly
+
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackArea = document.getElementById('feedback-area');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const currentQuestionNumberSpan = document.getElementById('current-question-number');
+        const totalQuestionsSpan = document.getElementById('total-questions');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const finalScoreSpan = document.getElementById('final-score');
+        const generalFeedbackParagraph = document.getElementById('general-feedback');
+        const restartButton = document.getElementById('restart-button');
+
+        totalQuestionsSpan.textContent = questions.length;
+
+        function loadQuestion() {
+            const questionData = questions[currentQuestionIndex];
+            questionText.textContent = questionData.question;
+            optionsContainer.innerHTML = '';
+            feedbackArea.classList.add('hidden');
+            feedbackArea.className = 'feedback hidden'; // Reset classes
+
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option.text;
+                button.classList.add('option-button');
+                button.dataset.index = index;
+                button.onclick = () => selectOption(index);
+                optionsContainer.appendChild(button);
+
+                // If user has already answered this question, show their previous selection and feedback
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    if (index === userAnswers[currentQuestionIndex]) {
+                        button.classList.add(questionStatus[currentQuestionIndex]);
+                    }
+                    button.disabled = true; // Disable all buttons once answered
+                }
+            });
+
+            // Show feedback if already answered
+            if (questionStatus[currentQuestionIndex] !== null) {
+                showFeedback(questionData, questionData.options[userAnswers[currentQuestionIndex]].isCorrect);
+            }
+
+            updateNavigationButtons();
+            currentQuestionNumberSpan.textContent = currentQuestionIndex + 1;
+        }
+
+        function selectOption(selectedIndex) {
+            const questionData = questions[currentQuestionIndex];
+            const isCorrect = questionData.options[selectedIndex].isCorrect;
+
+            // Store user's answer
+            userAnswers[currentQuestionIndex] = selectedIndex;
+
+            // Disable all options for the current question
+            Array.from(optionsContainer.children).forEach((button, index) => {
+                button.disabled = true;
+                if (index === selectedIndex) {
+                    button.classList.add(isCorrect ? 'correct' : 'incorrect');
+                } else if (questionData.options[index].isCorrect) {
+                    // Highlight the correct answer if the user chose incorrectly
+                    button.classList.add('correct');
+                }
+            });
+
+            // Store status
+            questionStatus[currentQuestionIndex] = isCorrect ? 'correct' : 'incorrect';
+
+            if (isCorrect) {
+                score += 4; // Each question is worth 4 points
+            }
+
+            showFeedback(questionData, isCorrect);
+        }
+
+        function showFeedback(questionData, isCorrect) {
+            feedbackArea.classList.remove('hidden');
+            feedbackArea.textContent = questionData.feedback;
+            feedbackArea.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+
+        function updateNavigationButtons() {
+            prevButton.disabled = currentQuestionIndex === 0;
+            nextButton.disabled = false; // Always enabled unless it's the last question and not answered
+            if (currentQuestionIndex === questions.length - 1) {
+                nextButton.textContent = 'Ver Resultados';
+            } else {
+                nextButton.textContent = 'Siguiente';
+            }
+        }
+
+        prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            finalScoreSpan.textContent = score;
+
+            let generalFeedback = "";
+            if (score >= 90) {
+                generalFeedback = "¡Excelente! Has demostrado un dominio excepcional de los conceptos clave sobre liderazgo y inteligencia emocional. Eres un verdadero líder.";
+            } else if (score >= 70) {
+                generalFeedback = "¡Muy bien! Tienes un buen conocimiento de los principios de liderazgo y la inteligencia emocional. ¡Sigue practicando para alcanzar la excelencia!";
+            } else if (score >= 50) {
+                generalFeedback = "Necesitas reforzar algunos conceptos. Revisa el documento para comprender mejor las ideas clave y mejorar tu puntuación.";
+            } else {
+                generalFeedback = "Es un buen comienzo. Te sugiero que leas el documento con más detenimiento para familiarizarte con los conceptos fundamentales de liderazgo e inteligencia emocional.";
+            }
+            generalFeedbackParagraph.textContent = generalFeedback;
+        }
+
+        restartButton.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers.fill(null);
+            questionStatus.fill(null);
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            questions.sort(() => Math.random() - 0.5); // Re-shuffle questions for a new game
+            loadQuestion();
+        });
+
+        // Initial load
+        loadQuestion();
+    </script>
+</body>
+</html>

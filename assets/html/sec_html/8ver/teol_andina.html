@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Teología Andina</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 0.8rem;
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn.correct {
+            background-color: #10B981 !important; /* green-500 */
+            color: white !important;
+            border-color: #059669 !important; /* green-600 */
+        }
+        .option-btn.incorrect {
+            background-color: #EF4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #DC2626 !important; /* red-600 */
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+        .feedback-animation {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8 m-4">
+        
+        <div id="quiz-container">
+            <div class="mb-6">
+                <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-900">Cuestionario de Teología Andina</h1>
+                <p class="text-center text-gray-500 mt-2">Basado en "La Teología Andina como realidad y proyecto" de Josef Estermann.</p>
+            </div>
+
+            <div id="question-area" class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="question-counter" class="text-lg font-semibold text-blue-700"></h2>
+                    <p id="score" class="text-lg font-semibold text-gray-700">Puntuación: 0</p>
+                </div>
+                <p id="question-text" class="text-lg text-gray-800 leading-relaxed"></p>
+            </div>
+            
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Las opciones se generarán aquí -->
+            </div>
+
+            <div id="feedback-area" class="mt-6 min-h-[80px]">
+                <!-- La retroalimentación se mostrará aquí -->
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button id="next-btn" class="hidden bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300">Siguiente</button>
+            </div>
+        </div>
+
+        <div id="results-container" class="hidden text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">¡Cuestionario completado!</h2>
+            <p class="text-xl text-gray-700 mb-2">Tu puntuación final es:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-blue-600 mb-6"></p>
+            <p id="final-feedback" class="text-lg text-gray-800 mb-8 p-4 bg-blue-50 rounded-lg"></p>
+            <button id="restart-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition duration-300">Intentar de nuevo</button>
+        </div>
+
+    </div>
+
+    <footer class="footer bg-gray-800 text-white">
+        PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor
+    </footer>
+
+    <script>
+        // --- BANCO DE PREGUNTAS ---
+        const allQuestions = [
+            {
+                question: "¿En qué contexto cultural surge el concepto de 'teología' según el texto?",
+                options: ["Cultura semita oriental", "Mundo cultural grecorromano", "Imperio Persa", "Antiguo Egipto"],
+                answer: 1,
+                feedback: "Correcto. El concepto 'teología' surge en el mundo cultural grecorromano como respuesta a los desafíos de la filosofía helenística y la religión del imperio romano.",
+                page: 1
+            },
+            {
+                question: "¿Cuál fue el propósito inicial de la teología cristiana según el autor?",
+                options: ["Expandir el imperio", "Crear nuevos rituales", "Servir como 'apología' o defensa racional de la fe", "Traducir textos antiguos"],
+                answer: 2,
+                feedback: "Correcto. La teología cristiana surgió como 'apología', una defensa racional de la fe frente a la ortodoxia judía, la religión oficial romana y la filosofía helenística.",
+                page: 2
+            },
+            {
+                question: "¿Qué conceptos, ajenos a las culturas bíblicas, entraron al vocabulario teológico cristiano debido a la 'helenización'?",
+                options: ["Pecado, gracia y redención", "Profecía, milagro y oración", "Reino, pueblo y alianza", "Persona, esencia y naturaleza"],
+                answer: 3,
+                feedback: "Correcto. Conceptos como 'persona', 'trascendencia', 'esencia' y 'naturaleza' son de origen grecorromano y se integraron en la formulación del dogma cristiano.",
+                page: 3
+            },
+            {
+                question: "Según el texto, la absolutización del contexto grecorromano llevó a una 'helenización' radical de la fe cristiana. ¿Qué implicó esto?",
+                options: ["La fe se volvió más accesible para todos", "Conceptos culturalmente relativos se convirtieron en contenidos absolutos de la fe", "Se abandonaron todas las prácticas judías", "La teología se centró exclusivamente en la figura de María"],
+                answer: 1,
+                feedback: "Correcto. El texto argumenta que lo que fue un proceso culturalmente relativo (la inculturación helénica) se convirtió en contenido necesario y absoluto de la fe cristiana.",
+                page: 3
+            },
+            {
+                question: "La campaña de 'extirpación de idolatrías' en la región andina fue una correa de transmisión para:",
+                options: ["Promover el arte local", "Fomentar el diálogo interreligioso", "Hacer valer la teología occidental escolástica-renacentista", "Proteger las creencias indígenas"],
+                answer: 2,
+                feedback: "Correcto. El autor afirma que esta campaña no solo buscaba imponer la fe cristiana, sino también la teología occidental, que no toleraba otras formas culturales de expresar la fe.",
+                page: 4
+            },
+            {
+                question: "Para el Vaticano, según Estermann, ¿cuáles son dos de las grandes 'amenazas' teológicas actuales?",
+                options: ["La teología de la prosperidad y el ateísmo", "La 'teología india' de América Latina y la 'teología de la India' inclusivista", "El misticismo oriental y la teología protestante", "La teología clásica y la teología medieval"],
+                answer: 1,
+                feedback: "Correcto. El texto menciona explícitamente que la 'teología india' de América Latina y la 'teología de la India' (por su inclusivismo) son vistas como grandes 'amenazas' teológicas.",
+                page: 5
+            },
+            {
+                question: "¿Cómo se clasifica la 'teología andina' en el texto?",
+                options: ["Como una teología del genitivo (ej. 'teología de la gracia')", "Como una 'teología adjetiva' que se refiere al contexto", "Como una teología dogmática", "Como una teología puramente filosófica"],
+                answer: 1,
+                feedback: "Correcto. Es una 'teología adjetiva', donde 'andina' no se refiere a un objeto material, sino al contexto sociocultural y étnico desde el cual se teologiza.",
+                page: 5
+            },
+            {
+                question: "¿Qué es la 'hermenéutica diatópica' propuesta como necesaria para la teología andina?",
+                options: ["Una interpretación literal de la Biblia", "Una traducción conceptual entre dos 'topoi' (lugares) culturales, sin un intermediario", "Un método para eliminar toda influencia occidental", "Una forma de estudiar la geografía sagrada de los Andes"],
+                answer: 1,
+                feedback: "Correcto. Es una interpretación y traducción conceptual entre dos lugares (topoi) culturales, como el andino y el occidental, para un diálogo genuino.",
+                page: 6
+            },
+            {
+                question: "El proceso de 'deshelenización' de la teología es parte de un proceso más amplio de:",
+                options: ["Globalización económica", "Descolonización mental", "Modernización tecnológica", "Secularización"],
+                answer: 1,
+                feedback: "Correcto. La 'deshelenización' se enmarca en la 'descolonización mental' de los pueblos indígenas, buscando liberarse de los parámetros filosóficos y teológicos impuestos.",
+                page: 6
+            },
+            {
+                question: "¿Cuál es la postura del autor sobre la 'desoccidentalización' en la teología andina?",
+                options: ["Debe ser un proceso de exclusión total de lo occidental", "Es un proceso de diálogo intercultural crítico, no de exclusión", "Es sinónimo de 'descristianización'", "Es una idea imposible de realizar"],
+                answer: 1,
+                feedback: "Correcto. El autor argumenta que la sabiduría andina es inclusiva, por lo que la desoccidentalización debe ser un diálogo crítico y constructivo, no una satanización de la cultura occidental.",
+                page: 8
+            },
+            {
+                question: "La deconstrucción andina de la teología consiste en la simultaneidad de dos procesos. ¿Cuáles son?",
+                options: ["Evangelización y bautismo", "Exculturación de la teología dominante y construcción de una teología indígena propia", "Estudio de la Biblia y la tradición", "Análisis político y acción social"],
+                answer: 1,
+                feedback: "Correcto. Implica, por un lado, 'deshelenizar' la teología dominante y, por otro, construir una teología propia desde los parámetros de las cosmovisiones andinas.",
+                page: 8
+            },
+            {
+                question: "En contraste con el teísmo occidental, la concepción andina de lo divino se describe mejor como:",
+                options: ["Deísmo (Dios creador pero distante)", "Ateísmo (negación de lo divino)", "Panenteísmo o animismo", "Politeísmo estricto"],
+                answer: 2,
+                feedback: "Correcto. El autor sugiere que la teología andina no es teísta, sino más bien panenteísta (todo está en Dios y Dios está en todo) o animista, concibiendo lo divino como parte de la pacha (realidad).",
+                page: 10
+            },
+            {
+                question: "¿A qué concepción se acerca más la idea andina de 'Dios' según Estermann?",
+                options: ["Panteísmo (Dios es todo)", "Deísmo", "Teísmo personal", "Panenteísmo (todo está en Dios)"],
+                answer: 3,
+                feedback: "Correcto. El autor se inclina por el 'panenteísmo', donde lo divino forma parte de la realidad misma y está presente en todos sus aspectos.",
+                page: 10
+            },
+            {
+                question: "El dogma cristológico formulado en Nicea y Calcedon es un obstáculo para el diálogo interreligioso porque:",
+                options: ["Está escrito en latín, un idioma muerto", "Utiliza una terminología y una cultura dominantemente helénicas", "Es demasiado simple y fácil de entender", "Se enfoca demasiado en los milagros de Jesús"],
+                answer: 1,
+                feedback: "Correcto. Conceptos como 'naturaleza', 'sustancia' o 'persona' reflejan una onto-teología griega, ajena a otras culturas, lo que dificulta el diálogo.",
+                page: 11
+            },
+            {
+                question: "El 'Cristo cósmico' andino se acerca más a la figura de:",
+                options: ["Un emperador romano", "Un filósofo griego", "La chakana universal que garantiza el equilibrio cósmico", "El logos preexistente de la teología clásica"],
+                answer: 2,
+                feedback: "Correcto. Se le ve como la 'chakana universal', el puente que garantiza el equilibrio y la armonía cósmicos, relacionándolo con divinidades como los apus y el rayo.",
+                page: 11
+            },
+            {
+                question: "¿Cuál es el origen de la mayoría de las denominaciones eclesiales en el mundo andino?",
+                options: ["Surgieron de movimientos proféticos locales", "Son producto de escisiones y disputas teológicas europeas", "Fueron creadas por los imperios Inca y Azteca", "Nacieron del sincretismo con religiones africanas"],
+                answer: 1,
+                feedback: "Correcto. El texto afirma que prácticamente ninguna de las iglesias en la región tiene sus orígenes en el continente, sino que son 'productos de exportación' de divisiones europeas.",
+                page: 12
+            },
+            {
+                question: "Una teología andina auténtica, según el autor, debe desarrollarse como una teología:",
+                options: ["Estrictamente católica", "Confesional y excluyente", "'Ecuménica', que refleje la convivencia y complementariedad andina", "Idéntica a la Teología de la Liberación"],
+                answer: 2,
+                feedback: "Correcto. Debe ser 'ecuménica', reflejando la 'casa común' que es el mundo andino, donde conviven y se complementan diferentes creencias y rituales.",
+                page: 12
+            },
+            {
+                question: "En contraste con la 'escrituralidad' del cristianismo, la religiosidad andina se centra en:",
+                options: ["La construcción de grandes templos", "La memorización de textos sagrados", "La oralidad y la lectura del 'libro' de la naturaleza y el cosmos", "La creación de iconos y pinturas religiosas"],
+                answer: 2,
+                feedback: "Correcto. Se enfatiza que la tradición andina es de oralidad, donde el cielo y la tierra son el 'libro' que se puede leer, en contraste con el foco en textos escritos de la tradición occidental.",
+                page: 13
+            },
+            {
+                question: "El episodio de Atahualpa desechando la Biblia en Cajamarca simboliza:",
+                options: ["Su falta de interés en la religión", "El choque entre una cultura auditiva/oral y una cultura centrada en la escritura", "Un acto de desafío político sin trasfondo religioso", "La superioridad de la cultura europea"],
+                answer: 1,
+                feedback: "Correcto. El autor interpreta la acción de Atahualpa como el resultado de su concepción auditiva y oral; al no 'oír' nada en el libro, lo desechó, simbolizando el desencuentro de dos mundos.",
+                page: 13
+            },
+            {
+                question: "El androcentrismo en la teología cristiana occidental tiene sus raíces en:",
+                options: ["Una casualidad histórica", "La influencia de religiones matriarcales", "Una larga historia de apropiación masculina de lo religioso (patriarcado)", "Las enseñanzas directas de Jesús de Nazaret"],
+                answer: 2,
+                feedback: "Correcto. El texto lo enmarca en una larga historia de patriarcado, desde la Biblia Hebrea, pasando por el 'machismo' paulino y los Padres de la Iglesia, hasta la actualidad.",
+                page: 14
+            },
+            {
+                question: "¿Qué principio de la cosmovisión andina contrarresta el androcentrismo teológico?",
+                options: ["El culto al sol", "El sacrificio de animales", "La complementariedad sexuada (entre lo femenino и lo masculino)", "La jerarquía social estricta"],
+                answer: 2,
+                feedback: "Correcto. La complementariedad entre lo femenino y lo masculino es un rasgo destacado de la cosmovisión andina, aplicándose a todos los niveles del cosmos, incluido lo divino.",
+                page: 14
+            },
+            {
+                question: "¿Cuál es el lugar predilecto y el método dominante del quehacer teológico en Occidente?",
+                options: ["El monasterio y la meditación", "La comunidad de base y el diálogo", "La Academia (universidad) y el canon de la ciencia occidental", "La plaza pública y el debate popular"],
+                answer: 2,
+                feedback: "Correcto. El autor señala que en Occidente, la teología ha adquirido una forma canónica en la Academia, siguiendo los métodos de la ciencia occidental.",
+                page: 15
+            },
+            {
+                question: "¿Quién es el sujeto primordial de la teología andina?",
+                options: ["Los teólogos profesionales formados en Europa", "El pueblo mismo: sus cuentos, sueños, creencias y rituales", "Los líderes políticos indígenas", "Los misioneros extranjeros"],
+                answer: 1,
+                feedback: "Correcto. El sujeto primordial de la teología andina es el pueblo, con sus narraciones, creencias y prácticas. La conceptualización teórica es un paso posterior.",
+                page: 16
+            },
+            {
+                question: "El 'gran dilema' de la teología andina es que...",
+                options: ["Carece de apoyo institucional y financiero.", "Al construirse, utiliza una terminología y un instrumentario eminentemente occidental.", "No hay suficientes teólogos indígenas para desarrollarla.", "Es rechazada por completo por las comunidades andinas."],
+                answer: 1,
+                feedback: "Correcto. El autor concluye que es inevitable usar herramientas conceptuales de Occidente para construir una teología no-occidental, creando un 'sincretismo teológico' complejo.",
+                page: 16
+            },
+            {
+                question: "¿Cuál debe ser el criterio de 'calidad' de una teología andina, según el texto?",
+                options: ["La consistencia y coherencia lógica al estilo occidental", "Su aprobación por parte de las autoridades eclesiásticas", "La medida en que contribuye a más vida, inclusión, justicia y solidaridad", "La cantidad de publicaciones académicas que genera"],
+                answer: 2,
+                feedback: "Correcto. Más que la coherencia lógica, su valor se mide por su capacidad para generar más vida, inclusión y justicia, teniendo siempre un aspecto praxológico y de compromiso.",
+                page: 17
+            }
+        ];
+
+        // --- LÓGICA DEL CUESTIONARIO ---
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionCounterEl = document.getElementById('question-counter');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackArea = document.getElementById('feedback-area');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const scoreEl = document.getElementById('score');
+
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            // Reiniciar estado
+            questions = [...allQuestions];
+            shuffleArray(questions);
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            // Reiniciar UI
+            scoreEl.textContent = `Puntuación: 0`;
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            feedbackArea.innerHTML = '';
+            nextBtn.classList.add('hidden');
+            
+            if (currentQuestionIndex < questions.length) {
+                const question = questions[currentQuestionIndex];
+                questionCounterEl.textContent = `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`;
+                questionTextEl.textContent = question.question;
+                
+                optionsContainer.innerHTML = '';
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.classList.add('option-btn', 'w-full', 'text-left', 'p-4', 'rounded-lg', 'border-2', 'border-gray-300', 'hover:bg-blue-50', 'hover:border-blue-400');
+                    button.dataset.index = index;
+                    button.addEventListener('click', selectAnswer);
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                showResults();
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const selectedAnswerIndex = parseInt(selectedButton.dataset.index, 10);
+            const question = questions[currentQuestionIndex];
+            const isCorrect = selectedAnswerIndex === question.answer;
+
+            // Deshabilitar todas las opciones
+            const optionButtons = optionsContainer.querySelectorAll('.option-btn');
+            optionButtons.forEach(btn => {
+                btn.disabled = true;
+                const btnIndex = parseInt(btn.dataset.index, 10);
+                if (btnIndex === question.answer) {
+                    btn.classList.add('correct'); // Siempre marcar la correcta
+                }
+            });
+            
+            // Mostrar retroalimentación
+            const feedbackEl = document.createElement('div');
+            feedbackEl.classList.add('p-4', 'rounded-lg', 'feedback-animation');
+            
+            if (isCorrect) {
+                score += 4;
+                feedbackEl.classList.add('bg-green-100', 'text-green-800');
+                feedbackEl.innerHTML = `<p class="font-bold">¡Correcto!</p><p>${question.feedback} (p. ${question.page})</p>`;
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackEl.classList.add('bg-red-100', 'text-red-800');
+                feedbackEl.innerHTML = `<p class="font-bold">Incorrecto.</p><p>La respuesta correcta era: "${question.options[question.answer]}". ${question.feedback} (p. ${question.page})</p>`;
+            }
+            
+            feedbackArea.appendChild(feedbackEl);
+            scoreEl.textContent = `Puntuación: ${score}`;
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            
+            const totalScore = score;
+            const maxScore = questions.length * 4;
+            const percentage = (totalScore / maxScore) * 100;
+            
+            document.getElementById('final-score').textContent = `${totalScore} / ${maxScore}`;
+            
+            let feedbackText = '';
+            if (percentage >= 90) {
+                feedbackText = "¡Excelente! Tienes un dominio profundo de las ideas clave del texto. Tu comprensión de la deconstrucción intercultural de la teología andina es sobresaliente.";
+            } else if (percentage >= 70) {
+                feedbackText = "¡Muy bien! Demuestras una sólida comprensión de los conceptos principales. Repasa las preguntas que fallaste para afianzar tu conocimiento.";
+            } else if (percentage >= 50) {
+                feedbackText = "¡Buen esfuerzo! Has captado varias ideas importantes, pero hay algunos conceptos clave que necesitan un repaso. Te recomiendo volver a leer las páginas indicadas en la retroalimentación.";
+            } else {
+                feedbackText = "Necesitas repasar el documento con más detenimiento. Concéntrate en los argumentos principales de cada sección para mejorar tu comprensión. ¡No te desanimes y vuelve a intentarlo!";
+            }
+            
+            document.getElementById('final-feedback').textContent = feedbackText;
+        }
+
+        // Event Listeners
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            displayQuestion();
+        });
+
+        restartBtn.addEventListener('click', startQuiz);
+
+        // Iniciar el cuestionario al cargar la página
+        startQuiz();
+    </script>
+</body>
+</html>

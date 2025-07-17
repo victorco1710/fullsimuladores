@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Química I</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #334155;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .quiz-header {
+            margin-bottom: 30px;
+        }
+        .quiz-header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        .quiz-header p {
+            font-size: 1.125rem;
+            color: #475569;
+        }
+        .question-card {
+            background-color: #f8fafc;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+            width: 100%;
+            text-align: left;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        .question-card p.question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        .options-container label {
+            display: block;
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-size: 1rem;
+            color: #334155;
+            display: flex;
+            align-items: center;
+        }
+        .options-container label:hover {
+            border-color: #6366f1;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+        }
+        .options-container input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+            accent-color: #6366f1;
+        }
+        .options-container label.selected {
+            background-color: #e0e7ff;
+            border-color: #6366f1;
+        }
+        .options-container label.correct {
+            background-color: #d1fae5;
+            border-color: #34d399;
+        }
+        .options-container label.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+        .feedback-container {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            text-align: left;
+            display: none; /* Hidden by default */
+        }
+        .feedback-container.correct-feedback {
+            background-color: #ecfdf5;
+            color: #059669;
+            border: 1px solid #34d399;
+        }
+        .feedback-container.incorrect-feedback {
+            background-color: #fff1f2;
+            color: #ef4444;
+            border: 1px solid #f87171;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #6366f1;
+            color: #ffffff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .result-container {
+            margin-top: 30px;
+            padding: 30px;
+            background-color: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        .result-container h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        .result-container p {
+            font-size: 1.1rem;
+            color: #475569;
+            margin-bottom: 10px;
+        }
+        .score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #6366f1;
+            margin-bottom: 20px;
+        }
+        .general-feedback {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #10b981;
+        }
+        .footer-credits {
+            margin-top: 30px;
+            font-size: 0.85rem;
+            color: #64748b;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>Cuestionario de Química I</h1>
+            <p>Pon a prueba tus conocimientos sobre el documento "QUÍMICA I".</p>
+        </div>
+
+        <div id="quiz-content">
+            <!-- Questions will be loaded here -->
+        </div>
+
+        <div class="navigation-buttons">
+            <button id="prev-btn" class="btn btn-secondary" disabled>Anterior</button>
+            <button id="next-btn" class="btn btn-primary">Siguiente</button>
+            <button id="submit-btn" class="btn btn-primary hidden">Finalizar Cuestionario</button>
+        </div>
+
+        <div id="result-screen" class="result-container hidden">
+            <h2>Resultados del Cuestionario</h2>
+            <p>Puntuación total:</p>
+            <p class="score" id="final-score"></p>
+            <p class="general-feedback" id="general-feedback"></p>
+            <button id="restart-btn" class="btn btn-primary mt-6">Reiniciar Cuestionario</button>
+        </div>
+
+        <div class="footer-credits">
+            Desarrollado por Victor Crespo
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es la ciencia que estudia la materia, su estructura, sus propiedades y transformaciones?",
+                options: ["Física", "Biología", "Química", "Matemáticas"],
+                answer: "Química",
+                feedback: "La Química es la ciencia central que se ocupa del estudio de la materia y sus cambios. (Página 7)",
+                page: 7
+            },
+            {
+                question: "¿Qué es la materia según el texto?",
+                options: ["Todo aquello que ocupa un lugar en el espacio y tiene forma definida.", "Todo aquello que tiene masa, energía, ocupa un lugar en el espacio, posee inercia y es susceptible a cambio, pero no puede ser destruida.", "Todo lo que podemos ver y tocar.", "Cualquier sustancia que tenga propiedades físicas visibles."],
+                answer: "Todo aquello que tiene masa, energía, ocupa un lugar en el espacio, posee inercia y es susceptible a cambio, pero no puede ser destruida.",
+                feedback: "La materia se define como todo aquello que tiene masa, energía, ocupa un lugar en el espacio, posee inercia y es susceptible a cambio, pero no puede ser destruida. (Página 20)",
+                page: 20
+            },
+            {
+                question: "¿Qué tipo de propiedades de la materia se presentan en todo tipo de materia?",
+                options: ["Específicas", "Intensivas", "Generales", "Químicas"],
+                answer: "Generales",
+                feedback: "Las propiedades generales son aquellas que se presentan en todo tipo de materia, como el volumen, peso, masa, etc. (Página 21)",
+                page: 21
+            },
+            {
+                question: "¿Cuál es la unidad fundamental de masa en el Sistema Internacional, según el texto?",
+                options: ["Gramo", "Libra", "Kilogramo", "Miligramo"],
+                answer: "Kilogramo",
+                feedback: "La unidad fundamental de masa es el kilogramo (kg). (Página 21)",
+                page: 21
+            },
+            {
+                question: "¿Qué es la inercia?",
+                options: ["La capacidad de un cuerpo para generar energía.", "La propiedad de los cuerpos para mantener su estado de reposo o movimiento a menos que intervenga una fuerza.", "La resistencia de un cuerpo a ser dividido.", "La capacidad de un cuerpo para disolverse en otro."],
+                answer: "La propiedad de los cuerpos para mantener su estado de reposo o movimiento a menos que intervenga una fuerza.",
+                feedback: "La inercia es la propiedad de los cuerpos para mantener su estado de reposo o movimiento a menos que intervenga una fuerza que modifique dicho estado. (Página 22)",
+                page: 22
+            },
+            {
+                question: "¿Cuáles son ejemplos de cambios físicos?",
+                options: ["Combustión y oxidación.", "Respiración y fotosíntesis.", "Fusión de la cera y hervir agua.", "Digestión y putrefacción."],
+                answer: "Fusión de la cera y hervir agua.",
+                feedback: "Los cambios físicos son aquellos en los cuales cambia la forma, el tamaño, el estado de movimiento o de reposo, o el estado de agregación de la materia, como la fusión de la cera o hervir agua. (Página 29)",
+                page: 29
+            },
+            {
+                question: "¿Qué es un elemento químico?",
+                options: ["Una sustancia compuesta por dos o más átomos.", "Una mezcla homogénea de sustancias.", "Una sustancia simple que no puede descomponerse en otra más simple por métodos químicos ordinarios.", "Cualquier sustancia que tenga masa y ocupe un lugar en el espacio."],
+                answer: "Una sustancia simple que no puede descomponerse en otra más simple por métodos químicos ordinarios.",
+                feedback: "Los elementos son sustancias simples que no pueden descomponerse en otras más simples por métodos químicos ordinarios. (Página 32)",
+                page: 32
+            },
+            {
+                question: "¿Cuál es el método de separación que se utiliza para separar un sólido de grano grueso e insoluble de un líquido, vertiendo el líquido después que se ha sedimentado el sólido?",
+                options: ["Filtración", "Destilación", "Decantación", "Centrifugación"],
+                answer: "Decantación",
+                feedback: "La decantación se utiliza para separar un sólido de grano grueso e insoluble de un líquido, vertiendo el líquido después de la sedimentación. (Página 33)",
+                page: 33
+            },
+            {
+                question: "¿Qué es un ión?",
+                options: ["Un átomo sin carga eléctrica.", "Una partícula subatómica dentro del núcleo.", "Un átomo o molécula con carga eléctrica que ha perdido o ganado electrones.", "Una molécula formada por la unión de dos elementos."],
+                answer: "Un átomo o molécula con carga eléctrica que ha perdido o ganado electrones.",
+                feedback: "Un ión es un átomo o molécula con carga eléctrica que ha perdido o ganado electrones. (Página 39)",
+                page: 39
+            },
+            {
+                question: "¿Cómo se denomina la representación gráfica de un compuesto que muestra el tipo y la cantidad de átomos que lo constituyen?",
+                options: ["Ecuación química", "Reacción química", "Fórmula química", "Símbolo químico"],
+                answer: "Fórmula química",
+                feedback: "Una fórmula es la representación gráfica de un compuesto que muestra el tipo y la cantidad de átomos que lo constituyen. (Página 40)",
+                page: 40
+            },
+            {
+                question: "¿Cuál es la unidad fundamental de cantidad de sustancia en el Sistema Internacional?",
+                options: ["Kilogramo", "Metro", "Mol", "Segundo"],
+                answer: "Mol",
+                feedback: "El Mol es la unidad fundamental empleada en química para la cantidad de sustancia. (Página 42)",
+                page: 42
+            },
+            {
+                question: "¿Quién propuso el sistema moderno de los símbolos químicos?",
+                options: ["John Dalton", "Dimitri Mendeleiev", "Juan Jacobo Berzelius", "Henry Moseley"],
+                answer: "Juan Jacobo Berzelius",
+                feedback: "Juan Jacobo Berzelius propuso el sistema moderno de los símbolos químicos. (Página 109)",
+                page: 109
+            },
+            {
+                question: "¿Quién ordenó los elementos en la tabla periódica por su número atómico, resolviendo el problema de Mendeleiev?",
+                options: ["Julius Lothar Meyer", "Glenn Seaborg", "Henry Gwyn Jeffreys Moseley", "Johann Wolfang Dobereiner"],
+                answer: "Henry Gwyn Jeffreys Moseley",
+                feedback: "Henry Gwyn Jeffreys Moseley resolvió el problema de Mendeleiev ordenando los elementos por su número atómico. (Página 111)",
+                page: 111
+            },
+            {
+                question: "¿Qué es un periodo en la tabla periódica?",
+                options: ["Un conjunto de elementos con propiedades químicas semejantes.", "Un conjunto de elementos clasificados por orden creciente de sus números atómicos.", "Una columna vertical de elementos.", "Un grupo de elementos con la misma configuración externa."],
+                answer: "Un conjunto de elementos clasificados por orden creciente de sus números atómicos.",
+                feedback: "El periodo es un conjunto de elementos clasificados por orden creciente de sus números atómicos, representando los niveles principales de energía. (Página 114)",
+                page: 114
+            },
+            {
+                question: "¿Cuál de las siguientes es una propiedad física de los metales?",
+                options: ["Forman óxidos ácidos.", "Son quebradizos.", "Presentan brillo metálico.", "Ganan electrones al combinarse."],
+                answer: "Presentan brillo metálico.",
+                feedback: "Los metales presentan brillo metálico, forman aleaciones y son buenos conductores de calor y electricidad, entre otras propiedades físicas. (Página 119)",
+                page: 119
+            },
+            {
+                question: "¿Qué tipo de elementos se encuentran en la familia 'B' y se les llama así por su último electrón ocupar los orbitales d y f de los niveles internos?",
+                options: ["Metales alcalinos", "No metales", "Metaloides", "Metales de transición"],
+                answer: "Metales de transición",
+                feedback: "Los metales de transición son los elementos que se hallan en la familia 'B'. (Página 121)",
+                page: 121
+            },
+            {
+                question: "¿Cuál es la característica principal de los gases nobles?",
+                options: ["Son muy reactivos.", "Son gases monoatómicos e inertes.", "Forman sales fácilmente.", "Tienen altos puntos de fusión y ebullición."],
+                answer: "Son gases monoatómicos e inertes.",
+                feedback: "Los gases nobles (Grupo VIIIA o grupo 0) son gases monoatómicos, incoloros y no reactivos o inertes debido a su configuración electrónica estable. (Página 126)",
+                page: 126
+            },
+            {
+                question: "¿Qué nombre reciben los iones positivos?",
+                options: ["Aniones", "Cationes", "Neutrones", "Protones"],
+                answer: "Cationes",
+                feedback: "Cuando los átomos ceden electrones, se convierten en iones positivos llamados cationes. (Página 39)",
+                page: 39
+            },
+            {
+                question: "¿Qué fenómeno se debe a la interacción de cargas positivas y negativas en la materia?",
+                options: ["Energía mecánica", "Energía hidráulica", "Energía eléctrica", "Energía química"],
+                answer: "Energía eléctrica",
+                feedback: "La energía eléctrica se manifiesta debido a la naturaleza eléctrica de la materia, como resultado de la interacción de cargas positivas y negativas. (Página 56, pregunta 30 de evaluación)",
+                page: 56
+            },
+            {
+                question: "¿Según el Principio de exclusión de Pauli, cuántos electrones con los mismos cuatro valores de números cuánticos pueden haber en un átomo?",
+                options: ["Ninguno", "Uno", "Dos", "Tres"],
+                answer: "Ninguno",
+                feedback: "El Principio de exclusión de Pauli establece que en un átomo no puede haber dos electrones que tengan sus cuatro valores de números cuánticos iguales. (Página 91)",
+                page: 91
+            },
+            {
+                question: "¿Qué establece el Principio de la edificación progresiva o regla de Auf – Bau?",
+                options: ["Los electrones se distribuyen en orden decreciente de su energía.", "En un orbital puede haber hasta 2 electrones de spin opuesto.", "En un átomo los electrones se distribuyen en orden creciente de su energía.", "Dentro de un subnivel, los electrones ocupan orbitales separados."],
+                answer: "En un átomo los electrones se distribuyen en orden creciente de su energía.",
+                feedback: "La regla de Auf – Bau indica que en un átomo los electrones se distribuyen en orden creciente de su energía. (Página 91)",
+                page: 91
+            },
+            {
+                question: "¿Cuál es el último electrón que se distribuye en una configuración electrónica y establece la diferencia entre un elemento y otro?",
+                options: ["Electrón de valencia", "Electrón interno", "Electrón diferencial", "Electrón de enlace"],
+                answer: "Electrón diferencial",
+                feedback: "El electrón diferencial es el último electrón que se distribuye en una configuración electrónica y establece la diferencia entre un elemento y otro. (Página 94)",
+                page: 94
+            },
+            {
+                question: "¿Qué es una molécula, según el modelo cinético-molecular?",
+                options: ["La parte más grande en la que se puede dividir una sustancia.", "Una partícula subatómica.", "La parte más pequeña en la que puede ser dividida una sustancia, sin que forme una nueva.", "Un conjunto de átomos desordenados."],
+                answer: "La parte más pequeña en la que puede ser dividida una sustancia, sin que forme una nueva.",
+                feedback: "Una molécula es la parte más pequeña en la que puede ser dividida una sustancia, sin que forme una nueva. (Página 24)",
+                page: 24
+            },
+            {
+                question: "¿Qué ley establece que 'La masa no se crea ni se destruye, solo se transforma'?",
+                options: ["Ley de la conservación de la energía", "Ley de la conservación de la materia de Einstein", "Ley de la conservación de la masa de Lavoisier", "Ley de Charles"],
+                answer: "Ley de la conservación de la masa de Lavoisier",
+                feedback: "La Ley de la conservación de la masa, propuesta por Lavoisier, establece que la masa no se crea ni se destruye, solo se transforma. (Página 28)",
+                page: 28
+            },
+            {
+                question: "¿Qué tipo de energía poseen los cuerpos en movimiento, debido a su velocidad?",
+                options: ["Potencial", "Térmica", "Cinética", "Química"],
+                answer: "Cinética",
+                feedback: "La energía cinética es la que poseen los cuerpos en movimiento debido a su velocidad. (Página 26)",
+                page: 26
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let score = 0;
+
+        // Shuffle questions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function loadQuestion() {
+            const quizContent = document.getElementById('quiz-content');
+            quizContent.innerHTML = ''; // Clear previous question
+
+            if (currentQuestionIndex < questions.length) {
+                const q = questions[currentQuestionIndex];
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.innerHTML = `
+                    <p class="question-text">Pregunta ${currentQuestionIndex + 1}/${questions.length}: ${q.question}</p>
+                    <div class="options-container" id="options-${currentQuestionIndex}">
+                        ${q.options.map((option, idx) => `
+                            <label>
+                                <input type="radio" name="question${currentQuestionIndex}" value="${option}" ${userAnswers[currentQuestionIndex] === option ? 'checked' : ''}>
+                                ${option}
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div class="feedback-container" id="feedback-${currentQuestionIndex}"></div>
+                `;
+                quizContent.appendChild(questionCard);
+
+                // Add event listeners to radio buttons for immediate feedback
+                document.querySelectorAll(`#options-${currentQuestionIndex} input[type="radio"]`).forEach(radio => {
+                    radio.addEventListener('change', (event) => {
+                        handleAnswer(event.target.value);
+                    });
+                });
+
+                updateNavigationButtons();
+                displayFeedback(false); // Hide feedback when loading new question
+            } else {
+                showResultScreen();
+            }
+        }
+
+        function handleAnswer(selectedOption) {
+            userAnswers[currentQuestionIndex] = selectedOption;
+            displayFeedback(true);
+            
+            // Visually mark the selected option
+            document.querySelectorAll(`#options-${currentQuestionIndex} label`).forEach(label => {
+                label.classList.remove('selected', 'correct', 'incorrect');
+                if (label.querySelector('input').value === selectedOption) {
+                    label.classList.add('selected');
+                }
+            });
+        }
+
+        function displayFeedback(show) {
+            const feedbackContainer = document.getElementById(`feedback-${currentQuestionIndex}`);
+            if (!feedbackContainer) return;
+
+            const q = questions[currentQuestionIndex];
+            const selectedOption = userAnswers[currentQuestionIndex];
+            const isCorrect = selectedOption === q.answer;
+
+            feedbackContainer.style.display = show ? 'block' : 'none';
+            feedbackContainer.classList.remove('correct-feedback', 'incorrect-feedback');
+            
+            if (show) {
+                if (isCorrect) {
+                    feedbackContainer.classList.add('correct-feedback');
+                    feedbackContainer.innerHTML = `<i class="fas fa-check-circle mr-2"></i> ¡Correcto! ${q.feedback}`;
+                } else {
+                    feedbackContainer.classList.add('incorrect-feedback');
+                    feedbackContainer.innerHTML = `<i class="fas fa-times-circle mr-2"></i> Incorrecto. La respuesta correcta es: <strong>${q.answer}</strong>. ${q.feedback}`;
+                }
+            }
+
+            // Disable radio buttons after selection and feedback is shown
+            document.querySelectorAll(`#options-${currentQuestionIndex} input[type="radio"]`).forEach(radio => {
+                radio.disabled = show;
+                const label = radio.closest('label');
+                if (show) {
+                    if (radio.value === q.answer) {
+                        label.classList.add('correct');
+                    } else if (radio.value === selectedOption && !isCorrect) {
+                        label.classList.add('incorrect');
+                    }
+                }
+            });
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+            document.getElementById('next-btn').classList.remove('hidden');
+            document.getElementById('submit-btn').classList.add('hidden');
+
+            if (currentQuestionIndex === questions.length - 1) {
+                document.getElementById('next-btn').classList.add('hidden');
+                document.getElementById('submit-btn').classList.remove('hidden');
+            }
+        }
+
+        function calculateScore() {
+            score = 0;
+            questions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score += 4;
+                }
+            });
+            return score;
+        }
+
+        function getGeneralFeedback(finalScore) {
+            if (finalScore === 100) {
+                return "¡Excelente! Has demostrado un conocimiento sobresaliente de Química I.";
+            } else if (finalScore >= 80) {
+                return "¡Muy bien! Tienes un sólido entendimiento de los conceptos clave.";
+            } else if (finalScore >= 60) {
+                return "Bien. Con un poco más de estudio, puedes mejorar aún más.";
+            } else {
+                return "Necesitas repasar más a fondo los temas. ¡No te desanimes y sigue estudiando!";
+            }
+        }
+
+        function showResultScreen() {
+            document.getElementById('quiz-content').classList.add('hidden');
+            document.getElementById('prev-btn').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            const finalScore = calculateScore();
+            document.getElementById('final-score').innerText = `${finalScore} / 100 puntos`;
+            document.getElementById('general-feedback').innerText = getGeneralFeedback(finalScore);
+        }
+
+        // Event Listeners
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (userAnswers[currentQuestionIndex]) { // Only allow next if an answer is selected
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                alert("Por favor, selecciona una opción antes de continuar.");
+            }
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            currentQuestionIndex--;
+            loadQuestion();
+        });
+
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            if (userAnswers[currentQuestionIndex]) { // Ensure last question is answered
+                showResultScreen();
+            } else {
+                alert("Por favor, selecciona una opción antes de finalizar.");
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            score = 0;
+            shuffleArray(questions);
+            document.getElementById('quiz-content').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            loadQuestion();
+        });
+
+        // Initial load
+        shuffleArray(questions);
+        loadQuestion();
+    </script>
+</body>
+</html>

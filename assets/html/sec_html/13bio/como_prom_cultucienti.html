@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        .question-container {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .question-text {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .options-container button {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background-color: #ffffff;
+            color: #34495e;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .options-container button:hover:not(:disabled) {
+            background-color: #e0f2f7;
+            border-color: #b3e0ed;
+        }
+        .options-container button.selected {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            font-weight: 600;
+        }
+        .options-container button.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+        }
+        .options-container button.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1em;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .feedback.correct {
+            background-color: #e6ffed;
+            color: #1a752e;
+            border: 1px solid #38c172;
+        }
+        .feedback.incorrect {
+            background-color: #ffe6e6;
+            color: #cc0000;
+            border: 1px solid #dc3545;
+        }
+        .navigation-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .navigation-buttons button {
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .navigation-buttons button.prev-button {
+            background-color: #6c757d;
+            color: white;
+        }
+        .navigation-buttons button.prev-button:hover:not(:disabled) {
+            background-color: #5a6268;
+        }
+        .navigation-buttons button.next-button, .navigation-buttons button.submit-button {
+            background-color: #3498db;
+            color: white;
+        }
+        .navigation-buttons button.next-button:hover:not(:disabled), .navigation-buttons button.submit-button:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+        .navigation-buttons button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .score-container {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #ecf0f1;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .score-container h2 {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .score-container p {
+            font-size: 1.2em;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+        .credits {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1 class="text-3xl font-bold mb-8 text-blue-800">Cuestionario sobre Cultura Científica</h1>
+        <div id="question-display">
+            <!-- Preguntas se cargarán aquí -->
+        </div>
+        <div id="feedback-display" class="feedback hidden">
+            <!-- Retroalimentación se mostrará aquí -->
+        </div>
+        <div class="navigation-buttons">
+            <button id="prev-btn" class="prev-button" disabled>Pregunta Anterior</button>
+            <button id="next-btn" class="next-button">Siguiente Pregunta</button>
+            <button id="submit-btn" class="submit-button hidden">Finalizar Cuestionario</button>
+        </div>
+        <div id="score-display" class="score-container hidden">
+            <!-- Puntuación final se mostrará aquí -->
+        </div>
+        <div class="credits">
+            Desarrollado por Victor Crespo
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el principal objetivo del programa de actividades propuesto en el documento sobre la resistencia en las plagas?",
+                options: [
+                    "Que el alumnado memorice los nombres de los insecticidas.",
+                    "Que el alumnado participe en la búsqueda de respuestas sobre el origen de los seres vivos y fenómenos evolutivos.",
+                    "Que el alumnado clasifique las plagas según su tipo.",
+                    "Que el alumnado diseñe nuevos insecticidas en el laboratorio."
+                ],
+                answer: 1,
+                page: "Página 3",
+                feedback: "El objetivo es que el alumnado participe, trabajando en grupos, como miembros de una comunidad de producción de conocimientos, en la búsqueda de las respuestas a algunas de las preguntas que plantea el origen de los seres vivos y los fenómenos evolutivos."
+            },
+            {
+                question: "¿Qué fenómeno se conoce como resistencia en el contexto del uso de insecticidas?",
+                options: [
+                    "El aumento de la producción de cosechas gracias a los insecticidas.",
+                    "El hecho de que los insecticidas se vuelvan más potentes con el tiempo.",
+                    "La incapacidad de muchos insectos y arácnidos que constituyen plagas para ser afectados por los insecticidas más utilizados.",
+                    "La disminución del número de insectos que transmiten enfermedades."
+                ],
+                answer: 2,
+                page: "Página 4",
+                feedback: "El fenómeno de resistencia se refiere a que muchos insectos y arácnidos de los que constituyen plagas para los cultivos, a los que no hacen efecto los insecticidas más utilizados, o que necesitan cantidades mayores para su control."
+            },
+            {
+                question: "¿Qué porcentaje de pérdida de cosechas se mantiene, a pesar del uso de más plaguicidas químicos, similar al de los años cuarenta según el documento?",
+                options: [
+                    "10%",
+                    "20%",
+                    "30%",
+                    "50%"
+                ],
+                answer: 2,
+                page: "Página 4",
+                feedback: "Aunque ahora se utilizan más plaguicidas químicos (hasta 2 millones de toneladas de ingredientes activos por año en todo el mundo), el porcentaje de pérdida de cosechas es de un 30% (Riechmann, 2000), similar al de los años cuarenta."
+            },
+            {
+                question: "Según el documento, ¿cuál es la explicación más común que dan los estudiantes de secundaria o bachillerato sobre la resistencia de los insectos a los insecticidas?",
+                options: [
+                    "Por mutaciones genéticas dirigidas a dotar de protección.",
+                    "Por supervivencia diferencial.",
+                    "Porque se han ido acostumbrando a ese veneno o por procesos genéticos de inmunización progresiva.",
+                    "Porque las especies han mejorado con el paso del tiempo."
+                ],
+                answer: 2,
+                page: "Página 5",
+                feedback: "La mayoría de los estudiantes (más del 60%) explica la resistencia 'porque se han ido acostumbrando a ese veneno' o 'por procesos genéticos de inmunización progresiva', es decir utilizando la idea de adaptación como proceso, y la herencia de los caracteres adquiridos."
+            },
+            {
+                question: "¿Qué concepto se define como 'organismo que causa daños en los cultivos, por ejemplo insectos, hongos (como el tizón de la papa), gusanos, etc.'?",
+                options: [
+                    "Plaguicida",
+                    "Vector",
+                    "Resistencia",
+                    "Plaga"
+                ],
+                answer: 3,
+                page: "Página 6",
+                feedback: "Una 'Plaga' es un organismo que causa daños en los cultivos, por ejemplo insectos, hongos (como el tizón de la papa), gusanos, etc."
+            },
+            {
+                question: "¿Cuál es el rango de edad de jóvenes al que va dirigida la propuesta didáctica fundamentada para la educación científica?",
+                options: [
+                    "10 a 14 años",
+                    "15 a 18 años",
+                    "19 a 22 años",
+                    "23 a 25 años"
+                ],
+                answer: 1,
+                page: "Página 1",
+                feedback: "La propuesta didáctica está fundamentada para la educación científica de jóvenes de 15 a 18 años."
+            },
+            {
+                question: "Según las explicaciones fijistas sobre el origen de las especies, ¿cómo aparecieron las especies?",
+                options: [
+                    "Han ido cambiando (evolucionando) lentamente.",
+                    "Todas al mismo tiempo, al inicio de la historia de la Tierra, y no han cambiado.",
+                    "Por selección natural a lo largo de millones de años.",
+                    "Debido a fenómenos naturales observables que actúan a un ritmo lento."
+                ],
+                answer: 1,
+                page: "Página 7",
+                feedback: "Las explicaciones fijistas proponen que las especies aparecieron todas al mismo tiempo, al inicio de la historia de la Tierra, y que no han cambiado, manteniéndose inmutables, fijas."
+            },
+            {
+                question: "¿Qué teoría propone que las primeras especies han ido cambiando (evolucionando), y que las que existen ahora son diferentes y descienden de aquellas pocas especies primitivas?",
+                options: [
+                    "Teorías fijistas",
+                    "Teorías creacionistas",
+                    "Teorías catastrofistas",
+                    "Teorías evolucionistas"
+                ],
+                answer: 3,
+                page: "Página 7",
+                feedback: "Las explicaciones evolucionistas proponen que las primeras especies han ido cambiando (evolucionando), y que las que existen ahora son diferentes y descienden de aquellas pocas especies primitivas."
+            },
+            {
+                question: "¿Cuál es la edad estimada de la Tierra según los cálculos actuales mencionados en el documento?",
+                options: [
+                    "45.000 años",
+                    "45 millones de años",
+                    "450 millones de años",
+                    "4.500 millones de años"
+                ],
+                answer: 3,
+                page: "Página 9",
+                feedback: "Hoy día se estima en 4.500 millones de años la edad de la Tierra."
+            },
+            {
+                question: "¿Qué método de datación permite calcular la edad de un material con un margen de error del 2% según el documento?",
+                options: [
+                    "Estudio del polen",
+                    "Anillos de crecimiento en los árboles",
+                    "Carbono 14",
+                    "Estudio de fósiles"
+                ],
+                answer: 2,
+                page: "Página 9",
+                feedback: "El método del carbono 14 es de datación absoluta, puede utilizarse para determinar la edad de un material con un margen de error del 2%."
+            },
+            {
+                question: "¿Qué zoólogo inglés definió los órganos homólogos como 'el mismo órgano en diferentes animales, situado en la misma posición respecto a otros, aunque su función e incluso su forma fuesen distintas'?",
+                options: [
+                    "Jean-Baptiste Lamarck",
+                    "Georges Cuvier",
+                    "Richard Owen",
+                    "Charles Darwin"
+                ],
+                answer: 2,
+                page: "Página 12",
+                feedback: "Los órganos homólogos fueron tratados por primera vez por el zoólogo inglés Richard Owen, contemporáneo de Lamarck y Cuvier, que los definió de esa manera."
+            },
+            {
+                question: "¿Qué par de científicos concibieron independientemente el modelo de selección natural, aceptado hoy día por la comunidad científica?",
+                options: [
+                    "Linneo y Buffon",
+                    "Lamarck y Cuvier",
+                    "Darwin y Wallace",
+                    "Kelvin y Lyell"
+                ],
+                answer: 2,
+                page: "Página 13",
+                feedback: "Alfred Wallace (1823-1913) y Charles Darwin (1809-1882) concibieron ambos independientemente el modelo de selección natural."
+            },
+            {
+                question: "¿Cuál de las siguientes no es una idea central del modelo de selección natural de Darwin y Wallace?",
+                options: [
+                    "La variabilidad hereditaria en las poblaciones.",
+                    "El enorme potencial reproductor de las especies.",
+                    "La supervivencia diferencial (selección natural).",
+                    "La tendencia a la perfección de los individuos."
+                ],
+                answer: 3,
+                page: "Página 14",
+                feedback: "La tendencia a la perfección de los individuos es una idea asociada a Lamarck, no a la selección natural de Darwin y Wallace."
+            },
+            {
+                question: "¿Qué tipo de selección mantiene la diversidad genética (o polimorfismo) en la población, como en el caso de la malaria y la anemia falciforme?",
+                options: [
+                    "Selección direccional",
+                    "Selección estabilizadora",
+                    "Selección equilibradora",
+                    "Selección disruptiva"
+                ],
+                answer: 2,
+                page: "Página 17",
+                feedback: "Este tipo de selección que mantiene la diversidad genética (o polimorfismo) en la población se conoce como equilibradora."
+            },
+            {
+                question: "¿Por qué la mosca tsé-tsé no desarrolló resistencia al DDT, a diferencia de los mosquitos?",
+                options: [
+                    "Porque tenía un ciclo de vida corto y alta fecundidad.",
+                    "Debido a su ciclo de vida largo y la producción de pocos juveniles (crías).",
+                    "Porque se acostumbró al insecticida.",
+                    "Debido a que no fue expuesta al DDT."
+                ],
+                answer: 1,
+                page: "Página 19",
+                feedback: "La mosca tsé-tsé no desarrolló resistencia debido a su ciclo de vida largo y la producción de pocos juveniles (crías), lo que hace el ritmo de cambio en la población más lento."
+            },
+            {
+                question: "¿Qué metal, raro y procedente de meteoritos, fue encontrado en niveles anormales en sedimentos de hace 65 millones de años, apoyando la hipótesis del impacto de un meteorito en la extinción de los dinosaurios?",
+                options: [
+                    "Oro",
+                    "Plata",
+                    "Iridio",
+                    "Platino"
+                ],
+                answer: 2,
+                page: "Página 21",
+                feedback: "En 1980, el equipo de Walter Álvarez encontró niveles anormales de iridio (metal muy raro que suele proceder de meteoritos) en sedimentos de hace 65 millones de años."
+            },
+            {
+                question: "¿Cuál es la principal diferencia entre los seres humanos y los chimpancés mencionada en el documento?",
+                options: [
+                    "La capacidad de nadar.",
+                    "La marcha bípeda, caminar sólo sobre las dos extremidades posteriores.",
+                    "La capacidad de volar.",
+                    "La ausencia de pulgares oponibles."
+                ],
+                answer: 1,
+                page: "Página 23",
+                feedback: "Las principales diferencias, además de marcha bípeda y lenguaje articulado, son la mayor capacidad craneana, el pie no prensil, el desarrollo infantil más largo y menores diferencias de tamaño entre los dos sexos."
+            },
+            {
+                question: "¿Cuál de las siguientes afirmaciones es correcta sobre la relación entre el ser humano actual y los simios antropomorfos?",
+                options: [
+                    "El ser humano desciende directamente de los monos actuales.",
+                    "El ser humano y los monos actuales tienen antepasados comunes.",
+                    "Existe un 'eslabón perdido' entre el hombre y los monos.",
+                    "Los seres humanos y los simios antropomorfos no tienen ninguna relación de parentesco."
+                ],
+                answer: 1,
+                page: "Página 24",
+                feedback: "Los evolucionistas nunca sostuvieron que el ser humano descienda de los monos actuales, sino que ambos tienen antepasados comunes."
+            },
+            {
+                question: "¿Qué hipótesis sobre el origen de los humanos actuales es apoyada por el descubrimiento del Homo antecessor en Atapuerca?",
+                options: [
+                    "La hipótesis multirregional.",
+                    "La hipótesis del diluvio universal.",
+                    "La hipótesis de la Eva Negra.",
+                    "La hipótesis del creacionismo."
+                ],
+                answer: 2,
+                page: "Página 24",
+                feedback: "El H. antecessor (forma intermedia entre H. ergaster y H. sapiens) es también antepasado de los Neandertales, mostrando que no hubo intercambios entre estos y el H. erectus que contribuyesen a originar los humanos actuales. Esto apoya la hipótesis de la Eva Negra, donde los Homo sapiens (aparecidos en África) habrían sustituido a las otras dos."
+            },
+            {
+                question: "¿Cómo explica el modelo de selección natural la disminución del sentido del olfato en los seres humanos?",
+                options: [
+                    "Por una mutación dirigida que eliminó los genes del olfato.",
+                    "Porque al vivir en sociedad y hacerse agricultores y ganaderos, su valor para la supervivencia se perdió, y sobrevivirían igual los que tuviesen olfato bueno o malo.",
+                    "Debido a un accidente genético aleatorio que inutilizó los genes del olfato.",
+                    "Por la aparición de nuevas especies con un olfato más desarrollado."
+                ],
+                answer: 1,
+                page: "Página 25",
+                feedback: "Al vivir en sociedad y a medida que los humanos se hacen agricultores y ganaderos, su valor para la supervivencia se pierde, por lo que sobrevivirían igual los que tuviesen olfato bueno o malo. Esto lleva a una pérdida de genes relacionados con el olfato."
+            },
+            {
+                question: "¿Qué efecto tienen las prácticas inadecuadas en el uso de antibióticos en relación con la resistencia de las bacterias?",
+                options: [
+                    "Disminuyen la resistencia de las bacterias.",
+                    "No tienen ningún efecto en la resistencia.",
+                    "Son responsables de una parte de la difusión de las resistencias.",
+                    "Hacen que las bacterias se vuelvan más débiles."
+                ],
+                answer: 2,
+                page: "Página 25",
+                feedback: "Las prácticas inadecuadas en el uso de antibióticos, por ejemplo utilizarlos sin receta, para dolencias menores, o para enfermedades causadas por virus (para las que no son efectivas) y sobre todo su uso para engordar el ganado, son responsables de una parte de la difusión de las resistencias."
+            },
+            {
+                question: "¿Cuál de las siguientes es una de las tres funciones vitales que realizan los seres vivos según el documento?",
+                options: [
+                    "Pensamiento",
+                    "Relación",
+                    "Locomoción",
+                    "Comunicación"
+                ],
+                answer: 1,
+                page: "Página 29",
+                feedback: "Los seres vivos realizan tres funciones vitales: nutrición, reproducción y relación."
+            },
+            {
+                question: "¿Qué tipo de receptores sensoriales son activados por la energía luminosa?",
+                options: [
+                    "Mecanorreceptores",
+                    "Quimiorreceptores",
+                    "Fotorreceptores",
+                    "Termorreceptores"
+                ],
+                answer: 2,
+                page: "Página 32",
+                feedback: "Los fotorreceptores son activados por la energía luminosa, como en los ojos."
+            },
+            {
+                question: "¿Dónde se transforman los estímulos sensoriales en imágenes, sonidos o conceptos y se les da sentido?",
+                options: [
+                    "En el propio órgano del sentido.",
+                    "En los nervios sensitivos.",
+                    "En el cerebro.",
+                    "En la médula espinal."
+                ],
+                answer: 2,
+                page: "Página 33",
+                feedback: "Los estímulos son recibidos por los sentidos, pero éstos se convierten en una imagen, en un sonido, en un concepto, cuando les damos sentido, esto es, cuando llegan al cerebro y allí son interpretados y asociados a ideas, recuerdos, otras sensaciones o determinadas respuestas."
+            },
+            {
+                question: "¿Qué estructura del ojo humano es comparable al diafragma de una cámara fotográfica en cuanto a la regulación de la entrada de luz?",
+                options: [
+                    "Cristalino",
+                    "Retina",
+                    "Córnea",
+                    "Pupila"
+                ],
+                answer: 3,
+                page: "Página 39",
+                feedback: "Ambos tienen un sistema de apertura variable por donde penetra la luz (pupila-diafragma)."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let questionsShuffled = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            const questionContainer = document.getElementById('question-display');
+            const feedbackDisplay = document.getElementById('feedback-display');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const submitBtn = document.getElementById('submit-btn');
+
+            questionContainer.innerHTML = '';
+            feedbackDisplay.classList.add('hidden');
+            feedbackDisplay.className = 'feedback hidden'; // Reset classes
+
+            if (currentQuestionIndex < questionsShuffled.length) {
+                const q = questionsShuffled[currentQuestionIndex];
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question-container');
+
+                const questionText = document.createElement('p');
+                questionText.classList.add('question-text');
+                questionText.textContent = `${currentQuestionIndex + 1}. ${q.question}`;
+                questionDiv.appendChild(questionText);
+
+                const optionsDiv = document.createElement('div');
+                optionsDiv.classList.add('options-container');
+
+                q.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.dataset.index = index;
+                    button.addEventListener('click', () => selectOption(index));
+                    optionsDiv.appendChild(button);
+                });
+                questionDiv.appendChild(optionsDiv);
+                questionContainer.appendChild(questionDiv);
+
+                // Restore selected answer if it exists
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    highlightSelection(userAnswers[currentQuestionIndex]);
+                    showFeedback(userAnswers[currentQuestionIndex]);
+                    disableOptions();
+                } else {
+                    enableOptions();
+                }
+
+                prevBtn.disabled = currentQuestionIndex === 0;
+                nextBtn.disabled = userAnswers[currentQuestionIndex] === null && currentQuestionIndex < questionsShuffled.length -1;
+                submitBtn.classList.add('hidden');
+                nextBtn.classList.remove('hidden');
+
+                if (currentQuestionIndex === questionsShuffled.length - 1) {
+                    submitBtn.classList.remove('hidden');
+                    nextBtn.classList.add('hidden');
+                }
+
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function selectOption(selectedIndex) {
+            userAnswers[currentQuestionIndex] = selectedIndex;
+            highlightSelection(selectedIndex);
+            showFeedback(selectedIndex);
+            disableOptions();
+            document.getElementById('next-btn').disabled = false; // Enable next button after answering
+        }
+
+        function highlightSelection(selectedIndex) {
+            const options = document.querySelectorAll('.options-container button');
+            options.forEach((button, index) => {
+                button.classList.remove('selected', 'correct', 'incorrect');
+                if (index === selectedIndex) {
+                    button.classList.add('selected');
+                }
+            });
+        }
+
+        function showFeedback(selectedIndex) {
+            const feedbackDisplay = document.getElementById('feedback-display');
+            const q = questionsShuffled[currentQuestionIndex];
+            const options = document.querySelectorAll('.options-container button');
+
+            feedbackDisplay.classList.remove('hidden');
+
+            if (selectedIndex === q.answer) {
+                feedbackDisplay.classList.remove('incorrect');
+                feedbackDisplay.classList.add('correct');
+                feedbackDisplay.innerHTML = `<p>¡Correcto! ${q.feedback} (Respuesta en ${q.page})</p>`;
+                options[selectedIndex].classList.add('correct');
+            } else {
+                feedbackDisplay.classList.remove('correct');
+                feedbackDisplay.classList.add('incorrect');
+                feedbackDisplay.innerHTML = `<p>Incorrecto. ${q.feedback} La respuesta correcta era: "${q.options[q.answer]}". (Respuesta en ${q.page})</p>`;
+                options[selectedIndex].classList.add('incorrect');
+                options[q.answer].classList.add('correct'); // Highlight correct answer
+            }
+        }
+
+        function disableOptions() {
+            const options = document.querySelectorAll('.options-container button');
+            options.forEach(button => {
+                button.disabled = true;
+            });
+        }
+
+        function enableOptions() {
+            const options = document.querySelectorAll('.options-container button');
+            options.forEach(button => {
+                button.disabled = false;
+                button.classList.remove('selected', 'correct', 'incorrect');
+            });
+        }
+
+        function calculateScore() {
+            score = 0;
+            userAnswers.forEach((answer, index) => {
+                if (answer !== null && answer === questionsShuffled[index].answer) {
+                    score += 4; // Each question is worth 4 points
+                }
+            });
+        }
+
+        function showFinalScore() {
+            calculateScore();
+            document.getElementById('question-display').classList.add('hidden');
+            document.getElementById('feedback-display').classList.add('hidden');
+            document.querySelector('.navigation-buttons').classList.add('hidden');
+
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.classList.remove('hidden');
+            scoreDisplay.innerHTML = `
+                <h2 class="text-green-700">Cuestionario Finalizado</h2>
+                <p>Tu puntuación total es: <span class="font-bold text-2xl">${score} / ${questions.length * 4}</span> puntos.</p>
+                <p>${getOverallFeedback(score)}</p>
+            `;
+        }
+
+        function getOverallFeedback(finalScore) {
+            const maxScore = questions.length * 4;
+            const percentage = (finalScore / maxScore) * 100;
+
+            if (percentage === 100) {
+                return "¡Excelente! Has demostrado un conocimiento sobresaliente del documento. ¡Felicidades!";
+            } else if (percentage >= 80) {
+                return "Muy bien. Tienes un buen entendimiento de las ideas clave del documento. ¡Sigue así!";
+            } else if (percentage >= 50) {
+                return "Necesitas revisar algunos conceptos. Te recomiendo repasar las secciones indicadas para mejorar tu comprensión.";
+            } else {
+                return "Parece que necesitas un repaso más profundo del documento. ¡No te desanimes, puedes mejorar!";
+            }
+        }
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentQuestionIndex < questionsShuffled.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else if (currentQuestionIndex === questionsShuffled.length - 1) {
+                showFinalScore();
+            }
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        });
+
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            showFinalScore();
+        });
+
+        // Initialize quiz
+        questionsShuffled = shuffleArray([...questions]);
+        loadQuestion();
+    </script>
+</body>
+</html>

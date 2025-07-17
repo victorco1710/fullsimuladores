@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo: Fronteras y Diálogos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .question-card {
+            background-color: #e2e8f0; /* Lighter blue-gray for cards */
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .question-text {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            color: #2d3748; /* Darker gray */
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            background-color: #edf2f7; /* Even lighter gray */
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 8px; /* Spacing between options */
+        }
+        .option-label:hover {
+            background-color: #d1d8e0; /* Hover state */
+            transform: translateY(-2px);
+        }
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+        }
+        .button-primary {
+            background-color: #4c51bf; /* Indigo-700 */
+            color: #ffffff;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 700; /* font-bold */
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 4px 8px rgba(76, 81, 191, 0.3);
+            text-align: center;
+        }
+        .button-primary:hover {
+            background-color: #5a62c9; /* Darker indigo on hover */
+        }
+        .button-secondary {
+            background-color: #a0aec0; /* Gray-500 */
+            color: #ffffff;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 4px 8px rgba(160, 174, 192, 0.3);
+            text-align: center;
+        }
+        .button-secondary:hover {
+            background-color: #b5bdc6; /* Darker gray on hover */
+        }
+        .feedback-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .feedback-correct {
+            background-color: #d4edda; /* Green-100 */
+            color: #155724; /* Green-800 */
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-incorrect {
+            background-color: #f8d7da; /* Red-100 */
+            color: #721c24; /* Red-800 */
+            border: 1px solid #f5c6cb;
+        }
+        .results-card {
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        .results-score {
+            font-size: 2.5rem; /* text-5xl */
+            font-weight: 700; /* font-bold */
+            color: #2d3748;
+        }
+        .results-feedback {
+            font-size: 1.1rem; /* text-lg */
+            margin-top: 10px;
+            color: #4a5568;
+        }
+        .hidden {
+            display: none;
+        }
+        .credits {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+    </style>
+</head>
+<body class="bg-blue-gray-100 flex justify-center items-start min-h-screen p-5">
+    <div class="quiz-container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Cuestionario: Fronteras y Diálogos</h1>
+
+        <div id="question-area">
+            <!-- Question will be loaded here -->
+        </div>
+
+        <div id="navigation-buttons" class="flex justify-between gap-4 mt-6">
+            <button id="check-answer-btn" class="button-primary w-full">Comprobar Respuesta</button>
+            <button id="next-question-btn" class="button-primary w-full hidden">Siguiente Pregunta</button>
+            <button id="submit-quiz-btn" class="button-primary w-full hidden">Finalizar Cuestionario</button>
+        </div>
+
+        <div id="results-area" class="results-card hidden">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Resultados Finales</h2>
+            <p class="results-score" id="final-score"></p>
+            <p class="results-feedback" id="final-feedback"></p>
+        </div>
+
+        <div class="credits">
+            PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es la hipótesis principal que John Murra explora en su ensayo sobre las sociedades andinas?",
+                options: [
+                    "A) La importancia de la tecnología hidráulica en la agricultura costeña.",
+                    "B) El control vertical de un máximo de pisos ecológicos para acceder a diversos recursos.",
+                    "C) La influencia de la invasión europea en la despoblación andina.",
+                    "D) Las migraciones estacionales y el comercio interregional como base económica."
+                ],
+                correctAnswer: "B) El control vertical de un máximo de pisos ecológicos para acceder a diversos recursos.",
+                feedback: "Correcto. Murra documenta el patrón andino de controlar simultáneamente 'archipiélagos verticales' para acceder a una variedad de recursos ecológicos.",
+                page: 15
+            },
+            {
+                question: "Según Murra, ¿qué característica fundamental distinguía el 'control vertical' ideal compartido por diversas etnias andinas?",
+                options: [
+                    "A) La creación de grandes mercados para el intercambio de productos.",
+                    "B) El establecimiento de guarniciones militares para proteger los recursos.",
+                    "C) El control simultáneo de 'archipiélagos verticales' por parte de una sola etnia o grupo.",
+                    "D) La especialización exclusiva de cada piso ecológico en un solo producto."
+                ],
+                correctAnswer: "C) El control simultáneo de 'archipiélagos verticales' por parte de una sola etnia o grupo.",
+                feedback: "Correcto. El ideal andino era controlar simultáneamente 'archipiélagos verticales' para diversificar el acceso a recursos.",
+                page: 15
+            },
+            {
+                question: "En el caso de Chaupiwaranqa (Chupaychu o Yacha), ¿qué caracterizaba la ocupación de sus asentamientos periféricos, como los cocales o salinas?",
+                options: [
+                    "A) Eran campamentos estacionales para la recolección.",
+                    "B) Se ejercía a través de colonias permanentes de su propia gente, que mantenían lazos con el núcleo.",
+                    "C) Eran zonas de comercio neutras para varias etnias.",
+                    "D) Estaban bajo la soberanía exclusiva de los territorios intermedios."
+                ],
+                correctAnswer: "B) Se ejercía a través de colonias permanentes de su propia gente, que mantenían lazos con el núcleo.",
+                feedback: "Correcto. Los Yacha o Chupaychu mantenían colonias permanentes con su gente en las 'islas' de recursos, a pesar de la distancia.",
+                page: 17
+            },
+            {
+                question: "¿Qué particularidad se observó en las zonas periféricas de Chaupiwaranqa, como las salinas de Yanacachi y los cocales del Huallaga?",
+                options: [
+                    "A) Eran explotadas exclusivamente por una sola etnia.",
+                    "B) Se dedicaban únicamente al pastoreo de rebaños.",
+                    "C) Tenían un carácter multiétnico, siendo compartidas por varios grupos.",
+                    "D) Eran administradas directamente por el Tawantinsuyu."
+                ],
+                correctAnswer: "C) Tenían un carácter multiétnico, siendo compartidas por varios grupos.",
+                feedback: "Correcto. Las salinas y cocales en la periferia de Chaupiwaranqa eran multiétnicas, compartidas por varios grupos.",
+                page: "22, 24"
+            },
+            {
+                question: "Según el khipu presentado por los señores Lupaca, ¿aproximadamente cuántas unidades domésticas componían su reino antes de la invasión europea?",
+                options: [
+                    "A) Menos de mil.",
+                    "B) Cerca de 5,000.",
+                    "C) Veinte mil.",
+                    "D) Cientos de miles."
+                ],
+                correctAnswer: "C) Veinte mil.",
+                feedback: "Correcto. Los Lupaca del Titicaca reportaron unas veinte mil unidades domésticas.",
+                page: 15
+            },
+            {
+                question: "En el caso de los Lupaca, ¿qué distancia podían alcanzar sus colonias periféricas desde el núcleo del Titicaca?",
+                options: [
+                    "A) No más de tres o cuatro días de camino.",
+                    "B) De cinco a diez días de camino o más.",
+                    "C) Estaban siempre contiguas al núcleo.",
+                    "D) Solo se extendían a zonas dentro del mismo valle."
+                ],
+                correctAnswer: "B) De cinco a diez días de camino o más.",
+                feedback: "Correcto. Las colonias Lupaca podían estar a distancias mucho mayores, hasta diez días de camino o más.",
+                page: 28
+            },
+            {
+                question: "¿Qué tipo de 'islas' adicionales, no necesariamente ligadas estrictamente a un piso ecológico, aparecieron en el reino Lupaca?",
+                options: [
+                    "A) Fortalezas militares.",
+                    "B) Centros ceremoniales.",
+                    "C) Asentamientos de artesanos especializados (oleross, plateros).",
+                    "D) Colonias exclusivamente agrícolas para un solo cultivo."
+                ],
+                correctAnswer: "C) Asentamientos de artesanos especializados (oleross, plateros).",
+                feedback: "Correcto. En el reino Lupaca, además de los pisos ecológicos, existían 'islas' de artesanos especializados.",
+                page: 33
+            },
+            {
+                question: "En el tercer caso de 'control vertical' (costa central), ¿cuál era el principal objeto de disputa entre las etnias de Canta, Yauyu y Collique?",
+                options: [
+                    "A) El control de zonas de pastoreo en la puna.",
+                    "B) La explotación de salinas.",
+                    "C) Un cocal en los alrededores de Quivi.",
+                    "D) El acceso a puertos marítimos."
+                ],
+                correctAnswer: "C) Un cocal en los alrededores de Quivi.",
+                feedback: "Correcto. La disputa se centraba en el control de un cocal en Quivi, en la vertiente occidental de los Andes.",
+                page: 37
+            },
+            {
+                question: "Antes de la llegada de los Inca, ¿a quiénes atribuían todas las partes en litigio (Canta, Yauyu, Collique) el control inicial de las tierras de Quivi?",
+                options: [
+                    "A) A los señores de Canta.",
+                    "B) A los señores de Chacalla.",
+                    "C) A los señores de Collique.",
+                    "D) A grupos étnicos foráneos."
+                ],
+                correctAnswer: "C) A los señores de Collique.",
+                feedback: "Correcto. Todos los testimonios coincidían en que las tierras disputadas habían sido de los señores de Collique.",
+                page: 39
+            },
+            {
+                question: "Respecto a los grandes reinos costeños (cuarto caso), ¿qué aspecto del 'control vertical' seguía sin comprobarse en 1972 según Murra?",
+                options: [
+                    "A) La existencia de grandes sistemas de riego.",
+                    "B) La presencia de guarniciones militares en las bocatomas.",
+                    "C) La existencia de colonias permanentes en la serranía, controladas por sociedades costeñas.",
+                    "D) El comercio interregional con la sierra."
+                ],
+                correctAnswer: "C) La existencia de colonias permanentes en la serranía, controladas por sociedades costeñas.",
+                feedback: "Correcto. En 1972, no se había comprobado la existencia de colonias permanentes en la serranía controladas por sociedades costeñas.",
+                page: 50
+            },
+            {
+                question: "En el caso de Songo (quinto caso), ¿por qué Murra inicialmente lo consideró un 'caso negativo' o una limitación al modelo de verticalidad?",
+                options: [
+                    "A) Porque la población se dedicaba exclusivamente al comercio.",
+                    "B) Porque los moradores negaban tener heredades o acceso a recursos en el altiplano.",
+                    "C) Porque se enfocaba únicamente en la producción de maíz.",
+                    "D) Porque solo había evidencia de intercambio con europeos."
+                ],
+                correctAnswer: "B) Porque los moradores negaban tener heredades o acceso a recursos en el altiplano.",
+                feedback: "Correcto. Los señores de Songo afirmaban no tener propiedades ni acceso a otros nichos ecológicos fuera de sus cocales y horticultura.",
+                page: "61-62"
+            },
+            {
+                question: "¿Cómo interpreta Murra la relación del Tawantinsuyu (Inca) con el modelo de 'archipiélagos verticales'?",
+                options: [
+                    "A) Fue un sistema creado exclusivamente por el Tawantinsuyu.",
+                    "B) El Tawantinsuyu lo erradicó por completo.",
+                    "C) La élite Inca adaptó y amplió un modelo preincaico para sus propios fines estatales y militares, aunque la 'verticalidad' física perdió importancia.",
+                    "D) Los Inca implementaron un modelo completamente diferente de organización económica."
+                ],
+                correctAnswer: "C) La élite Inca adaptó y amplió un modelo preincaico para sus propios fines estatales y militares, aunque la 'verticalidad' física perdió importancia.",
+                feedback: "Correcto. Murra sugiere que el Tawantinsuyu amplió y transformó un modelo preexistente para sus propósitos, aunque la verticalidad física se diluyó.",
+                page: "65-66"
+            },
+            {
+                question: "¿Cuál es el argumento central de Fernando Santos-Granero respecto a la conceptualización de los Andes y la Amazonía como áreas culturales distintas?",
+                options: [
+                    "A) Se debe exclusivamente a diferencias ecológicas insuperables.",
+                    "B) Es resultado del choque entre gentes de tierras altas y bajas, impulsado por la expansión de formaciones estatales andinas.",
+                    "C) Proviene de la ausencia total de intercambio cultural entre ambas regiones.",
+                    "D) Se originó con la llegada de los colonizadores europeos y sus clasificaciones."
+                ],
+                correctAnswer: "B) Es resultado del choque entre gentes de tierras altas y bajas, impulsado por la expansión de formaciones estatales andinas.",
+                feedback: "Correcto. Santos-Granero argumenta que la distinción Andes/Amazonía es un producto de los procesos de expansión estatal andinos.",
+                page: 85
+            },
+            {
+                question: "Según Santos-Granero, ¿cuál es el propósito principal de los procesos de 'alterización' en la construcción de lugar (place making)?",
+                options: [
+                    "A) Promover el intercambio cultural y la integración.",
+                    "B) Reforzar la característica no social de ciertos espacios y justificar la colonización.",
+                    "C) Eliminar las fronteras entre comunidades.",
+                    "D) Establecer una línea única de progreso civilizatorio."
+                ],
+                correctAnswer: "B) Reforzar la característica no social de ciertos espacios y justificar la colonización.",
+                feedback: "Correcto. La alterización refuerza el carácter no social de los espacios percibidos como salvajes y justifica su ocupación.",
+                page: 83
+            },
+            {
+                question: "En el informe del padre Francisco de Andrade (Cruzados de la Fe), ¿cómo describe el ambiente amazónico?",
+                options: [
+                    "A) Como un paraíso terrenal de abundancia.",
+                    "B) Como una tierra acogedora y de gran fertilidad.",
+                    "C) Como una zona de montaña fragosa, áspera, cenagosa, con calor insoportable.",
+                    "D) Como un lugar sin diferencias ecológicas con los Andes."
+                ],
+                correctAnswer: "C) Como una zona de montaña fragosa, áspera, cenagosa, con calor insoportable.",
+                feedback: "Correcto. Andrade describe la Amazonía como un ambiente duro e inhóspito, con quebradas profundas y calor extremo.",
+                page: 90
+            },
+            {
+                question: "¿Qué afirma el padre Andrade sobre la capacidad de los Inca para conquistar la Amazonía?",
+                options: [
+                    "A) Que los Inca lograron someter completamente a todas las naciones amazónicas.",
+                    "B) Que los Inca se atrevieron a adentrarse más allá de las fronteras de la civilización.",
+                    "C) Que los Inca, a pesar de su poder, fueron incapaces de sojuzgar a la 'infinidad de indios' amazónicos debido a lo agreste del territorio y la hostilidad de sus habitantes.",
+                    "D) Que los Inca establecieron una paz duradera con los pueblos amazónicos."
+                ],
+                correctAnswer: "C) Que los Inca, a pesar de su poder, fueron incapaces de sojuzgar a la 'infinidad de indios' amazónicos debido a lo agreste del territorio y la hostilidad de sus habitantes.",
+                feedback: "Correcto. Andrade asegura que los Incas no pudieron conquistar la Amazonía debido a su geografía y la ferocidad de sus habitantes.",
+                page: 91
+            },
+            {
+                question: "En contraste con Andrade, ¿cómo describe el Capitán Pedro Bohórquez (Buscadores de El Dorado) la naturaleza amazónica?",
+                options: [
+                    "A) Como un ambiente salvaje e incontrolable.",
+                    "B) Como una tierra inhóspita y difícil de navegar.",
+                    "C) Como una tierra acogedora, de abundancia, fertilidad y diversidad, apta para la navegación.",
+                    "D) Como un desierto cubierto de montañas inaccesibles."
+                ],
+                correctAnswer: "C) Como una tierra acogedora, de abundancia, fertilidad y diversidad, apta para la navegación.",
+                feedback: "Correcto. Bohórquez describe la Amazonía como una tierra fértil y abundante, llena de riquezas naturales.",
+                page: "96-97"
+            },
+            {
+                question: "¿Cómo describe Bohórquez a los indígenas amazónicos en su documento?",
+                options: [
+                    "A) Como gente cruelísima y bárbara, dada a la sensualidad.",
+                    "B) Como 'apacibles y domésticos', inteligentes, ingeniosos, buenos mozos, y de piel más clara que la del andino.",
+                    "C) Como salvajes ignorantes que viven en chozas rústicas.",
+                    "D) Como pueblos oprimidos y desorganizados."
+                ],
+                correctAnswer: "B) Como 'apacibles y domésticos', inteligentes, ingeniosos, buenos mozos, y de piel más clara que la del andino.",
+                feedback: "Correcto. Bohórquez los presenta como gente pacífica, inteligente y de apariencia favorable, con buenas costumbres.",
+                page: 98
+            },
+            {
+                question: "Joaquín Capelo (Emisarios del Progreso) reinterpreta los aspectos inhóspitos del ambiente amazónico desde una perspectiva de progreso. ¿Cómo?",
+                options: [
+                    "A) Enfocándose en su belleza natural inalterable.",
+                    "B) Argumentando que la ciencia y la tecnología pueden transformar sus elementos 'inhóspitos' en fuentes de riqueza y poder.",
+                    "C) Criticando la explotación de sus recursos.",
+                    "D) Sosteniendo que debe permanecer virgen y sin intervención humana."
+                ],
+                correctAnswer: "B) Argumentando que la ciencia y la tecnología pueden transformar sus elementos 'inhóspitos' en fuentes de riqueza y poder.",
+                feedback: "Correcto. Capelo ve el potencial de la ciencia y la tecnología para aprovechar los recursos naturales de la Amazonía para el desarrollo.",
+                page: 103
+            },
+            {
+                question: "¿Qué 'recursos morales' percibe Joaquín Capelo en los indígenas amazónicos, que considera ausentes en los andinos?",
+                options: [
+                    "A) Su sumisión y obediencia a la autoridad.",
+                    "B) Su capacidad para el trabajo agrícola intensivo.",
+                    "C) 'El amor de los chunchos por su libertad' y la defensa de sus derechos con 'varonil entereza'.",
+                    "D) Su avanzada organización social y política."
+                ],
+                correctAnswer: "C) 'El amor de los chunchos por su libertad' y la defensa de sus derechos con 'varonil entereza'.",
+                feedback: "Correcto. Capelo valora la libertad y la entereza de los indígenas amazónicos, contrastándolos con la percepción de una 'raza' andina derrotada.",
+                page: 105
+            },
+            {
+                question: "¿Cómo describe el documento de Sendero Luminoso la situación socioeconómica de los Asháninka?",
+                options: [
+                    "A) Como pueblos que han logrado un alto nivel de desarrollo.",
+                    "B) Como 'guerreros famosos' que viven en 'pobreza y explotación extrema' y sufren 'trabajo forzado' y 'despojo de sus tierras.'",
+                    "C) Como una sociedad igualitaria y autosuficiente.",
+                    "D) Como comunidades integradas plenamente al Estado peruano."
+                ],
+                correctAnswer: "B) Como 'guerreros famosos' que viven en 'pobreza y explotación extrema' y sufren 'trabajo forzado' y 'despojo de sus tierras.'",
+                feedback: "Correcto. El documento de Sendero Luminoso enfatiza la pobreza, explotación y despojo de los Asháninka bajo el sistema capitalista.",
+                page: 110
+            },
+            {
+                question: "¿Qué rol se atribuye Sendero Luminoso en relación con los Asháninka en su documento?",
+                options: [
+                    "A) Simplemente ser observadores de su desarrollo.",
+                    "B) Organizar y entrenar políticamente a los Asháninka, vinculándolos con la Guerra Popular para su liberación.",
+                    "C) Fomentar su integración pacífica al mercado.",
+                    "D) Promover la autonomía cultural sin intervención externa."
+                ],
+                correctAnswer: "B) Organizar y entrenar políticamente a los Asháninka, vinculándolos con la Guerra Popular para su liberación.",
+                feedback: "Correcto. Sendero Luminoso se posiciona como el liberador y organizador de los Asháninka en la lucha revolucionaria.",
+                page: 112
+            },
+            {
+                question: "Más allá de la riqueza de sus recursos, ¿qué valor espiritual enfatiza la agencia 'El Tigre Journeys' sobre la Amazonía?",
+                options: [
+                    "A) Su potencial para la agricultura industrial.",
+                    "B) Los secretos espirituales que esconde, fruto de siglos de interacción entre la gente y el bosque.",
+                    "C) Su capacidad para atraer inversiones extranjeras.",
+                    "D) Su papel como reserva de biodiversidad virgen."
+                ],
+                correctAnswer: "B) Los secretos espirituales que esconde, fruto de siglos de interacción entre la gente y el bosque.",
+                feedback: "Correcto. El Tigre Journeys se centra en la riqueza espiritual y los secretos del bosque amazónico, vistos como resultado de la interacción cultural y natural.",
+                page: "115-116"
+            },
+            {
+                question: "¿Cuál es el 'esquema tripartito' común que Santos-Granero identifica en todos los documentos analizados, a pesar de sus diferencias?",
+                options: [
+                    "A) Origen, desarrollo y conclusión.",
+                    "B) Descripción del pasado, presente y futuro de la Amazonía.",
+                    "C) Alusión a la singularidad de Amazonía, justificación para cruzar la frontera, y afirmación de ser el único capaz de cruzarla.",
+                    "D) Examen de factores económicos, sociales y políticos."
+                ],
+                correctAnswer: "C) Alusión a la singularidad de Amazonía, justificación para cruzar la frontera, y afirmación de ser el único capaz de cruzarla.",
+                feedback: "Correcto. Este esquema recurrente implica la creación de alteridad, la justificación de la intervención y la autoatribución de la capacidad para llevarla a cabo.",
+                page: "120-121"
+            },
+            {
+                question: "¿Cuál es, según Santos-Granero, el propósito final de la 'alterización y consumo simbólico de la Amazonía y su gente' por parte de los Andes?",
+                options: [
+                    "A) Promover el respeto por la diversidad cultural.",
+                    "B) Justificar la eliminación de las fronteras existentes mediante el disciplinamiento y consumo higiénico de los Otros.",
+                    "C) Establecer un diálogo equitativo entre regiones.",
+                    "D) Fomentar la autogestión de los pueblos amazónicos."
+                ],
+                correctAnswer: "B) Justificar la eliminación de las fronteras existentes mediante el disciplinamiento y consumo higiénico de los Otros.",
+                feedback: "Correcto. El consumo simbólico del Otro busca domesticar la diferencia y eliminar las fronteras para la incorporación.",
+                page: "123-124"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredQuestions = 0;
+        let shuffledQuestions = [];
+
+        const questionArea = document.getElementById('question-area');
+        const checkAnswerBtn = document.getElementById('check-answer-btn');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const submitQuizBtn = document.getElementById('submit-quiz-btn');
+        const resultsArea = document.getElementById('results-area');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const finalFeedbackDisplay = document.getElementById('final-feedback');
+
+        // Function to shuffle questions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                showResults();
+                return;
+            }
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            questionArea.innerHTML = `
+                <div class="question-card">
+                    <p class="question-text">Pregunta ${currentQuestionIndex + 1}/${shuffledQuestions.length}: ${q.question}</p>
+                    <div class="options-container">
+                        ${q.options.map((option, index) => `
+                            <label class="option-label">
+                                <input type="radio" name="answer" value="${option}" id="option${index}">
+                                ${option}
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-box" class="feedback-box hidden"></div>
+                </div>
+            `;
+
+            checkAnswerBtn.classList.remove('hidden');
+            nextQuestionBtn.classList.add('hidden');
+            submitQuizBtn.classList.add('hidden');
+            resultsArea.classList.add('hidden');
+        }
+
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            const feedbackBox = document.getElementById('feedback-box');
+
+            if (!selectedOption) {
+                feedbackBox.classList.remove('hidden', 'feedback-correct', 'feedback-incorrect');
+                feedbackBox.classList.add('feedback-incorrect');
+                feedbackBox.innerHTML = 'Por favor, selecciona una opción.';
+                return;
+            }
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            const isCorrect = selectedOption.value === q.correctAnswer;
+            answeredQuestions++;
+
+            if (isCorrect) {
+                score += 4;
+                feedbackBox.classList.remove('feedback-incorrect');
+                feedbackBox.classList.add('feedback-correct');
+                feedbackBox.innerHTML = `¡Correcto! ${q.feedback} (Página ${q.page} del PDF).`;
+            } else {
+                feedbackBox.classList.remove('feedback-correct');
+                feedbackBox.classList.add('feedback-incorrect');
+                feedbackBox.innerHTML = `Incorrecto. La respuesta correcta era: ${q.correctAnswer}. ${q.feedback} (Página ${q.page} del PDF).`;
+            }
+            feedbackBox.classList.remove('hidden');
+
+            checkAnswerBtn.classList.add('hidden');
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                nextQuestionBtn.classList.remove('hidden');
+            } else {
+                submitQuizBtn.classList.remove('hidden');
+            }
+
+            // Disable all radio buttons after checking
+            document.querySelectorAll('input[name="answer"]').forEach(radio => {
+                radio.disabled = true;
+            });
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function showResults() {
+            questionArea.classList.add('hidden');
+            document.getElementById('navigation-buttons').classList.add('hidden');
+            resultsArea.classList.remove('hidden');
+
+            finalScoreDisplay.textContent = `Tu puntuación final: ${score} / ${questions.length * 4}`;
+
+            let generalFeedback = '';
+            const percentage = (score / (questions.length * 4)) * 100;
+
+            if (percentage === 100) {
+                generalFeedback = "¡Excelente! Has demostrado un conocimiento excepcional del documento. ¡Felicidades!";
+            } else if (percentage >= 80) {
+                generalFeedback = "¡Muy bien! Tienes un sólido conocimiento de las ideas clave del documento. Sigue así.";
+            } else if (percentage >= 60) {
+                generalFeedback = "Buen esfuerzo. Has captado varias ideas importantes, pero hay áreas que puedes repasar para mejorar.";
+            } else if (percentage >= 40) {
+                generalFeedback = "Necesitas repasar el documento con más detenimiento. Hay varias ideas clave que podrías reforzar.";
+            } else {
+                generalFeedback = "Un comienzo. Te sugiero leer el documento nuevamente y prestar atención a los puntos principales.";
+            }
+            finalFeedbackDisplay.textContent = generalFeedback;
+        }
+
+        // Event Listeners
+        checkAnswerBtn.addEventListener('click', checkAnswer);
+        nextQuestionBtn.addEventListener('click', nextQuestion);
+        submitQuizBtn.addEventListener('click', showResults);
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            shuffledQuestions = shuffleArray([...questions]); // Create a shuffled copy
+            loadQuestion();
+        });
+    </script>
+</body>
+</html>

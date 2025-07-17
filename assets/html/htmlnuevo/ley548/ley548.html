@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Ley N° 548</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #fcfaf9;
+            border-radius: 1.5rem; /* rounded-3xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); /* shadow-xl */
+            padding: 2.5rem; /* p-10 */
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem; /* gap-6 */
+            position: relative;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 1rem 1.5rem; /* py-4 px-6 */
+            border-radius: 0.75rem; /* rounded-xl */
+            background-color: #e2e8f0; /* bg-slate-200 */
+            text-align: left;
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 500; /* font-medium */
+            color: #334155; /* text-slate-700 */
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .option-button:hover {
+            background-color: #cbd5e1; /* bg-slate-300 */
+            transform: translateY(-2px);
+        }
+        .option-button.selected {
+            border-color: #3b82f6; /* border-blue-500 */
+            background-color: #bfdbfe; /* bg-blue-200 */
+        }
+        .option-button.correct {
+            background-color: #d1fae5; /* bg-green-100 */
+            border-color: #10b981; /* border-green-500 */
+            color: #065f46; /* text-green-800 */
+        }
+        .option-button.incorrect {
+            background-color: #fee2e2; /* bg-red-100 */
+            border-color: #ef4444; /* border-red-500 */
+            color: #991b1b; /* text-red-800 */
+        }
+        .navigation-button {
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            border-radius: 0.75rem; /* rounded-xl */
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .navigation-button.primary {
+            background-color: #3b82f6; /* bg-blue-500 */
+            color: #ffffff; /* text-white */
+        }
+        .navigation-button.primary:hover {
+            background-color: #2563eb; /* bg-blue-600 */
+            transform: translateY(-2px);
+        }
+        .navigation-button.secondary {
+            background-color: #e2e8f0; /* bg-slate-200 */
+            color: #334155; /* text-slate-700 */
+        }
+        .navigation-button.secondary:hover {
+            background-color: #cbd5e1; /* bg-slate-300 */
+            transform: translateY(-2px);
+        }
+        .feedback-box {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        .feedback-correct {
+            background-color: #d1fae5; /* bg-green-100 */
+            color: #065f46; /* text-green-800 */
+            border: 1px solid #10b981; /* border-green-500 */
+        }
+        .feedback-incorrect {
+            background-color: #fee2e2; /* bg-red-100 */
+            color: #991b1b; /* text-red-800 */
+            border: 1px solid #ef4444; /* border-red-500 */
+        }
+        .final-score-container {
+            text-align: center;
+            padding: 2.5rem;
+            background-color: #2da5f5; /* bg-blue-50 */
+            border-radius: 1.5rem;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+        .final-score-container h2 {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 700; /* font-bold */
+            color: #1e40af; /* text-blue-800 */
+            margin-bottom: 1rem;
+        }
+        .final-score-container p {
+            font-size: 1.25rem; /* text-xl */
+            color: #334155; /* text-slate-700 */
+            margin-bottom: 1.5rem;
+        }
+        .credits {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.875rem; /* text-sm */
+            color: #64748b; /* text-slate-500 */
+        }
+        .score-display {
+            position: absolute;
+            top: 1px;
+            right: 2.5rem;
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700; /* font-bold */
+            color: #3b82f6; /* text-blue-500 */
+        }
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 1.5rem;
+            }
+            .option-button {
+                font-size: 1rem;
+                padding: 0.75rem 1rem;
+            }
+            .navigation-button {
+                font-size: 1rem;
+                padding: 0.6rem 1.2rem;
+            }
+            .score-display {
+                top: 1.5rem;
+                right: 1.5rem;
+                font-size: 1rem;
+            }
+            .final-score-container h2 {
+                font-size: 1.75rem;
+            }
+            .final-score-container p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="score-display">Puntuación: <span id="current-score">0.0</span></div>
+        <h1 class="text-3xl font-bold text-center text-blue-700 mb-6">Cuestionario: Ley N° 548 - Código Niña, Niño y Adolescente</h1>
+
+        <div id="quiz-content">
+            <div class="mb-6">
+                <p id="question-number" class="text-sm font-semibold text-slate-500 mb-2"></p>
+                <p id="question-text" class="text-2xl font-bold text-slate-800 mb-6"></p>
+                <div id="options-container" class="grid grid-cols-1 gap-4">
+                    <!-- Options will be loaded here by JavaScript -->
+                </div>
+            </div>
+
+            <div id="feedback-area" class="feedback-box hidden">
+                <p id="feedback-text"></p>
+                <p id="page-reference" class="text-sm mt-2"></p>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button id="prev-button" class="navigation-button secondary" disabled>Anterior</button>
+                <button id="next-button" class="navigation-button primary">Siguiente</button>
+                <button id="submit-button" class="navigation-button primary hidden">Finalizar Cuestionario</button>
+            </div>
+        </div>
+
+        <div id="results-screen" class="hidden final-score-container">
+            <h2>Resultados del Cuestionario</h2>
+            <p class="text-xl">Has respondido <span id="correct-answers-count" class="font-bold"></span> preguntas correctamente de un total de <span id="total-questions-count" class="font-bold"></span>.</p>
+            <p class="text-2xl font-bold text-blue-700">Tu Puntuación Total: <span id="final-score">0.0</span> / 126.0</p>
+            <p id="general-feedback" class="mt-4 text-slate-600"></p>
+            <button id="restart-button" class="navigation-button primary mt-6">Reiniciar Cuestionario</button>
+        </div>
+
+        <div class="credits">
+            PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025.<br>
+            © Victor
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Según el Artículo 5, ¿cuál es la definición de 'Niñez' en el Código Niña, Niño y Adolescente?",
+                options: [
+                    "Desde la concepción hasta los diez (10) años cumplidos.",
+                    "Desde el nacimiento hasta los doce (12) años cumplidos.",
+                    "Desde la concepción hasta los doce (12) años cumplidos.",
+                    "Desde los seis (6) años hasta los dieciocho (18) años cumplidos."
+                ],
+                correctAnswer: "Desde la concepción hasta los doce (12) años cumplidos.",
+                feedback: "La niñez se define desde la concepción hasta los doce (12) años cumplidos.",
+                page: 13
+            },
+            {
+                question: "De acuerdo con el Artículo 48, ¿cuándo es nulo el consentimiento de la madre o padre para la renuncia de la autoridad con fines de adopción?",
+                options: [
+                    "Si se da bajo presión o promesa de pago.",
+                    "Si no es ratificado verbalmente en audiencia.",
+                    "Si es otorgado antes del nacimiento de la niña o niño.",
+                    "Si no se brinda con completo conocimiento de las consecuencias jurídicas."
+                ],
+                correctAnswer: "Si es otorgado antes del nacimiento de la niña o niño.",
+                feedback: "El consentimiento es nulo si se da antes del nacimiento de la niña o niño.",
+                page: 24
+            },
+            {
+                question: "Según el Artículo 129, ¿cuál es la edad mínima para trabajar establecida en el Código, y cuáles son las excepciones para trabajar por cuenta ajena?",
+                options: [
+                    "12 años, con autorización para adolescentes de 10 a 12 años.",
+                    "14 años, con autorización para adolescentes de 12 a 14 años.",
+                    "14 años, sin excepciones para trabajo por cuenta ajena.",
+                    "10 años, con autorización para adolescentes de 8 a 10 años."
+                ],
+                correctAnswer: "14 años, con autorización para adolescentes de 12 a 14 años.",
+                feedback: "La edad mínima para trabajar es de 14 años, con excepciones para adolescentes de 12 a 14 años con autorización para trabajo por cuenta ajena.",
+                page: 45
+            },
+            {
+                question: "Según el Artículo 60, ¿cuánto tiempo estará vigente la guarda provisional y qué entidad es responsable de su seguimiento?",
+                options: [
+                    "Un año, la Instancia Técnica Departamental de Política Social.",
+                    "Indefinidamente, el Ministerio de Justicia.",
+                    "En tanto se defina la suspensión o extinción de la autoridad, la Defensoría de la Niñez y Adolescencia.",
+                    "Seis meses, la Jueza o Juez Público."
+                ],
+                correctAnswer: "En tanto se defina la suspensión o extinción de la autoridad, la Defensoría de la Niñez y Adolescencia.",
+                feedback: "La guarda provisional estará vigente hasta que se defina la suspensión o extinción de la autoridad, y la Defensoría de la Niñez y Adolescencia es la encargada de su seguimiento.",
+                page: 28
+            },
+            {
+                question: "El Artículo 132, Parágrafo VI, establece un límite para la jornada de trabajo diurna semanal de adolescentes. ¿Cuál es este límite?",
+                options: [
+                    "No mayor a 48 horas.",
+                    "No mayor a 40 horas.",
+                    "No mayor a 30 horas.",
+                    "No mayor a 35 horas."
+                ],
+                correctAnswer: "No mayor a 40 horas.",
+                feedback: "La jornada de trabajo diurna semanal para adolescentes no debe exceder las 40 horas.",
+                page: 47
+            },
+            {
+                question: "De acuerdo con el Artículo 149, ¿qué medida preventiva específica se debe adoptar para personas con sentencia condenatoria ejecutoriada por delitos contra la libertad sexual de niñas, niños o adolescentes, una vez cumplida la sanción penal?",
+                options: [
+                    "Prohibición de residir en el mismo departamento.",
+                    "Aplicación de tratamientos psicológicos o psiquiátricos como medidas de seguridad.",
+                    "Prohibición de tener contacto con menores de 18 años bajo ninguna circunstancia.",
+                    "Inclusión en un registro público sin restricciones de residencia o trabajo."
+                ],
+                correctAnswer: "Aplicación de tratamientos psicológicos o psiquiátricos como medidas de seguridad.",
+                feedback: "Se deben aplicar tratamientos psicológicos o psiquiátricos como medidas de seguridad.",
+                page: 55
+            },
+            {
+                question: "Según el Artículo 166, ¿cuál es la finalidad principal de los programas de protección integral de las niñas, niños y adolescentes?",
+                options: [
+                    "Exclusivamente la inserción laboral.",
+                    "Principalmente la recaudación de fondos.",
+                    "Asistencia, prevención, atención, cuidado integral, capacitación, inserción familiar y social, entre otros.",
+                    "Únicamente la promoción cultural y deportiva."
+                ],
+                correctAnswer: "Asistencia, prevención, atención, cuidado integral, capacitación, inserción familiar y social, entre otros.",
+                feedback: "Los programas de protección integral tienen múltiples finalidades, incluyendo asistencia, prevención, y desarrollo integral.",
+                page: 65
+            },
+            {
+                question: "El Artículo 176 establece las sanciones que puede imponer la Jueza o Juez Público en materia de Niñez y Adolescencia por infracciones. ¿Cuál de las siguientes no es una sanción contemplada en este artículo?",
+                options: [
+                    "Prestación de servicios a la comunidad.",
+                    "Multa.",
+                    "Prisión.",
+                    "Arresto de ocho (8) a veinticuatro (24) horas."
+                ],
+                correctAnswer: "Prisión.",
+                feedback: "La prisión no es una sanción directa para infracciones en este contexto, sino las mencionadas en las otras opciones.",
+                page: 71
+            },
+            {
+                question: "De acuerdo con el Artículo 183, ¿cuál de las siguientes no es una atribución de la Instancia Técnica Departamental de Política Social?",
+                options: [
+                    "Diseñar e implementar programas de Desarrollo Infantil Integral para niñas y niños hasta cinco (5) años de edad.",
+                    "Llevar un registro único de solicitantes para la adopción de niña, niño y adolescente en condiciones de ser adoptados.",
+                    "Interponer demandas, solicitudes, denuncias y recursos ante las autoridades competentes por conductas y hechos de violencia.",
+                    "Brindar servicios técnicos especializados de preparación y selección para candidatos adoptantes."
+                ],
+                correctAnswer: "Interponer demandas, solicitudes, denuncias y recursos ante las autoridades competentes por conductas y hechos de violencia.",
+                feedback: "Interponer demandas es una atribución de la Defensoría de la Niñez y Adolescencia, no de la Instancia Técnica Departamental de Política Social.",
+                page: 77
+            },
+            {
+                question: "Según el Artículo 193, ¿cuál de los siguientes principios procesales rige en los procesos especiales previstos en el Código Niña, Niño y Adolescente?",
+                options: [
+                    "Formalidad estricta.",
+                    "Publicidad total.",
+                    "Desformalización.",
+                    "Celeridad sin considerar la opinión del niño."
+                ],
+                correctAnswer: "Desformalización.",
+                feedback: "El principio de desformalización busca flexibilizar el procedimiento, evitando ritualidades.",
+                page: 82
+            },
+            {
+                question: "El Artículo 214 establece el plazo para contestar la demanda. ¿Cuál es este plazo?",
+                options: [
+                    "Tres (3) días.",
+                    "Diez (10) días.",
+                    "Cinco (5) días.",
+                    "Veinte (20) días."
+                ],
+                correctAnswer: "Cinco (5) días.",
+                feedback: "El plazo para contestar la demanda es de cinco (5) días.",
+                page: 88
+            },
+            {
+                question: "Según el Artículo 250, ¿cuál es el plazo máximo para el trámite de adopción nacional o internacional, desde la admisión de la demanda hasta la sentencia?",
+                options: [
+                    "Seis (6) meses.",
+                    "Un (1) año.",
+                    "Cuatro (4) meses.",
+                    "Dos (2) meses."
+                ],
+                correctAnswer: "Cuatro (4) meses.",
+                feedback: "El trámite de adopción no debe exceder los cuatro (4) meses.",
+                page: 95
+            },
+            {
+                question: "El Artículo 264 menciona el plazo máximo de duración del proceso jurisdiccional en el Sistema Penal para adolescentes. ¿Cuál es este plazo?",
+                options: [
+                    "Seis (6) meses.",
+                    "Un (1) año.",
+                    "Ocho (8) meses.",
+                    "Diez (10) meses."
+                ],
+                correctAnswer: "Ocho (8) meses.",
+                feedback: "El proceso jurisdiccional en el Sistema Penal para adolescentes no debe exceder los ocho (8) meses.",
+                page: 104
+            },
+            {
+                question: "De acuerdo con el Artículo 268, ¿cómo se atenúa la responsabilidad penal de la o el adolescente respecto del máximo penal correspondiente al delito?",
+                options: [
+                    "En la mitad.",
+                    "En tres cuartas partes.",
+                    "En cuatro quintas partes.",
+                    "En un tercio."
+                ],
+                correctAnswer: "En cuatro quintas partes.",
+                feedback: "La responsabilidad penal se atenúa en cuatro quintas partes.",
+                page: 105
+            },
+            {
+                question: "Según el Artículo 287, ¿cuál de las siguientes situaciones no es una causal para la aprehensión de la persona adolescente?",
+                options: [
+                    "En caso de fuga, estando legalmente detenida o detenido.",
+                    "Por requerimiento Fiscal, ante su inasistencia, sin indicios suficientes de delito.",
+                    "En caso de delito flagrante.",
+                    "En cumplimiento de orden emanada por la Jueza o el Juez."
+                ],
+                correctAnswer: "Por requerimiento Fiscal, ante su inasistencia, sin indicios suficientes de delito.",
+                feedback: "El requerimiento Fiscal para aprehensión debe tener indicios suficientes de delito.",
+                page: 113
+            },
+            {
+                question: "El Artículo 291, Parágrafo I, inciso c), establece una causal para la cesación de la detención preventiva. ¿Cuál es esta causal en relación con la acusación fiscal?",
+                options: [
+                    "Cuando su duración exceda de treinta (30) días sin acusación Fiscal.",
+                    "Cuando su duración exceda de cuarenta y cinco (45) días sin acusación Fiscal.",
+                    "Cuando su duración exceda de sesenta (60) días sin acusación Fiscal.",
+                    "Cuando su duración exceda de noventa (90) días sin acusación Fiscal."
+                ],
+                correctAnswer: "Cuando su duración exceda de cuarenta y cinco (45) días sin acusación Fiscal.",
+                feedback: "La detención preventiva cesa si excede 45 días sin acusación fiscal.",
+                page: 115
+            },
+            {
+                question: "Según el Artículo 299, ¿cuál es la pena máxima privativa de libertad que debe tener un delito para que se pueda aplicar la remisión?",
+                options: [
+                    "Hasta dos (2) años.",
+                    "Hasta tres (3) años.",
+                    "Hasta cinco (5) años.",
+                    "Hasta siete (7) años."
+                ],
+                correctAnswer: "Hasta cinco (5) años.",
+                feedback: "La remisión se aplica para delitos con pena máxima privativa de libertad de hasta cinco (5) años.",
+                page: 118
+            },
+            {
+                question: "El Artículo 311, Parágrafo V, establece el plazo máximo de duración del juicio oral para adolescentes. ¿Cuál es este plazo?",
+                options: [
+                    "Tres (3) días hábiles.",
+                    "Cinco (5) días hábiles.",
+                    "Diez (10) días hábiles.",
+                    "Quince (15) días hábiles."
+                ],
+                correctAnswer: "Cinco (5) días hábiles.",
+                feedback: "El juicio oral para adolescentes no debe exceder los cinco (5) días hábiles.",
+                page: 123
+            },
+            {
+                question: "De acuerdo con el Artículo 324, ¿cuándo se aplicarán las medidas socio-educativas en libertad?",
+                options: [
+                    "Cuando la pena atenuada sea superior a dos (2) años.",
+                    "Cuando la pena atenuada esté comprendida entre uno (1) y dos (2) años.",
+                    "Cuando la pena atenuada sea menor a un (1) año.",
+                    "En todos los casos, independientemente de la pena."
+                ],
+                correctAnswer: "Cuando la pena atenuada sea menor a un (1) año.",
+                feedback: "Las medidas socio-educativas en libertad se aplican cuando la pena atenuada es menor a un (1) año.",
+                page: 129
+            },
+            {
+                question: "El Artículo 339 menciona la segregación de género en los centros especializados. ¿Cómo deben cumplir las adolescentes las sanciones restrictivas y privativas de libertad?",
+                options: [
+                    "En los mismos centros que los adolescentes varones, pero en secciones separadas.",
+                    "En centros separados a los de los adolescentes varones, gozando de un régimen diferenciado.",
+                    "En centros mixtos con supervisión constante.",
+                    "No se especifica la segregación de género en este artículo."
+                ],
+                correctAnswer: "En centros separados a los de los adolescentes varones, gozando de un régimen diferenciado.",
+                feedback: "Las adolescentes deben cumplir sanciones en centros separados y con un régimen diferenciado.",
+                page: 134
+            },
+            {
+                question: "Según el Artículo 12, ¿cuál de los siguientes no es un principio fundamental del Código Niña, Niño y Adolescente?",
+                options: [
+                    "Interés Superior.",
+                    "Prioridad Absoluta.",
+                    "Autonomía Financiera.",
+                    "Corresponsabilidad."
+                ],
+                correctAnswer: "Autonomía Financiera.",
+                feedback: "La Autonomía Financiera no es un principio fundamental del Código Niña, Niño y Adolescente.",
+                page: 14
+            },
+            {
+                question: "El Artículo 21, Parágrafo III, prohíbe negar la atención médica de emergencia a niñas, niños y adolescentes. ¿Cuál de las siguientes razones no puede ser alegada para negar dicha atención?",
+                options: [
+                    "Ausencia de los padres o representantes.",
+                    "Carencia de documentos de identidad.",
+                    "Falta de recursos económicos.",
+                    "Necesidad de una derivación a un especialista."
+                ],
+                correctAnswer: "Necesidad de una derivación a un especialista.",
+                feedback: "La necesidad de una derivación no es una razón válida para negar la atención de emergencia.",
+                page: 17
+            },
+            {
+                question: "De acuerdo con el Artículo 25, ¿cuánto tiempo deben mantener los hospitales un registro de los casos atendidos por medio de fichas médicas individuales?",
+                options: [
+                    "Diez (10) años.",
+                    "Quince (15) años.",
+                    "Dieciocho (18) años.",
+                    "Veinte (20) años."
+                ],
+                correctAnswer: "Dieciocho (18) años.",
+                feedback: "Los hospitales deben mantener registros por dieciocho (18) años.",
+                page: 19
+            },
+            {
+                question: "El Artículo 47, inciso e), establece una causal para la extinción de la autoridad materna o paterna. ¿Cuál es la pena privativa de libertad mínima para esta causal?",
+                options: [
+                    "Cinco (5) años.",
+                    "Siete (7) años.",
+                    "Diez (10) años.",
+                    "Quince (15) años."
+                ],
+                correctAnswer: "Siete (7) años.",
+                feedback: "La pena mínima para esta causal de extinción de autoridad es de siete (7) años.",
+                page: 24
+            },
+            {
+                question: "Según el Artículo 54, ¿cuál es el plazo máximo que tiene la autoridad judicial para determinar la medida de integración de la niña, niño o adolescente en una familia sustituta o derivación a un centro de acogimiento, a partir del conocimiento del acogimiento circunstancial?",
+                options: [
+                    "Quince (15) días.",
+                    "Veinte (20) días.",
+                    "Treinta (30) días.",
+                    "Sesenta (60) días."
+                ],
+                correctAnswer: "Treinta (30) días.",
+                feedback: "La autoridad judicial tiene un plazo máximo de treinta (30) días para determinar la medida.",
+                page: 26
+            },
+            {
+                question: "El Artículo 73 establece la remuneración de la tutora o tutor. ¿Cuál es el rango de porcentaje de las rentas producidas por los bienes sujetos a su administración?",
+                options: [
+                    "No inferior al 2% ni excederá el 5%.",
+                    "No inferior al 5% ni excederá el 10%.",
+                    "No inferior al 10% ni excederá el 15%.",
+                    "No inferior al 1% ni excederá el 7%."
+                ],
+                correctAnswer: "No inferior al 5% ni excederá el 10%.",
+                feedback: "La remuneración de la tutora o tutor está entre el 5% y el 10% de las rentas.",
+                page: 30
+            },
+            {
+                question: "De acuerdo con el Artículo 84, ¿cuál es la edad máxima que debe tener al menos uno de los miembros de una pareja casada o en unión libre que solicita una adopción, salvo excepciones?",
+                options: [
+                    "Cuarenta y cinco (45) años.",
+                    "Cincuenta (50) años.",
+                    "Cincuenta y cinco (55) años.",
+                    "Sesenta (60) años."
+                ],
+                correctAnswer: "Cincuenta y cinco (55) años.",
+                feedback: "Al menos uno de los solicitantes debe tener menos de cincuenta y cinco (55) años.",
+                page: 32
+            },
+            {
+                question: "El Artículo 93, Parágrafo I, establece la reserva del trámite de adopción. ¿En qué momento puede levantarse esta reserva excepcionalmente?",
+                options: [
+                    "A solicitud de cualquier persona interesada.",
+                    "A solicitud fundamentada de la Defensoría de la Niñez y Adolescencia, la Instancia Técnica Departamental de Política Social, el Ministerio Público o el Ministerio de Justicia, mediante orden judicial.",
+                    "Después de la sentencia ejecutoriada.",
+                    "Nunca, es una reserva absoluta."
+                ],
+                correctAnswer: "A solicitud fundamentada de la Defensoría de la Niñez y Adolescencia, la Instancia Técnica Departamental de Política Social, el Ministerio Público o el Ministerio de Justicia, mediante orden judicial.",
+                feedback: "La reserva puede levantarse bajo solicitud fundamentada y orden judicial de las entidades mencionadas.",
+                page: 35
+            },
+            {
+                question: "Según el Artículo 103, ¿con qué periodicidad la Autoridad Central del país de recepción tiene la obligación de remitir los informes post-adoptivos en caso de adopción internacional?",
+                options: [
+                    "Anualmente.",
+                    "Cada tres (3) meses.",
+                    "Cada seis (6) meses y durante dos (2) años.",
+                    "Una única vez al finalizar el primer año."
+                ],
+                correctAnswer: "Cada seis (6) meses y durante dos (2) años.",
+                feedback: "Los informes post-adoptivos deben remitirse cada seis (6) meses durante dos (2) años.",
+                page: 38
+            },
+            {
+                question: "El Artículo 110, Parágrafo II, indica el plazo para que la madre y el padre registren la filiación de su hija o hijo al momento del nacimiento. ¿Cuál es este plazo?",
+                options: [
+                    "Hasta quince (15) días después.",
+                    "Hasta treinta (30) días después.",
+                    "Hasta sesenta (60) días después.",
+                    "Hasta noventa (90) días después."
+                ],
+                correctAnswer: "Hasta treinta (30) días después.",
+                feedback: "El plazo para registrar la filiación es de treinta (30) días después del nacimiento.",
+                page: 39
+            },
+            {
+                question: "Según el Artículo 117, ¿cuál de las siguientes previsiones debe sujetarse la disciplina escolar en el Código Niña, Niño y Adolescente?",
+                options: [
+                    "Prohibición de cualquier tipo de castigo físico, violento o humillante.",
+                    "Establecimiento de sanciones monetarias para los estudiantes.",
+                    "La posibilidad de expulsión por faltas graves.",
+                    "La aplicación de amonestaciones sin derecho a la defensa."
+                ],
+                correctAnswer: "Prohibición de cualquier tipo de castigo físico, violento o humillante.",
+                feedback: "La disciplina escolar debe prohibir cualquier tipo de castigo físico, violento o humillante.",
+                page: 42
+            },
+            {
+                question: "El Artículo 135, inciso b), prohíbe la contratación de la o el adolescente mayor de catorce (14) años para qué tipo de actividad laboral.",
+                options: [
+                    "Trabajo asalariado del hogar.",
+                    "Actividad laboral o trabajo fuera del país.",
+                    "Actividades en el marco familiar.",
+                    "Trabajo por cuenta propia."
+                ],
+                correctAnswer: "Actividad laboral o trabajo fuera del país.",
+                feedback: "Se prohíbe la contratación de adolescentes mayores de 14 años para trabajar fuera del país.",
+                page: 48
+            },
+            {
+                question: "De acuerdo con el Artículo 136, ¿cuál de las siguientes actividades laborales está prohibida por su naturaleza o condición?",
+                options: [
+                    "Cuidado de ganado menor en el ámbito familiar.",
+                    "Venta de periódicos en la calle.",
+                    "Zafra de caña de azúcar.",
+                    "Ayuda en el comercio familiar."
+                ],
+                correctAnswer: "Zafra de caña de azúcar.",
+                feedback: "La zafra de caña de azúcar es una actividad laboral prohibida.",
+                page: 49
+            },
+            {
+                question: "El Artículo 145, Parágrafo III, establece la obligación de protección contra la violencia. ¿Quiénes deben proteger a todas las niñas, niños y adolescentes contra cualquier forma de explotación, maltrato, abuso o negligencia?",
+                options: [
+                    "Únicamente el Estado.",
+                    "Solo la familia y la sociedad.",
+                    "El Estado en todos sus niveles, las familias y la sociedad.",
+                    "Principalmente las instituciones privadas."
+                ],
+                correctAnswer: "El Estado en todos sus niveles, las familias y la sociedad.",
+                feedback: "La protección es una corresponsabilidad del Estado, las familias y la sociedad.",
+                page: 54
+            },
+            {
+                question: "Según el Artículo 155, ¿cuál es el plazo máximo para denunciar hechos de violencia contra niñas, niños o adolescentes, una vez conocidos?",
+                options: [
+                    "Doce (12) horas.",
+                    "Veinticuatro (24) horas.",
+                    "Cuarenta y ocho (48) horas.",
+                    "Setenta y dos (72) horas."
+                ],
+                correctAnswer: "Veinticuatro (24) horas.",
+                feedback: "La denuncia debe realizarse en un plazo máximo de veinticuatro (24) horas.",
+                page: 60
+            },
+            {
+                question: "El Artículo 164, Parágrafo I, inciso d), define las Políticas Sociales Básicas. ¿A qué se refieren estas políticas?",
+                options: [
+                    "Exclusivamente a la promoción de derechos.",
+                    "A políticas que generen condiciones mínimas y universales que garanticen el desarrollo de toda la población y en particular de las niñas, niños y adolescentes, relativas a la salud, educación, vivienda, seguridad y empleo.",
+                    "A acciones encaminadas a restablecer derechos vulnerados.",
+                    "A programas de prevención de situaciones de vulnerabilidad."
+                ],
+                correctAnswer: "A políticas que generen condiciones mínimas y universales que garanticen el desarrollo de toda la población y en particular de las niñas, niños y adolescentes, relativas a la salud, educación, vivienda, seguridad y empleo.",
+                feedback: "Las Políticas Sociales Básicas buscan garantizar condiciones mínimas y universales para el desarrollo integral.",
+                page: 64
+            },
+            {
+                question: "De acuerdo con el Artículo 174, ¿cuál es el plazo máximo que tiene la autoridad judicial para emitir una determinación sobre la situación de la niña, niño o adolescente en un centro de acogimiento, desde el conocimiento del hecho?",
+                options: [
+                    "Quince (15) días.",
+                    "Veinte (20) días.",
+                    "Treinta (30) días.",
+                    "Sesenta (60) días."
+                ],
+                correctAnswer: "Treinta (30) días.",
+                feedback: "La autoridad judicial tiene un plazo máximo de treinta (30) días para emitir una determinación.",
+                page: 70
+            },
+            {
+                question: "El Artículo 180, Parágrafo III, establece las funciones mínimas del Consejo de Coordinación Sectorial e Intersectorial para temas de la niña, niño y adolescente. ¿Cuál de las siguientes es una de estas funciones?",
+                options: [
+                    "Aprobar el presupuesto nacional para la niñez y adolescencia.",
+                    "Coordinar la articulación del diseño, implementación y monitoreo de políticas, planes, estrategias, programas, proyectos y normativa para las niñas, niños y adolescentes.",
+                    "Ejecutar directamente programas de protección.",
+                    "Sancionar a las instituciones que incumplan la normativa."
+                ],
+                correctAnswer: "Coordinar la articulación del diseño, implementación y monitoreo de políticas, planes, estrategias, programas, proyectos y normativa para las niñas, niños y adolescentes.",
+                feedback: "Una función clave es coordinar el diseño, implementación y monitoreo de políticas y programas.",
+                page: 74
+            },
+            {
+                question: "Según el Artículo 191, ¿cómo deben estar conformados los Comités de Niñas, Niños y Adolescentes en cuanto a la participación de niñas y adolescentes mujeres?",
+                options: [
+                    "Al menos 30%.",
+                    "Al menos 40%.",
+                    "Al menos 50%.",
+                    "No se especifica un porcentaje."
+                ],
+                correctAnswer: "Al menos 50%.",
+                feedback: "La participación de niñas y adolescentes mujeres debe ser de al menos el 50%.",
+                page: 78
+            },
+            {
+                question: "El Artículo 197 establece cómo se computan los plazos procesales en el Código. ¿Cómo se computan, salvo disposición contraria?",
+                options: [
+                    "En días calendario.",
+                    "En días hábiles.",
+                    "En horas.",
+                    "En meses."
+                ],
+                correctAnswer: "En días hábiles.",
+                feedback: "Los plazos procesales se computan en días hábiles.",
+                page: 83
+            },
+            {
+                question: "De acuerdo con el Artículo 226, ¿cuál es el plazo máximo para la celebración de la audiencia, una vez vencido el plazo para la contestación de la demanda?",
+                options: [
+                    "Quince (15) días.",
+                    "Veinte (20) días.",
+                    "Veinticinco (25) días.",
+                    "Treinta (30) días."
+                ],
+                correctAnswer: "Veinticinco (25) días.",
+                feedback: "La audiencia debe celebrarse en un plazo no mayor a veinticinco (25) días.",
+                page: 89
+            },
+            {
+                question: "El Artículo 233, Parágrafo III, establece el plazo para que el Tribunal Departamental de Justicia resuelva el recurso de apelación de sentencia. ¿Cuál es este plazo?",
+                options: [
+                    "Tres (3) días.",
+                    "Cinco (5) días.",
+                    "Diez (10) días.",
+                    "Quince (15) días."
+                ],
+                correctAnswer: "Cinco (5) días.",
+                feedback: "El Tribunal debe resolver el recurso de apelación en un plazo de cinco (5) días.",
+                page: 91
+            },
+            {
+                question: "Según el Artículo 253, ¿cuál es el plazo máximo para el periodo de convivencia pre-adoptiva en caso de adopción nacional o internacional?",
+                options: [
+                    "Un (1) mes.",
+                    "Dos (2) meses.",
+                    "Tres (3) meses.",
+                    "Seis (6) meses."
+                ],
+                correctAnswer: "Dos (2) meses.",
+                feedback: "El periodo de convivencia pre-adoptiva no debe ser mayor a dos (2) meses.",
+                page: 98
+            },
+            {
+                question: "El Artículo 344, Parágrafo II, establece el plazo para que el plan individual de ejecución de medidas socio-educativas esté listo. ¿Cuál es este plazo a partir de la sentencia ejecutoriada?",
+                options: [
+                    "Quince (15) días.",
+                    "Veinte (20) días.",
+                    "Treinta (30) días.",
+                    "Sesenta (60) días."
+                ],
+                correctAnswer: "Treinta (30) días.",
+                feedback: "El plan individual debe estar listo en un plazo de treinta (30) días a partir de la sentencia ejecutoriada.",
+                page: 135
+            },
+            {
+                question: "De acuerdo con el Artículo 346, ¿con qué periodicidad la Jueza o el Juez debe revisar y evaluar las medidas socio-educativas para modificarlas o sustituirlas?",
+                options: [
+                    "Anualmente.",
+                    "Cada tres (3) meses.",
+                    "Cada seis (6) meses.",
+                    "Cada nueve (9) meses."
+                ],
+                correctAnswer: "Cada seis (6) meses.",
+                feedback: "Las medidas socio-educativas deben revisarse y evaluarse cada seis (6) meses.",
+                page: 136
+            },
+            {
+                question: "Según el Artículo 16, ¿qué comprende el derecho a la vida de la niña, niño o adolescente?",
+                options: [
+                    "Únicamente el derecho a nacer.",
+                    "El derecho a vivir en condiciones que garanticen una existencia digna.",
+                    "El derecho a la alimentación y vivienda.",
+                    "El derecho a la salud y educación."
+                ],
+                correctAnswer: "El derecho a vivir en condiciones que garanticen una existencia digna.",
+                feedback: "El derecho a la vida comprende vivir en condiciones que garanticen una existencia digna.",
+                page: 16
+            },
+            {
+                question: "El Artículo 37, Parágrafo II, establece una prohibición importante. ¿Qué no podrá interpretarse como violencia ni constituir motivo para iniciar acciones de extinción o suspensión de la autoridad de la madre o padre?",
+                options: [
+                    "La falta de afecto.",
+                    "La falta o carencia de recursos materiales y económicos.",
+                    "El incumplimiento de deberes educativos.",
+                    "La discordancia en el ejercicio de la autoridad."
+                ],
+                correctAnswer: "La falta o carencia de recursos materiales y económicos.",
+                feedback: "La falta o carencia de recursos materiales y económicos no es motivo para interpretar como violencia o iniciar acciones de extinción de autoridad.",
+                page: 21
+            },
+            {
+                question: "De acuerdo con el Artículo 89, ¿cuál de los siguientes grupos no tiene preferencia para la adopción nacional e internacional?",
+                options: [
+                    "Niñas y niños mayores de 4 años.",
+                    "Grupo de hermanos.",
+                    "Niñas, niños o adolescentes con discapacidad.",
+                    "Niñas, niños o adolescentes que requieren cirugías mayores con riesgo de vida."
+                ],
+                correctAnswer: "Niñas, niños o adolescentes que requieren cirugías mayores con riesgo de vida.",
+                feedback: "Se da preferencia a quienes requieren cirugías menores o tratamientos médicos que no involucren riesgo de vida, no cirugías mayores con riesgo de vida.",
+                page: 35
+            },
+            {
+                question: "Según el Artículo 106, ¿qué edad máxima puede tener una niña o niño para permanecer con su madre en espacios aledaños a los centros penitenciarios para mujeres?",
+                options: [
+                    "Hasta los cuatro (4) años de edad.",
+                    "Hasta los cinco (5) años de edad.",
+                    "Hasta los seis (6) años de edad.",
+                    "Hasta los siete (7) años de edad."
+                ],
+                correctAnswer: "Hasta los seis (6) años de edad.",
+                feedback: "Una niña o niño puede permanecer con su madre hasta los seis (6) años de edad en espacios aledaños a centros penitenciarios para mujeres.",
+                page: 38
+            },
+            {
+                question: "El Artículo 147, Parágrafo III, indica que las formas de violencia que no estén tipificadas como delito en la Ley Penal, ¿qué constituyen y quién las sanciona?",
+                options: [
+                    "Constituyen faltas y las sanciona la Policía Boliviana.",
+                    "Constituyen infracciones y las sanciona la Jueza o Juez Público de la Niñez y Adolescencia.",
+                    "Constituyen delitos menores y las sanciona el Ministerio Público.",
+                    "No son sancionables por el Código."
+                ],
+                correctAnswer: "Constituyen infracciones y las sanciona la Jueza o Juez Público de la Niñez y Adolescencia.",
+                feedback: "Las formas de violencia no tipificadas como delito son infracciones y son sancionadas por la Jueza o Juez Público de la Niñez y Adolescencia.",
+                page: 54
+            },
+            {
+                question: "De acuerdo con el Artículo 158, ¿cuál de los siguientes no es un deber de la niña, niño y adolescente?",
+                options: [
+                    "Preservar su vida y salud.",
+                    "Asumir su responsabilidad como sujetos activos en la construcción de la sociedad.",
+                    "Exigir privilegios especiales por su condición de menor.",
+                    "Respetar a su madre, padre, guardadora o guardador, tutora o tutor, maestras o maestros y a toda persona."
+                ],
+                correctAnswer: "Exigir privilegios especiales por su condición de menor.",
+                feedback: "Exigir privilegios especiales no es un deber; los deberes se centran en la responsabilidad y el respeto.",
+                page: 61
+            },
+            {
+                question: "El Artículo 170, inciso d), establece la periodicidad de revisión de las medidas de protección. ¿Con qué frecuencia deben ser revisadas, excepto la adopción?",
+                options: [
+                    "Cada tres (3) meses.",
+                    "Cada seis (6) meses.",
+                    "Anualmente.",
+                    "Cada dos (2) años."
+                ],
+                correctAnswer: "Cada seis (6) meses.",
+                feedback: "Las medidas de protección, excepto la adopción, deben revisarse cada seis (6) meses.",
+                page: 68
+            },
+            {
+                question: "Según el Artículo 200, además de los requisitos de la Ley del Órgano Judicial, ¿cuántos años de experiencia y formación especializada se requiere para ser Jueza o Juez Público de la Niñez y Adolescencia?",
+                options: [
+                    "Al menos un (1) año.",
+                    "Al menos dos (2) años.",
+                    "Al menos tres (3) años.",
+                    "Al menos cinco (5) años."
+                ],
+                correctAnswer: "Al menos dos (2) años.",
+                feedback: "Se requiere al menos dos (2) años de experiencia y formación especializada.",
+                page: 84
+            },
+            {
+                question: "El Artículo 215, Parágrafo I, inciso 1), establece una causal de excusa para la Jueza o el Juez. ¿Hasta qué grado de consanguinidad o afinidad se considera el parentesco?",
+                options: [
+                    "Hasta el segundo grado de consanguinidad, primero de afinidad.",
+                    "Hasta el tercer grado de consanguinidad, segundo de afinidad.",
+                    "Hasta el cuarto grado de consanguinidad, segundo de afinidad.",
+                    "Hasta el quinto grado de consanguinidad, tercero de afinidad."
+                ],
+                correctAnswer: "Hasta el cuarto grado de consanguinidad, segundo de afinidad.",
+                feedback: "El parentesco para excusa se considera hasta el cuarto grado de consanguinidad y segundo de afinidad.",
+                page: 89
+            },
+            {
+                question: "De acuerdo con el Artículo 248, ¿cuál de las siguientes acciones puede ordenar la Jueza o el Juez con posterioridad a la designación de la tutela?",
+                options: [
+                    "Aprobar y modificar el presupuesto de gastos de alimentación y educación de la niña, niño o adolescente.",
+                    "Cancelar la fianza del tutor en su totalidad al inicio de la tutela.",
+                    "Prohibir la adquisición de nuevos bienes por parte del tutelado.",
+                    "Exigir informes trimestrales de la gestión del tutor."
+                ],
+                correctAnswer: "Aprobar y modificar el presupuesto de gastos de alimentación y educación de la niña, niño o adolescente.",
+                feedback: "La Jueza o el Juez puede aprobar y modificar el presupuesto de gastos de alimentación y educación.",
+                page: 97
+            },
+            {
+                question: "El Artículo 269, Parágrafo I, establece la exención de responsabilidad penal. ¿Qué edad debe tener la persona adolescente para estar exenta de responsabilidad penal?",
+                options: [
+                    "Menor de doce (12) años de edad.",
+                    "Menor de catorce (14) años de edad.",
+                    "Menor de dieciséis (16) años de edad.",
+                    "Menor de dieciocho (18) años de edad."
+                ],
+                correctAnswer: "Menor de catorce (14) años de edad.",
+                feedback: "La persona adolescente menor de catorce (14) años de edad está exenta de responsabilidad penal.",
+                page: 105
+            },
+            {
+                question: "Según el Artículo 316, ¿quiénes participan en los mecanismos de justicia restaurativa?",
+                options: [
+                    "Únicamente el adolescente y la víctima.",
+                    "La víctima, el adolescente, su madre, padre, guardadora o guardador, tutora o tutor, una o varias personas de apoyo, y en su caso, miembros de la comunidad afectada por el delito.",
+                    "Solo las autoridades judiciales y el Ministerio Público.",
+                    "El adolescente y su defensor."
+                ],
+                correctAnswer: "La víctima, el adolescente, su madre, padre, guardadora o guardador, tutora o tutor, una o varias personas de apoyo, y en su caso, miembros de la comunidad afectada por el delito.",
+                feedback: "Los mecanismos de justicia restaurativa involucran a una amplia gama de participantes para una reintegración integral.",
+                page: 125
+            },
+            {
+                question: "El Artículo 347, Parágrafo II, permite la modificación o sustitución de la medida socio-educativa de privación de libertad. ¿Cuándo puede la Jueza o el Juez disponer que el último año del régimen cerrado se cumpla en régimen semi-abierto o de libertad asistida?",
+                options: [
+                    "En cualquier momento del cumplimiento de la medida.",
+                    "Cuando el delito cometido por la o el adolescente no revistiera gravedad, su conducta lo amerite y de acuerdo al cumplimiento de su plan individual.",
+                    "Solo si el adolescente ha cumplido la mitad de la pena.",
+                    "Únicamente si el adolescente ha alcanzado la mayoría de edad."
+                ],
+                correctAnswer: "Cuando el delito cometido por la o el adolescente no revistiera gravedad, su conducta lo amerite y de acuerdo al cumplimiento de su plan individual.",
+                feedback: "La modificación es posible si el delito no es grave, la conducta lo amerita y se cumple el plan individual.",
+                page: 136
+            },
+            {
+                question: "Según el Artículo 15, Parágrafo I, ¿qué programa debe desarrollar el Estado en su nivel central para niñas, niños y adolescentes menores de catorce (14) años en actividad laboral?",
+                options: [
+                    "Programa de Erradicación del Trabajo Infantil.",
+                    "Programa de Prevención y Protección Social.",
+                    "Programa de Reinserción Educativa.",
+                    "Programa de Apoyo Familiar."
+                ],
+                correctAnswer: "Programa de Prevención y Protección Social.",
+                feedback: "El Estado debe desarrollar el Programa de Prevención y Protección Social para niñas, niños y adolescentes menores de catorce (14) años en actividad laboral.",
+                page: 15
+            },
+            {
+                question: "El Artículo 19, ¿qué asegura el Estado a través de los servicios públicos y privados de salud para niñas, niños y adolescentes?",
+                options: [
+                    "Acceso a atención médica solo en casos de emergencia.",
+                    "Acceso a atención permanente sin discriminación.",
+                    "Acceso a servicios de salud solo con pago.",
+                    "Acceso a atención médica solo con consentimiento de los padres."
+                ],
+                correctAnswer: "Acceso a atención permanente sin discriminación.",
+                feedback: "El Estado asegura el acceso universal a la atención permanente y sin discriminación.",
+                page: 17
+            }
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const pointsPerQuestion = 2.8;
+        let answeredQuestions = {}; // To store the selected option and correctness for each question
+
+        const questionNumberElem = document.getElementById('question-number');
+        const questionTextElem = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackText = document.getElementById('feedback-text');
+        const pageReference = document.getElementById('page-reference');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const submitButton = document.getElementById('submit-button');
+        const currentScoreDisplay = document.getElementById('current-score');
+        const quizContent = document.getElementById('quiz-content');
+        const resultsScreen = document.getElementById('results-screen');
+        const correctAnswersCountElem = document.getElementById('correct-answers-count');
+        const totalQuestionsCountElem = document.getElementById('total-questions-count');
+        const finalScoreElem = document.getElementById('final-score');
+        const generalFeedbackElem = document.getElementById('general-feedback');
+        const restartButton = document.getElementById('restart-button');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            shuffledQuestions = shuffleArray([...questions]);
+            currentQuestionIndex = 0;
+            score = 0;
+            answeredQuestions = {};
+            currentScoreDisplay.textContent = score.toFixed(1);
+            quizContent.classList.remove('hidden');
+            resultsScreen.classList.add('hidden');
+            renderQuestion();
+            updateNavigationButtons();
+        }
+
+        function renderQuestion() {
+            const q = shuffledQuestions[currentQuestionIndex];
+            questionNumberElem.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+            questionTextElem.textContent = q.question;
+            optionsContainer.innerHTML = '';
+            feedbackArea.classList.add('hidden');
+            feedbackText.textContent = '';
+            pageReference.textContent = '';
+
+            const shuffledOptions = shuffleArray([...q.options]);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.textContent = option;
+                button.dataset.option = option;
+                button.addEventListener('click', () => selectOption(button, q.correctAnswer, q.feedback, q.page));
+                optionsContainer.appendChild(button);
+
+                // If this question was already answered, show the previous selection and feedback
+                if (answeredQuestions[currentQuestionIndex]) {
+                    const savedAnswer = answeredQuestions[currentQuestionIndex];
+                    if (option === savedAnswer.selectedOption) {
+                        button.classList.add('selected');
+                    }
+                    if (option === savedAnswer.correctAnswer) {
+                        button.classList.add('correct');
+                    } else if (option === savedAnswer.selectedOption && option !== savedAnswer.correctAnswer) {
+                        button.classList.add('incorrect');
+                    }
+                    button.disabled = true; // Disable buttons if already answered
+                    showFeedback(savedAnswer.isCorrect, savedAnswer.feedback, savedAnswer.page);
+                }
+            });
+            updateNavigationButtons();
+        }
+
+        function selectOption(selectedButton, correctAnswer, feedback, page) {
+            // Disable all option buttons after selection
+            Array.from(optionsContainer.children).forEach(button => button.disabled = true);
+
+            const selectedOption = selectedButton.dataset.option;
+            selectedButton.classList.add('selected');
+
+            let isCorrect = false;
+            if (selectedOption === correctAnswer) {
+                selectedButton.classList.add('correct');
+                score += pointsPerQuestion;
+                isCorrect = true;
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Highlight the correct answer
+                Array.from(optionsContainer.children).forEach(button => {
+                    if (button.dataset.option === correctAnswer) {
+                        button.classList.add('correct');
+                    }
+                });
+            }
+
+            // Save the answer state
+            answeredQuestions[currentQuestionIndex] = {
+                selectedOption: selectedOption,
+                correctAnswer: correctAnswer,
+                isCorrect: isCorrect,
+                feedback: feedback,
+                page: page
+            };
+
+            currentScoreDisplay.textContent = score.toFixed(1);
+            showFeedback(isCorrect, feedback, page);
+        }
+
+        function showFeedback(isCorrect, feedback, page) {
+            feedbackArea.classList.remove('hidden');
+            feedbackArea.classList.remove('feedback-correct', 'feedback-incorrect');
+            if (isCorrect) {
+                feedbackArea.classList.add('feedback-correct');
+                feedbackText.textContent = `¡Correcto! ${feedback}`;
+            } else {
+                feedbackArea.classList.add('feedback-incorrect');
+                feedbackText.textContent = `Incorrecto. ${feedback}`;
+            }
+            pageReference.textContent = `Respuesta en la página ${page} del PDF.`;
+        }
+
+        function updateNavigationButtons() {
+            prevButton.disabled = currentQuestionIndex === 0;
+            nextButton.classList.toggle('hidden', currentQuestionIndex === shuffledQuestions.length - 1);
+            submitButton.classList.toggle('hidden', currentQuestionIndex !== shuffledQuestions.length - 1);
+        }
+
+        prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        });
+
+        submitButton.addEventListener('click', () => {
+            displayResults();
+        });
+
+        restartButton.addEventListener('click', () => {
+            startQuiz();
+        });
+
+        function displayResults() {
+            quizContent.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            let correctCount = 0;
+            for (const key in answeredQuestions) {
+                if (answeredQuestions[key].isCorrect) {
+                    correctCount++;
+                }
+            }
+
+            correctAnswersCountElem.textContent = correctCount;
+            totalQuestionsCountElem.textContent = shuffledQuestions.length;
+            finalScoreElem.textContent = score.toFixed(1);
+
+            let feedbackMessage = '';
+            const percentage = (correctCount / shuffledQuestions.length) * 100;
+
+            if (percentage >= 90) {
+                feedbackMessage = "¡Excelente trabajo! Demuestras un dominio excepcional de la Ley 548. Estás muy bien preparado.";
+            } else if (percentage >= 70) {
+                feedbackMessage = "¡Muy bien! Tienes un buen conocimiento de la Ley 548. Revisa las preguntas incorrectas para mejorar aún más.";
+            } else if (percentage >= 50) {
+                feedbackMessage = "Necesitas reforzar algunos conceptos. Te recomiendo revisar los artículos clave de la Ley 548 para mejorar tu puntuación.";
+            } else {
+                feedbackMessage = "Es importante que dediques más tiempo al estudio de la Ley 548. Repasa el documento detenidamente y vuelve a intentarlo.";
+            }
+            generalFeedbackElem.textContent = feedbackMessage;
+        }
+
+        // Initialize the quiz when the page loads
+        document.addEventListener('DOMContentLoaded', startQuiz);
+    </script>
+</body>
+</html>

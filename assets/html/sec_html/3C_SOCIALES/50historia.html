@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: 50 Años de Historia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .feedback-correct {
+            color: #16a34a; /* green-600 */
+            background-color: #dcfce7; /* green-100 */
+            border-left-color: #16a34a; /* green-600 */
+        }
+        .feedback-incorrect {
+            color: #dc2626; /* red-600 */
+            background-color: #fee2e2; /* red-100 */
+            border-left-color: #dc2626; /* red-600 */
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .correct-answer {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+            border-color: #16a34a !important; /* green-600 */
+        }
+        .incorrect-answer {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #dc2626 !important; /* red-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="w-full max-w-2xl bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">Cuestionario Interactivo</h1>
+            <h2 class="text-xl font-semibold text-gray-700 mb-6">"50 Años de Historia" de René Zavaleta</h2>
+            <p class="text-gray-600 mb-8">Pon a prueba tu conocimiento sobre la historia moderna de Bolivia. Responde 20 preguntas de opción múltiple y descubre tu puntuación. ¡Cada pregunta vale 5 puntos!</p>
+            <button id="start-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg shadow-md">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-indigo-600">Pregunta <span id="question-number"></span> de 20</h2>
+                <div class="text-lg font-semibold">Puntuación: <span id="score">0</span></div>
+            </div>
+            
+            <p id="question-text" class="text-xl font-medium mb-8 min-h-[100px]"></p>
+            
+            <div id="options-container" class="space-y-4 mb-6">
+                <!-- Las opciones se generarán aquí -->
+            </div>
+
+            <div id="feedback-container" class="hidden p-4 rounded-lg border-l-4 my-6">
+                <p id="feedback-text" class="text-base"></p>
+            </div>
+            
+            <button id="next-btn" class="hidden w-full bg-gray-800 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-900 transition-colors duration-300">Siguiente Pregunta</button>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">¡Cuestionario Completado!</h2>
+            <p class="text-xl text-gray-700 mb-6">Tu puntuación final es:</p>
+            <div id="final-score" class="text-6xl font-extrabold text-indigo-600 bg-indigo-50 p-6 rounded-full w-40 h-40 mx-auto flex items-center justify-center mb-8"></div>
+            <p id="general-feedback" class="text-lg text-gray-600 mb-8"></p>
+            <button id="restart-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md">
+                Intentar de Nuevo
+            </button>
+        </div>
+    </div>
+    
+    <footer class="mt-8 text-center text-gray-500 text-sm">
+        <p>PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025</p>
+    </footer>
+
+    <script>
+        // --- BASE DE DATOS DE PREGUNTAS ---
+        const quizData = [
+            {
+                question: "¿Qué evento es considerado por Zavaleta como el punto de partida de toda la Bolivia moderna?",
+                options: ["La Revolución de 1952", "La Guerra del Chaco", "La Guerra del Pacífico", "La fundación de la República"],
+                answer: "La Guerra del Chaco",
+                feedback: {
+                    correct: "¡Correcto! Zavaleta afirma que la Guerra del Chaco fue el punto de partida del periodo que analiza y de toda la Bolivia moderna.",
+                    incorrect: "Incorrecto. Según Zavaleta, fue en el Chaco donde Bolivia fue a preguntar en qué consistía su vida, marcando el inicio de la Bolivia moderna.",
+                    page: 19
+                }
+            },
+            {
+                question: "Según el texto, ¿cuál era el verdadero centro del Virreinato del Río de la Plata en sus orígenes?",
+                options: ["Buenos Aires", "Asunción", "Charcas", "Lima"],
+                answer: "Charcas",
+                feedback: {
+                    correct: "¡Exacto! Zavaleta aclara que el virreinato se constituyó fundándose en Charcas, que reunía a las actuales Argentina, Bolivia, Paraguay y Uruguay.",
+                    incorrect: "Respuesta equivocada. Zavaleta argumenta que, contrariamente a la creencia común, Charcas (Alto Perú) fue el centro original, no Buenos Aires.",
+                    page: 20
+                }
+            },
+            {
+                question: "La decadencia de Charcas y Paraguay se debió principalmente a:",
+                options: ["Sus conflictos internos", "La caída de los precios de la plata", "La sustitución de una economía de estanco por una de puertos", "Las guerras de independencia"],
+                answer: "La sustitución de una economía de estanco por una de puertos",
+                feedback: {
+                    correct: "¡Muy bien! Ambos países se vieron perjudicados por el nuevo orden económico que priorizaba la periferia comercial de los puertos, al servicio del comercio inglés.",
+                    incorrect: "No es la respuesta correcta. La causa principal fue el cambio estructural de una economía basada en centros interiores a una economía comercial y portuaria.",
+                    page: 21
+                }
+            },
+            {
+                question: "¿Cómo describe Zavaleta al Paraguay anterior a la Guerra de la Triple Alianza?",
+                options: ["Como una democracia liberal", "Como una provincia pobre y desorganizada", "Como una república despótica, paternalista pero igualitaria", "Como un estado feudal dominado por terratenientes"],
+                answer: "Como una república despótica, paternalista pero igualitaria",
+                feedback: {
+                    correct: "¡Correcto! Fue un país construido bajo la modalidad de las misiones jesuítas, con un estado fuerte y una sociedad más igualitaria que sus vecinos.",
+                    incorrect: "Incorrecto. Zavaleta lo caracteriza como una república despótica y paternalista, herencia de las misiones jesuíticas y los dictadores Francia y López.",
+                    page: 21
+                }
+            },
+            {
+                question: "¿Qué legado dejaron las 'republiquetas' o 'facciones' en la naturaleza social de Bolivia?",
+                options: ["Un fuerte poder centralizado", "Una tradición de pacifismo", "Hábitos democráticos en las masas y los 'caudillos bárbaros'", "Una oligarquía militar fuerte"],
+                answer: "Hábitos democráticos en las masas y los 'caudillos bárbaros'",
+                feedback: {
+                    correct: "¡Así es! La herencia de las facciones fue una democracia directa de guerra, lo que Arguedas denominó la 'plebe en acción' y los 'caudillos bárbaros'.",
+                    incorrect: "La respuesta no es correcta. El legado fue el carácter centrífugo del poder y los hábitos democráticos de las masas, no un poder centralizado.",
+                    page: 25
+                }
+            },
+            {
+                question: "¿Cuál era el objetivo fundamental del proyecto político de Andrés de Santa Cruz?",
+                options: ["La restauración del Imperio de los Incas", "La reconstrucción oligárquica de un eje central perdido", "La creación de una federación de repúblicas sudamericanas", "La alianza con el imperio británico"],
+                answer: "La reconstrucción oligárquica de un eje central perdido",
+                feedback: {
+                    correct: "¡Excelente! Zavaleta interpreta el proyecto de Santa Cruz no como una restauración incaica, sino como un intento de restaurar el centralismo de Charcas, que ya había dejado de ser central.",
+                    incorrect: "Incorrecto. Zavaleta sostiene que se trataba más bien de la restauración de un eje perdido, la aplicación del centralismo de provincias que habían dejado de ser centrales.",
+                    page: 27
+                }
+            },
+            {
+                question: "¿Cómo reaccionaron Bolivia y Paraguay tras sus grandes derrotas del siglo XIX?",
+                options: ["Desarrollaron un fuerte sentimiento anti-imperialista", "Se aislaron completamente del resto del mundo", "Admiraron a sus vencedores e intentaron repetir sus esquemas", "Formaron una alianza militar para defenderse"],
+                answer: "Admiraron a sus vencedores e intentaron repetir sus esquemas",
+                feedback: {
+                    correct: "¡Correcto! Los razonamientos de ambos países acerca de sus derrotas se limitaron a la admiración a quienes los habían vencido, intentando imitarlos.",
+                    incorrect: "No es la opción correcta. El texto indica que ambos países pasaron a admirar a sus vencedores, como Chile y Argentina, intentando copiar sus modelos.",
+                    page: 29
+                }
+            },
+            {
+                question: "Zavaleta describe a Daniel Salamanca como el heredero de una cultura:",
+                options: ["Democrática y popular", "Mórbida, provinciana, arrogante y ciega", "Europeísta y moderna", "Militarista y pragmática"],
+                answer: "Mórbida, provinciana, arrogante y ciega",
+                feedback: {
+                    correct: "¡Muy bien! Salamanca encarnaba la cultura de la clase superior del país, resultado de la servidumbre y el aislamiento, de gente que nunca había trabajado.",
+                    incorrect: "Incorrecto. Zavaleta lo define como el heredero culminante de una cultura 'mórbida', producto de la servidumbre y el aislamiento de la clase dominante.",
+                    page: 35
+                }
+            },
+            {
+                question: "¿Qué significó el 'corralito' de Villa Montes?",
+                options: ["La victoria final en la Guerra del Chaco", "La destitución del presidente Salamanca por los militares en el frente", "La rendición del ejército boliviano", "La firma del tratado de paz con Paraguay"],
+                answer: "La destitución del presidente Salamanca por los militares en el frente",
+                feedback: {
+                    correct: "¡Perfecto! El 'corralito' fue la destitución de Salamanca en el campo de batalla, lo que simbolizó la caída moral del sector civil del estado oligárquico.",
+                    incorrect: "Incorrecto. El 'corralito' de Villa Montes fue la defenestración del presidente Salamanca por parte de sus propios oficiales en pleno campo de batalla.",
+                    page: 37
+                }
+            },
+            {
+                question: "A diferencia de Toro, Germán Busch es descrito como un hombre de:",
+                options: ["Gran frivolidad y escepticismo", "Convicción pura y patriotismo fundamental", "Cálculo político y diplomacia", "Intelectualidad refinada"],
+                answer: "Convicción pura y patriotismo fundamental",
+                feedback: {
+                    correct: "¡Así es! Para Zavaleta, Busch era la convicción pura, cuya fuerza política era un accesorio de su vitalidad natural y su profundo patriotismo.",
+                    incorrect: "Respuesta equivocada. Zavaleta contrasta a Busch, la 'convicción pura', con la vanidad y frivolidad del presidente Toro.",
+                    page: 41
+                }
+            },
+            {
+                question: "¿Qué factor fue clave para que el MNR lograra canalizar el descontento y tomar el poder con Villarroel?",
+                options: ["Su alianza con los partidos tradicionales", "Su programa económico liberal", "Su conexión con los oficiales nacionalistas y el proletariado minero", "El apoyo financiero de la oligarquía"],
+                answer: "Su conexión con los oficiales nacionalistas y el proletariado minero",
+                feedback: {
+                    correct: "¡Correcto! El MNR, formado por excombatientes, logró una fácil comunicación con los jóvenes oficiales y, crucialmente, con los mineros, sobre todo tras la masacre de Catavi.",
+                    incorrect: "No del todo. Su mayor acierto fue conectar con los oficiales nacionalistas (excombatientes) y organizar al proletariado minero, lo que le dio la viabilidad para tomar el poder.",
+                    page: '45 y 47'
+                }
+            },
+            {
+                question: "El gobierno de Gualberto Villarroel es caracterizado por Zavaleta como:",
+                options: ["Una dictadura fascista", "Una restauración oligárquica", "Un bonapartismo en esbozo", "Un gobierno puramente militar"],
+                answer: "Un bonapartismo en esbozo",
+                feedback: {
+                    correct: "¡Muy bien! Se describe como un 'bonapartismo en esbozo', con ideas sobre la independencia del estado pero llevadas a la práctica con gran timidez.",
+                    incorrect: "Incorrecto. Zavaleta lo caracteriza como 'el caso de un bonapartismo en esbozo', un intento tímido de crear un estado independiente de la oligarquía.",
+                    page: 48
+                }
+            },
+            {
+                question: "La ideología de la logia militar RADEPA se resumía en el lema:",
+                options: ["'Por la Democracia y la Libertad'", "'Socialismo o Muerte'", "'Razón de Patria'", "'Orden y Progreso'"],
+                answer: "'Razón de Patria'",
+                feedback: {
+                    correct: "¡Exacto! RADEPA significa 'Razón de Patria', para ellos, la causa final que justificaba la liquidación del enemigo: la oligarquía o 'antipatria'.",
+                    incorrect: "La respuesta correcta es 'Razón de Patria'. RADEPA significaba que la patria estaba por encima de todo y justificaba sus acciones, como la liquidación de la oligarquía.",
+                    page: 52
+                }
+            },
+            {
+                question: "¿Con qué objetivo principal el MNR impulsó la creación de la Federación Sindical de Trabajadores Mineros de Bolivia (FSTMB)?",
+                options: ["Para preparar una revolución socialista", "Para compensar el poder militar de sus aliados de RADEPA", "Para seguir las directivas de la Internacional Comunista", "Para mejorar la producción de estaño"],
+                answer: "Para compensar el poder militar de sus aliados de RADEPA",
+                feedback: {
+                    correct: "¡Así es! El MNR se dio cuenta de su posición precaria frente a los militares y se apresuró a compensar ese poder con la organización del movimiento obrero.",
+                    incorrect: "Incorrecto. El MNR organizó a los mineros para disponer de un contrapeso ('un garrote') frente al poder de sus aliados militares de la logia RADEPA.",
+                    page: '53-54'
+                }
+            },
+            {
+                question: "¿Qué evento marcó la caída y muerte de Gualberto Villarroel en 1946?",
+                options: ["Un golpe militar liderado por Barrientos", "Una insurrección popular que terminó con su colgamiento", "Una invasión extranjera", "Su renuncia y exilio voluntario"],
+                answer: "Una insurrección popular que terminó con su colgamiento",
+                feedback: {
+                    correct: "¡Correcto! La oligarquía, apoyada por sectores de izquierda y militares traidores, promovió una sublevación que culminó con el bárbaro colgamiento de Villarroel.",
+                    incorrect: "Incorrecto. Villarroel fue derrocado y colgado en la Plaza Murillo como resultado de una acción subversiva de la oligarquía, que movilizó a sectores estudiantiles y populares.",
+                    page: 57
+                }
+            },
+            {
+                question: "La Insurrección de abril de 1952, que destruyó el estado oligárquico, tuvo como 'esqueleto combatiente' a:",
+                options: ["Los campesinos indígenas", "Las clases medias urbanas", "El ejército nacionalista", "La clase obrera"],
+                answer: "La clase obrera",
+                feedback: {
+                    correct: "¡Muy bien! Aunque participaron las masas en general (artesanos, estudiantes), Zavaleta afirma que el esqueleto combatiente, el núcleo de la lucha, fue la clase obrera.",
+                    incorrect: "La respuesta no es correcta. Zavaleta es claro en que, si bien participaron muchas 'masas', el 'esqueleto combatiente' de la insurrección fue la clase obrera.",
+                    page: 66
+                }
+            },
+            {
+                question: "Zavaleta define la Revolución de 1952, en cuanto a su carácter, como una:",
+                options: ["Revolución proletaria", "Revolución democrático-burguesa", "Revolución campesina e indigenista", "Revolución anarquista"],
+                answer: "Revolución democrático-burguesa",
+                feedback: {
+                    correct: "¡Excelente! La define como una auténtica revolución democrático-burguesa, donde un bloque de clases (liderado por la pequeña burguesía y con la fuerza obrera) derroca a otro.",
+                    incorrect: "No exactamente. El autor la caracteriza como una 'revolución democrático-burguesa', ya que sus tareas y resultados objetivos fueron la creación de un nuevo estado y burguesía.",
+                    page: 68
+                }
+            },
+            {
+                question: "El rol de Juan Lechín en la revolución es descrito como el de un caudillo que:",
+                options: ["Buscaba implantar el socialismo científico", "Era un instrumento de la clase obrera para dialogar con la pequeña burguesía, pero apoyando el proyecto de esta", "Traicionó a los obreros desde el principio", "Era un agente del imperialismo"],
+                answer: "Era un instrumento de la clase obrera para dialogar con la pequeña burguesía, pero apoyando el proyecto de esta",
+                feedback: {
+                    correct: "¡Así es! Fue un instrumento eficaz para la clase obrera, pero a la vez, la clase obrera fue un instrumento para él. Nunca dejó de admitir el programa histórico del MNR.",
+                    incorrect: "Respuesta incorrecta. Lechín es visto como un puente: un instrumento de la clase obrera ante la pequeña burguesía, pero a la vez sumiso al programa histórico de esta última.",
+                    page: '72-73'
+                }
+            },
+            {
+                question: "¿En qué se basó fundamentalmente el régimen de René Barrientos?",
+                options: ["En una alianza obrero-campesina", "En el apoyo de la burguesía industrial", "En el llamado 'pacto militar-campesino'", "En el respaldo de los partidos de izquierda"],
+                answer: "En el llamado 'pacto militar-campesino'",
+                feedback: {
+                    correct: "¡Correcto! El régimen se fundó en el 'pacto militar-campesino', una alianza entre el sector menos politizado (campesinos) y el más penetrado por el imperialismo (militares).",
+                    incorrect: "Respuesta equivocada. El régimen de Barrientos se sustentó en lo que se bautizó como el 'pacto militar-campesino'.",
+                    page: 104
+                }
+            },
+            {
+                question: "¿Qué significó la guerrilla de Ñancahuazú en el contexto de la época, según Zavaleta?",
+                options: ["Un éxito militar rotundo que liberó Bolivia", "Un movimiento sin apoyo popular que no tuvo consecuencias", "Un fracaso táctico que, sin embargo, habilitó la construcción de una futura estrategia para la clase obrera", "Un complot de la CIA para desestabilizar al gobierno"],
+                answer: "Un fracaso táctico que, sin embargo, habilitó la construcción de una futura estrategia para la clase obrera",
+                feedback: {
+                    correct: "¡Muy bien! Zavaleta concluye que fue un fracaso táctico, pero que su sacrificio, lleno de grandeza, abrió las puertas al sujeto verdadero de la revolución, la clase obrera.",
+                    incorrect: "No, el análisis es más matizado. Zavaleta lo ve como un fracaso táctico, pero un sacrificio que fue decisivo para habilitar la construcción de una estrategia correcta de la clase obrera.",
+                    page: 113
+                }
+            }
+        ];
+
+        // --- ELEMENTOS DEL DOM ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackTextEl = document.getElementById('feedback-text');
+        const scoreEl = document.getElementById('score');
+        const finalScoreEl = document.getElementById('final-score');
+        const generalFeedbackEl = document.getElementById('general-feedback');
+
+        // --- VARIABLES DE ESTADO DEL QUIZ ---
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // --- FUNCIONES ---
+        
+        // Función para barajar las preguntas (Algoritmo Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Función para iniciar el cuestionario
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            score = 0;
+            currentQuestionIndex = 0;
+            scoreEl.textContent = score;
+            
+            shuffledQuestions = [...quizData];
+            shuffleArray(shuffledQuestions);
+            
+            displayQuestion();
+        }
+
+        // Función para mostrar la pregunta actual
+        function displayQuestion() {
+            resetState();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            questionNumberEl.textContent = currentQuestionIndex + 1;
+            questionTextEl.textContent = currentQuestion.question;
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-btn', 'w-full', 'text-left', 'p-4', 'rounded-lg', 'border-2', 'border-gray-300', 'hover:bg-gray-200', 'transition-colors');
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Función para reiniciar el estado entre preguntas
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackContainer.classList.add('hidden');
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        // Función para manejar la selección de una respuesta
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const correct = selectedBtn.textContent === shuffledQuestions[currentQuestionIndex].answer;
+            
+            if (correct) {
+                score += 5;
+                scoreEl.textContent = score;
+            }
+
+            showFeedback(correct);
+            
+            Array.from(optionsContainer.children).forEach(button => {
+                setStatusClass(button, button.textContent === shuffledQuestions[currentQuestionIndex].answer);
+                button.disabled = true;
+            });
+
+            nextBtn.classList.remove('hidden');
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                nextBtn.textContent = 'Ver Resultados Finales';
+            }
+        }
+
+        // Función para establecer las clases CSS de correcto/incorrecto
+        function setStatusClass(element, correct) {
+            if (correct) {
+                element.classList.add('correct-answer');
+            } else {
+                element.classList.add('incorrect-answer');
+            }
+        }
+
+        // Función para mostrar la retroalimentación
+        function showFeedback(isCorrect) {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            feedbackContainer.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackContainer.className = 'p-4 rounded-lg border-l-4 my-6 feedback-correct';
+                feedbackTextEl.innerHTML = `${currentQuestion.feedback.correct} <br><strong>(Ver pág. ${currentQuestion.page})</strong>`;
+            } else {
+                feedbackContainer.className = 'p-4 rounded-lg border-l-4 my-6 feedback-incorrect';
+                feedbackTextEl.innerHTML = `${currentQuestion.feedback.incorrect} <br><strong>(Respuesta en pág. ${currentQuestion.page})</strong>`;
+            }
+        }
+        
+        // Función para mostrar los resultados finales
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScoreEl.textContent = score;
+            
+            let feedback = '';
+            const percentage = (score / (quizData.length * 5)) * 100;
+            if (percentage >= 85) {
+                feedback = '¡Excelente trabajo! Demuestras un conocimiento profundo de las ideas de Zavaleta. Tu comprensión de la historia boliviana es sobresaliente.';
+            } else if (percentage >= 60) {
+                feedback = '¡Buen trabajo! Tienes una buena comprensión de los temas clave del libro. Sigue profundizando en estos fascinantes eventos.';
+            } else {
+                feedback = 'Has completado el cuestionario. Es una buena oportunidad para repasar el texto y reforzar algunos de los conceptos más importantes de la historia boliviana.';
+            }
+            generalFeedbackEl.textContent = feedback;
+        }
+
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

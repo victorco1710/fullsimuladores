@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Biología</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* Tailwind's green-50 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* rounded-3xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            padding: 2.5rem; /* p-10 */
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem; /* gap-6 */
+        }
+        .question-card {
+            background-color: #f7fee7; /* Tailwind's green-50 */
+            border-radius: 1rem; /* rounded-xl */
+            padding: 1.5rem; /* p-6 */
+            border: 1px solid #d9f99d; /* Tailwind's green-200 */
+        }
+        .question-text {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            margin-bottom: 1rem; /* mb-4 */
+            color: #1a202c; /* Tailwind's gray-900 */
+        }
+        .options-container label {
+            display: block;
+            background-color: #ecfdf5; /* Tailwind's green-100 */
+            padding: 0.75rem 1rem; /* py-3 px-4 */
+            border-radius: 0.75rem; /* rounded-lg */
+            margin-bottom: 0.75rem; /* mb-3 */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #a7f3d0; /* Tailwind's green-200 */
+        }
+        .options-container label:hover {
+            background-color: #d1fae5; /* Tailwind's green-200 */
+        }
+        .options-container input[type="radio"] {
+            margin-right: 0.75rem; /* mr-3 */
+            accent-color: #10b981; /* Tailwind's emerald-500 */
+        }
+        .feedback {
+            margin-top: 1rem; /* mt-4 */
+            padding: 0.75rem 1rem; /* py-3 px-4 */
+            border-radius: 0.75rem; /* rounded-lg */
+            font-weight: 500; /* font-medium */
+            display: none; /* Hidden by default */
+        }
+        .feedback.correct {
+            background-color: #d1fae5; /* Tailwind's green-100 */
+            color: #065f46; /* Tailwind's green-700 */
+            border: 1px solid #10b981; /* Tailwind's green-500 */
+        }
+        .feedback.incorrect {
+            background-color: #fee2e2; /* Tailwind's red-100 */
+            color: #991b1b; /* Tailwind's red-700 */
+            border: 1px solid #ef4444; /* Tailwind's red-500 */
+        }
+        .page-info {
+            font-size: 0.875rem; /* text-sm */
+            color: #4b5563; /* Tailwind's gray-600 */
+            margin-top: 0.5rem; /* mt-2 */
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem; /* mt-6 */
+        }
+        .navigation-buttons button {
+            background-color: #10b981; /* Tailwind's emerald-500 */
+            color: white;
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            border-radius: 0.75rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
+        .navigation-buttons button:hover:not(:disabled) {
+            background-color: #059669; /* Tailwind's emerald-600 */
+        }
+        .navigation-buttons button:disabled {
+            background-color: #a7f3d0; /* Tailwind's emerald-200 */
+            cursor: not-allowed;
+        }
+        .submit-button {
+            background-color: #059669; /* Tailwind's emerald-600 */
+            margin-left: auto;
+        }
+        .submit-button:hover:not(:disabled) {
+            background-color: #047857; /* Tailwind's emerald-700 */
+        }
+        .results-container {
+            background-color: #e0f2fe; /* Tailwind's blue-50 */
+            border-radius: 1.5rem; /* rounded-3xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            padding: 2.5rem; /* p-10 */
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            color: #1e40af; /* Tailwind's blue-800 */
+        }
+        .results-container h2 {
+            font-size: 2rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            margin-bottom: 1rem; /* mb-4 */
+            color: #10b981; /* Emerald-500 */
+        }
+        .results-container p {
+            font-size: 1.125rem; /* text-lg */
+            margin-bottom: 0.75rem; /* mb-3 */
+        }
+        .credits {
+            font-size: 0.75rem; /* text-xs */
+            color: #6b7280; /* Tailwind's gray-500 */
+            text-align: center;
+            margin-top: 2rem; /* mt-8 */
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2.5rem; /* p-10 */
+            border-radius: 1.5rem; /* rounded-3xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.75rem; /* text-3xl */
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .modal-buttons button {
+            background-color: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .modal-buttons button.cancel {
+            background-color: #ef4444; /* Tailwind's red-500 */
+        }
+        .modal-buttons button:hover {
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="quizApp" class="quiz-container">
+        <div id="quizContent">
+            <!-- Questions will be loaded here -->
+        </div>
+        <div id="navigation" class="navigation-buttons">
+            <button id="prevBtn" disabled>Anterior</button>
+            <button id="nextBtn">Siguiente</button>
+            <button id="submitBtn" class="submit-button" style="display: none;">Enviar Cuestionario</button>
+        </div>
+        <div class="credits">Desarrollado por Victor Crespo</div>
+    </div>
+
+    <div id="resultsApp" class="results-container hidden">
+        <h2>Resultados del Cuestionario</h2>
+        <p id="totalScore"></p>
+        <p id="generalFeedback"></p>
+        <button id="restartQuiz" class="mt-8 bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold shadow-md hover:bg-blue-600 transition-colors">Reiniciar Cuestionario</button>
+        <div class="credits">Desarrollado por Victor Crespo</div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage" class="text-xl font-semibold mb-4 text-gray-800"></p>
+            <div class="modal-buttons">
+                <button id="confirmYes">Sí</button>
+                <button id="confirmNo" class="cancel">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions data
+        const questions = [
+            {
+                question: "¿Cuál de los siguientes NO es uno de los tres temas básicos de la biología?",
+                options: [
+                    "Evolución",
+                    "Transferencia o flujo de información",
+                    "Transferencia o flujo de energía",
+                    "Clasificación de organismos",
+                    "Adaptación al cambio ambiental"
+                ],
+                answer: "Clasificación de organismos",
+                feedback: "Los tres temas básicos de la biología son evolución, transferencia o flujo de información y transferencia o flujo de energía. La clasificación es un aspecto de la biología, pero no un tema básico global.",
+                page: "2"
+            },
+            {
+                question: "¿Qué característica de la vida se refiere a la capacidad de un organismo para mantener un ambiente interno adecuado y equilibrado?",
+                options: [
+                    "Crecimiento y desarrollo",
+                    "Respuesta a los estímulos",
+                    "Metabolismo autorregulado",
+                    "Reproducción",
+                    "Estructura celular"
+                ],
+                answer: "Metabolismo autorregulado",
+                feedback: "El metabolismo autorregulado incluye la homeostasis, que es la capacidad de mantener un ambiente interno equilibrado.",
+                page: "4"
+            },
+            {
+                question: "¿Cuál es la unidad básica estructural y funcional de la vida, el componente más simple de la materia viva que puede realizar todas las actividades necesarias para vivir?",
+                options: [
+                    "Molécula",
+                    "Tejido",
+                    "Célula",
+                    "Órgano",
+                    "Orgánulo"
+                ],
+                answer: "Célula",
+                feedback: "A nivel celular, las propiedades emergentes hacen de la célula la unidad básica estructural y funcional de la vida.",
+                page: "6"
+            },
+            {
+                question: "¿Qué nivel de organización biológica incluye a todos los miembros de una misma especie que viven en la misma área geográfica al mismo tiempo?",
+                options: [
+                    "Comunidad",
+                    "Ecosistema",
+                    "Población",
+                    "Biosfera",
+                    "Organismo"
+                ],
+                answer: "Población",
+                feedback: "Una población está formada por todos los miembros de una misma especie que viven en la misma área geográfica al mismo tiempo.",
+                page: "8"
+            },
+            {
+                question: "¿Cuál es el material hereditario que transmite información de una generación a la siguiente y constituye los genes?",
+                options: [
+                    "Proteína",
+                    "Hormona",
+                    "ADN",
+                    "Neurotransmisor",
+                    "Glucosa"
+                ],
+                answer: "ADN",
+                feedback: "El ADN es la molécula de gran tamaño que constituye los genes y transmite la información genética de generación en generación.",
+                page: "8"
+            },
+            {
+                question: "¿Qué tipo de organismos producen su propio alimento a partir de materias primas simples, utilizando la luz del Sol como fuente de energía para la fotosíntesis?",
+                options: [
+                    "Consumidores primarios",
+                    "Descomponedores",
+                    "Heterótrofos",
+                    "Productores",
+                    "Consumidores secundarios"
+                ],
+                answer: "Productores",
+                feedback: "Los productores (o autótrofos) son organismos que producen su propio alimento, a menudo mediante la fotosíntesis.",
+                page: "9"
+            },
+            {
+                question: "¿Quién creó el sistema jerárquico para denominar y clasificar los organismos, aún utilizado hoy en día con algunas modificaciones?",
+                options: [
+                    "Charles Darwin",
+                    "Alfred Wallace",
+                    "Carolus Linneo",
+                    "James Watson",
+                    "Francis Crick"
+                ],
+                answer: "Carolus Linneo",
+                feedback: "Carolus Linneo, un botánico sueco, creó el sistema jerárquico para denominar y clasificar organismos.",
+                page: "11"
+            },
+            {
+                question: "¿Cuál es la fuente principal de variación en una población que proporciona la materia prima para la evolución?",
+                options: [
+                    "Selección natural",
+                    "Adaptación",
+                    "Reproducción sexual",
+                    "Mutaciones aleatorias",
+                    "Competencia por recursos"
+                ],
+                answer: "Mutaciones aleatorias",
+                feedback: "La principal fuente de variaciones son mutaciones aleatorias, que son cambios químicos o físicos en el ADN que persisten y se pueden heredar.",
+                page: "15"
+            },
+            {
+                question: "¿Qué se define como una explicación tentativa de las observaciones o fenómenos, que puede ser probada y refutada?",
+                options: [
+                    "Teoría científica",
+                    "Hecho",
+                    "Predicción",
+                    "Hipótesis",
+                    "Paradigma"
+                ],
+                answer: "Hipótesis",
+                feedback: "Una hipótesis es una explicación tentativa de las observaciones o fenómenos. Debe ser razonablemente coherente con hechos bien establecidos y refutable.",
+                page: "17"
+            },
+            {
+                question: "¿Qué tipo de razonamiento científico comienza con observaciones específicas y da una conclusión o descubre un principio general?",
+                options: [
+                    "Razonamiento deductivo",
+                    "Razonamiento hipotético",
+                    "Razonamiento inductivo",
+                    "Razonamiento experimental",
+                    "Razonamiento analítico"
+                ],
+                answer: "Razonamiento inductivo",
+                feedback: "El razonamiento inductivo comienza con observaciones específicas y da una conclusión o descubre un principio general.",
+                page: "18"
+            },
+            {
+                question: "¿Qué es la biología de sistemas (o biología sistémica)?",
+                options: [
+                    "Un campo que estudia los componentes más simples de los procesos biológicos.",
+                    "Un campo que se centra en el estudio de fósiles para comprender la evolución.",
+                    "Un campo que integra datos de distintos niveles de complejidad para comprender cómo funcionan los sistemas biológicos como un todo.",
+                    "Un campo que investiga únicamente las interacciones entre organismos y su entorno.",
+                    "Un campo que solo utiliza el razonamiento deductivo."
+                ],
+                answer: "Un campo que integra datos de distintos niveles de complejidad para comprender cómo funcionan los sistemas biológicos como un todo.",
+                feedback: "La biología de sistemas integra datos de distintos niveles de complejidad con el objetivo de comprender todo el panorama de cómo funcionan los sistemas biológicos.",
+                page: "21"
+            },
+            {
+                question: "¿Cuál de los siguientes elementos es responsable de más del 96% de la masa de la mayoría de los organismos?",
+                options: [
+                    "Calcio, Fósforo, Potasio, Magnesio",
+                    "Yodo, Cobre, Hierro, Sodio",
+                    "Oxígeno, Carbono, Hidrógeno, Nitrógeno",
+                    "Azufre, Cloro, Magnesio, Sodio",
+                    "Silicio, Boro, Selenio, Cobalto"
+                ],
+                answer: "Oxígeno, Carbono, Hidrógeno, Nitrógeno",
+                feedback: "Solo cuatro elementos: oxígeno, carbono, hidrógeno y nitrógeno, son responsables de más del 96% de la masa de la mayoría de los organismos.",
+                page: "27"
+            },
+            {
+                question: "¿Qué partícula subatómica porta una unidad de carga eléctrica positiva y se encuentra en el núcleo atómico?",
+                options: [
+                    "Electrón",
+                    "Neutrón",
+                    "Protón",
+                    "Ion",
+                    "Orbital"
+                ],
+                answer: "Protón",
+                feedback: "Un protón porta una unidad de carga positiva y se agrupa con los neutrones para conformar el núcleo atómico.",
+                page: "27"
+            },
+            {
+                question: "¿Cuál es el término para átomos de un mismo elemento que difieren en el número de neutrones y, por lo tanto, tienen masas diferentes?",
+                options: [
+                    "Iones",
+                    "Compuestos",
+                    "Moléculas",
+                    "Isótopos",
+                    "Electrones de valencia"
+                ],
+                answer: "Isótopos",
+                feedback: "Los isótopos de un mismo elemento tienen el mismo número de protones y electrones, solo varía el número de neutrones.",
+                page: "29"
+            },
+            {
+                question: "¿Cuál de los siguientes tipos de enlaces químicos implica compartir electrones entre átomos para que cada átomo complete su capa de valencia?",
+                options: [
+                    "Enlace iónico",
+                    "Enlace de hidrógeno",
+                    "Interacciones de van der Waals",
+                    "Enlace covalente",
+                    "Puente salino"
+                ],
+                answer: "Enlace covalente",
+                feedback: "Los enlaces covalentes implican compartir electrones entre átomos de manera que cada átomo queda con su capa de valencia completa.",
+                page: "32"
+            },
+            {
+                question: "¿Qué término describe una molécula que tiene en un extremo una carga parcial positiva y en el otro extremo una carga parcial negativa, a pesar de ser eléctricamente neutra en su conjunto?",
+                options: [
+                    "Molécula no polar",
+                    "Catión",
+                    "Anión",
+                    "Molécula polar",
+                    "Hidrocarburo"
+                ],
+                answer: "Molécula polar",
+                feedback: "Una molécula con uno o más enlaces covalentes polares puede ser polar a pesar de que es eléctricamente neutra en su conjunto.",
+                page: "34"
+            },
+            {
+                question: "¿Qué tipo de reacción química implica la transferencia de electrones de una sustancia a otra, y siempre se presenta junto con la oxidación?",
+                options: [
+                    "Hidrólisis",
+                    "Condensación",
+                    "Reacción ácido-base",
+                    "Reacción redox",
+                    "Reacción de ionización"
+                ],
+                answer: "Reacción redox",
+                feedback: "La transferencia de electrones se conoce como una oxidación-reducción, o reacción redox. La oxidación y la reducción siempre se presentan juntas.",
+                page: "37"
+            },
+            {
+                question: "¿Cuál es la propiedad del agua que se debe a los enlaces de hidrógeno entre sus moléculas, y que permite que cualquier fuerza ejercida sobre una parte de una columna de agua se transmita a la columna completa?",
+                options: [
+                    "Adhesión",
+                    "Capilaridad",
+                    "Tensión superficial",
+                    "Cohesión",
+                    "Alto calor específico"
+                ],
+                answer: "Cohesión",
+                feedback: "Las moléculas de agua tienen una fuerte tendencia a adherirse a otras, propiedad conocida como cohesión. Ésta se debe a los enlaces de hidrógeno entre las moléculas.",
+                page: "38"
+            },
+            {
+                question: "¿Qué es el pH?",
+                options: [
+                    "Una medida de la concentración de iones hidróxido.",
+                    "El logaritmo negativo (de base 10) de la concentración de iones hidrógeno.",
+                    "Una medida de la masa atómica de una disolución.",
+                    "Un indicador de la temperatura de una disolución.",
+                    "La cantidad de calor requerida para cambiar 1 g de una sustancia de fase líquida a fase de vapor."
+                ],
+                answer: "El logaritmo negativo (de base 10) de la concentración de iones hidrógeno.",
+                feedback: "El pH se define como el logaritmo negativo (de base 10) de la concentración de iones hidrógeno (expresada en moles por litro).",
+                page: "41"
+            },
+            {
+                question: "¿Qué son los amortiguadores en los organismos?",
+                options: [
+                    "Sustancias que aumentan los cambios en el pH cuando se agrega un ácido o base.",
+                    "Sustancias que solo funcionan en disoluciones ácidas.",
+                    "Sustancias o combinaciones de sustancias que resisten los cambios en el pH cuando se agrega un ácido o base.",
+                    "Sustancias que disocian completamente en iones en una disolución acuosa.",
+                    "Sustancias que siempre tienen un pH de 7."
+                ],
+                answer: "Sustancias o combinaciones de sustancias que resisten los cambios en el pH cuando se agrega un ácido o base.",
+                feedback: "Un amortiguador es una sustancia o combinación de sustancias que resiste los cambios en el pH cuando se agrega un ácido o base.",
+                page: "42"
+            },
+            {
+                question: "¿Cuál es la principal razón de la gran diversidad de compuestos orgánicos?",
+                options: [
+                    "La capacidad del carbono para formar solo enlaces simples.",
+                    "La tendencia del carbono a unirse solo con hidrógeno.",
+                    "La incapacidad del carbono para formar estructuras 3-D.",
+                    "La capacidad de los átomos de carbono para unirse entre sí o con otros átomos para formar moléculas grandes con una amplia diversidad de formas.",
+                    "La limitación de los grupos funcionales."
+                ],
+                answer: "La capacidad de los átomos de carbono para unirse entre sí o con otros átomos para formar moléculas grandes con una amplia diversidad de formas.",
+                feedback: "Los compuestos orgánicos son extraordinariamente diversos porque pueden producirse en una gran variedad de formas tridimensionales y el átomo de carbono forma enlaces con un número mayor de elementos diferentes.",
+                page: "46-47"
+            },
+            {
+                question: "¿Qué son los isómeros?",
+                options: [
+                    "Compuestos con la misma estructura pero diferente fórmula molecular.",
+                    "Compuestos con la misma fórmula molecular pero diferentes estructuras y, por lo tanto, propiedades distintas.",
+                    "Moléculas que solo contienen carbono e hidrógeno.",
+                    "Macromoléculas formadas por la unión de monómeros idénticos.",
+                    "Grupos de átomos que determinan las reacciones químicas de un compuesto."
+                ],
+                answer: "Compuestos con la misma fórmula molecular pero diferentes estructuras y, por lo tanto, propiedades distintas.",
+                feedback: "Los isómeros son compuestos con la misma fórmula molecular pero estructuras diferentes y por tanto, con propiedades distintas.",
+                page: "48"
+            },
+            {
+                question: "¿Qué grupo funcional es polar debido a la presencia de un átomo de oxígeno fuertemente electronegativo y no debe confundirse con el ion hidróxido?",
+                options: [
+                    "Grupo carbonilo",
+                    "Grupo carboxilo",
+                    "Grupo amino",
+                    "Grupo fosfato",
+                    "Grupo hidroxilo"
+                ],
+                answer: "Grupo hidroxilo",
+                feedback: "El grupo hidroxilo (ROOH) es polar por la presencia de un átomo de oxígeno fuertemente electronegativo. No se debe confundir con el ion hidróxido (OH−).",
+                page: "49"
+            },
+            {
+                question: "¿Cómo se llama el proceso por el cual los polímeros se degradan en sus monómeros constituyentes mediante la adición de agua?",
+                options: [
+                    "Condensación",
+                    "Síntesis por deshidratación",
+                    "Polimerización",
+                    "Hidrólisis",
+                    "Oxidación"
+                ],
+                answer: "Hidrólisis",
+                feedback: "Los polímeros se pueden degradar en sus monómeros constituyentes por medio de reacciones de hidrólisis ('rompimiento con agua').",
+                page: "51"
+            },
+            {
+                question: "¿Cuál es el monosacárido más abundante que se utiliza en la mayor parte de los organismos como fuente de energía?",
+                options: [
+                    "Fructosa",
+                    "Galactosa",
+                    "Ribosa",
+                    "Glucosa",
+                    "Sacarosa"
+                ],
+                answer: "Glucosa",
+                feedback: "La glucosa (C6H12O6), el monosacárido más abundante, se utiliza en la mayor parte de los organismos como fuente de energía.",
+                page: "52"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let score = 0;
+        let shuffledQuestions = [];
+
+        // Get DOM elements
+        const quizContent = document.getElementById('quizContent');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const quizApp = document.getElementById('quizApp');
+        const resultsApp = document.getElementById('resultsApp');
+        const totalScoreElement = document.getElementById('totalScore');
+        const generalFeedbackElement = document.getElementById('generalFeedback');
+        const restartQuizBtn = document.getElementById('restartQuiz');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const confirmYesBtn = document.getElementById('confirmYes');
+        const confirmNoBtn = document.getElementById('confirmNo');
+
+        // Function to shuffle questions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        // Function to render a question
+        function renderQuestion() {
+            const q = shuffledQuestions[currentQuestionIndex];
+            quizContent.innerHTML = `
+                <div class="question-card">
+                    <p class="question-text">Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}: ${q.question}</p>
+                    <div class="options-container">
+                        ${q.options.map((option, index) => `
+                            <label>
+                                <input type="radio" name="question${currentQuestionIndex}" value="${option}" ${userAnswers[currentQuestionIndex] === option ? 'checked' : ''}>
+                                ${option}
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${currentQuestionIndex}" class="feedback"></div>
+                    <p class="page-info">Página: ${q.page}</p>
+                </div>
+            `;
+            updateNavigationButtons();
+
+            // Add event listeners to radio buttons for immediate feedback
+            document.querySelectorAll(`input[name="question${currentQuestionIndex}"]`).forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    userAnswers[currentQuestionIndex] = event.target.value;
+                    showFeedback(currentQuestionIndex);
+                });
+            });
+
+            // Show feedback if already answered
+            if (userAnswers[currentQuestionIndex]) {
+                showFeedback(currentQuestionIndex);
+            } else {
+                document.getElementById(`feedback-${currentQuestionIndex}`).style.display = 'none';
+            }
+        }
+
+        // Function to show feedback
+        function showFeedback(qIndex) {
+            const q = shuffledQuestions[qIndex];
+            const feedbackElement = document.getElementById(`feedback-${qIndex}`);
+            const selectedOption = userAnswers[qIndex];
+
+            if (selectedOption) {
+                if (selectedOption === q.answer) {
+                    feedbackElement.textContent = `¡Correcto! ${q.feedback}`;
+                    feedbackElement.className = 'feedback correct';
+                } else {
+                    feedbackElement.textContent = `Incorrecto. La respuesta correcta era: "${q.answer}". ${q.feedback}`;
+                    feedbackElement.className = 'feedback incorrect';
+                }
+                feedbackElement.style.display = 'block';
+            } else {
+                feedbackElement.style.display = 'none';
+            }
+        }
+
+        // Function to update navigation button states
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === shuffledQuestions.length - 1;
+
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                submitBtn.style.display = 'block';
+                nextBtn.style.display = 'none';
+            } else {
+                submitBtn.style.display = 'none';
+                nextBtn.style.display = 'block';
+            }
+        }
+
+        // Event listeners for navigation
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        });
+
+        // Event listener for submit button
+        submitBtn.addEventListener('click', () => {
+            modalMessage.textContent = '¿Estás seguro de que quieres enviar el cuestionario? No podrás cambiar tus respuestas después.';
+            confirmationModal.style.display = 'flex';
+        });
+
+        confirmYesBtn.addEventListener('click', () => {
+            confirmationModal.style.display = 'none';
+            calculateScore();
+        });
+
+        confirmNoBtn.addEventListener('click', () => {
+            confirmationModal.style.display = 'none';
+        });
+
+        document.querySelector('.close-button').addEventListener('click', () => {
+            confirmationModal.style.display = 'none';
+        });
+
+        // Calculate score and show results
+        function calculateScore() {
+            score = 0;
+            shuffledQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score += 4; // Each question is worth 4 points
+                }
+            });
+
+            totalScoreElement.textContent = `Tu puntuación total es: ${score} de ${shuffledQuestions.length * 4} puntos.`;
+            
+            let feedbackText = '';
+            if (score === shuffledQuestions.length * 4) {
+                feedbackText = "¡Felicidades! Tienes un excelente dominio de los conceptos de biología.";
+            } else if (score >= (shuffledQuestions.length * 4) * 0.75) {
+                feedbackText = "¡Muy bien! Has demostrado un buen conocimiento de los conceptos clave.";
+            } else if (score >= (shuffledQuestions.length * 4) * 0.5) {
+                feedbackText = "Necesitas repasar algunos conceptos. Sigue estudiando para mejorar.";
+            } else {
+                feedbackText = "Hay áreas en las que puedes mejorar. Te recomiendo revisar a fondo el documento de biología.";
+            }
+            generalFeedbackElement.textContent = feedbackText;
+
+            quizApp.classList.add('hidden');
+            resultsApp.classList.remove('hidden');
+        }
+
+        // Restart Quiz
+        restartQuizBtn.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            score = 0;
+            shuffledQuestions = shuffleArray([...questions]).slice(0, 25); // Reshuffle and take 25 questions
+            renderQuestion();
+            quizApp.classList.remove('hidden');
+            resultsApp.classList.add('hidden');
+        });
+
+        // Initialize quiz
+        document.addEventListener('DOMContentLoaded', () => {
+            shuffledQuestions = shuffleArray([...questions]).slice(0, 25); // Take 25 questions
+            renderQuestion();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Vocabulario y Conocimiento del Mundo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #f9fafb; /* bg-gray-50 */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+        }
+        .question-text {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            margin-bottom: 1.5rem; /* mb-6 */
+            color: #1f2937; /* text-gray-800 */
+        }
+        .option-label {
+            display: block;
+            padding: 0.75rem 1rem; /* p-3 px-4 */
+            margin-bottom: 0.75rem; /* mb-3 */
+            background-color: #ffffff; /* bg-white */
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .option-label:hover {
+            background-color: #eff6ff; /* hover:bg-blue-100 */
+            border-color: #3b82f6; /* hover:border-blue-500 */
+        }
+        .option-label.selected {
+            background-color: #dbeafe; /* bg-blue-200 */
+            border-color: #2563eb; /* border-blue-600 */
+        }
+        .feedback {
+            margin-top: 1rem; /* mt-4 */
+            padding: 0.75rem; /* p-3 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 0.875rem; /* text-sm */
+        }
+        .feedback.correct {
+            background-color: #d1fae5; /* bg-green-100 */
+            color: #065f46; /* text-green-700 */
+            border: 1px solid #6ee7b7; /* border-green-300 */
+        }
+        .feedback.incorrect {
+            background-color: #fee2e2; /* bg-red-100 */
+            color: #b91c1c; /* text-red-700 */
+            border: 1px solid #fca5a5; /* border-red-300 */
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb; /* bg-gray-200 */
+            border-radius: 0.25rem; /* rounded-sm */
+            margin-bottom: 1rem; /* mb-4 */
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 1rem; /* h-4 */
+            background-color: #3b82f6; /* bg-blue-500 */
+            width: 0%;
+            transition: width 0.3s ease-in-out;
+            border-radius: 0.25rem; /* rounded-sm */
+        }
+        .btn {
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #3b82f6; /* bg-blue-500 */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; /* hover:bg-blue-600 */
+        }
+        .btn-secondary {
+            background-color: #6b7280; /* bg-gray-500 */
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; /* hover:bg-gray-600 */
+        }
+        .creator-credit {
+            font-size: 0.875rem; /* text-sm */
+            color: #6b7280; /* text-gray-500 */
+            margin-top: 2rem; /* mt-8 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <div class="quiz-container">
+        <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">Cuestionario: Vocabulario y Conocimiento del Mundo</h1>
+
+        <div id="quiz-area">
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div id="question-counter" class="text-sm text-gray-600 mb-2"></div>
+            <div id="question-text" class="question-text"></div>
+            <div id="options-container"></div>
+            <div id="feedback-area" class="feedback"></div>
+            <button id="next-btn" class="btn btn-primary mt-6 w-full">Siguiente Pregunta</button>
+        </div>
+
+        <div id="results-area" class="hidden text-center">
+            <h2 class="text-2xl font-semibold mb-4">Resultados del Cuestionario</h2>
+            <p class="text-xl mb-2">Tu puntuación final es: <span id="score" class="font-bold text-blue-600"></span> puntos.</p>
+            <p id="final-feedback" class="text-lg mb-6"></p>
+            <button id="restart-btn" class="btn btn-secondary">Volver a Intentar</button>
+            <p class="creator-credit">Creado por Victor Crespo</p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el fenómeno que Jeanne Chall describió como el 'bajón de cuarto grado' (slump)?",
+                options: [
+                    "Un aumento repentino en las habilidades de decodificación de los estudiantes de bajos ingresos.",
+                    "Una caída aparentemente repentina y brusca en los puntajes de lectura de estudiantes de bajos ingresos entre tercer y cuarto grado.",
+                    "La dificultad de todos los estudiantes para comprender textos narrativos en cuarto grado.",
+                    "El estancamiento general de los puntajes de lectura a nivel nacional en todos los grados."
+                ],
+                answer: 1,
+                feedback: "La respuesta correcta es la B. Este concepto se introduce en la página 231, al describir la investigación de Jeanne Chall."
+            },
+            {
+                question: "Según E. D. Hirsch, ¿cuál es la 'nueva frontera' de la investigación en lectura, una vez que se han logrado avances en la enseñanza de la decodificación?",
+                options: [
+                    "Enseñar a los niños a leer más rápido independientemente de la comprensión.",
+                    "La creación de programas y métodos que enseñen a los alumnos a comprender el texto con precisión y fluidez.",
+                    "Desarrollar únicamente el vocabulario técnico de cada asignatura.",
+                    "Fomentar la lectura por placer sin un enfoque en la comprensión profunda."
+                ],
+                answer: 1,
+                feedback: "La respuesta correcta es la B. Hirsch menciona esto en la página 232, al hablar sobre los desafíos actuales en la investigación de la lectura."
+            },
+            {
+                question: "De los tres principios con consenso científico para mejorar la comprensión lectora mencionados por Hirsch, ¿cuál se ha comprendido sólo recientemente en su totalidad?",
+                options: [
+                    "La fluidez permite a la mente concentrarse en la comprensión.",
+                    "La amplitud de vocabulario aumenta la comprensión y facilita un mayor aprendizaje.",
+                    "El conocimiento del tema aumenta la fluidez, amplía el vocabulario y permite una comprensión más profunda.",
+                    "La decodificación precisa es el único factor determinante para la comprensión."
+                ],
+                answer: 2,
+                feedback: "La respuesta correcta es la C. Los tres principios se enumeran en la página 232, indicando que el tercero ha sido comprendido sólo recientemente."
+            },
+            {
+                question: "¿Por qué es crucial la rapidez en la decodificación para la comprensión, según el texto?",
+                options: [
+                    "Porque permite al lector saltarse palabras desconocidas sin afectar el significado.",
+                    "Porque si la decodificación no es rápida, el material decodificado se olvidará antes de ser comprendido debido a los límites de la memoria de corto plazo.",
+                    "Porque la lectura rápida impresiona a los evaluadores y mejora los puntajes en las pruebas.",
+                    "Porque la rapidez en la decodificación es un indicador directo de la inteligencia general del lector."
+                ],
+                answer: 1,
+                feedback: "La respuesta correcta es la B. Esta explicación se encuentra en la página 233, bajo el subtítulo 'La fluidez es importante'."
+            },
+            {
+                question: "¿Qué es el 'mágico número siete, más dos o menos dos' descrito por George A. Miller?",
+                options: [
+                    "El número ideal de palabras que un niño debe aprender cada día.",
+                    "El número aproximado de ítems que se pueden retener de una vez en la mente consciente (memoria de corto plazo).",
+                    "La cantidad de estrategias de comprensión que un profesor debe enseñar.",
+                    "El número máximo de errores permitidos en una prueba de fluidez lectora."
+                ],
+                answer: 1,
+                feedback: "La respuesta correcta es la B. Este concepto se explica en la página 234, en relación con la memoria de corto plazo."
+            },
+            {
+                question: "El experimento de Adrian de Groot con jugadores de ajedrez demostró que la diferencia en destreza entre expertos y novatos radica principalmente en:",
+                options: [
+                    "Una capacidad de memoria de corto plazo inherentemente superior en los expertos.",
+                    "Músculos mentales más fuertes desarrollados a través de la práctica.",
+                    "Un gran acopio de conocimientos previamente adquiridos ('erudición') que están rápidamente disponibles.",
+                    "La habilidad de los expertos para procesar información visualmente más rápido."
+                ],
+                answer: 2,
+                feedback: "La respuesta correcta es la C. El experimento de De Groot y su conclusión sobre la 'erudición' se detallan en las páginas 235-236."
+            },
+            {
+                question: "¿Qué porcentaje aproximado de palabras de un texto necesita conocer una persona para lograr una comprensión lectora adecuada y poder inferir el significado de palabras desconocidas?",
+                options: [
+                    "50-60%",
+                    "70-75%",
+                    "90-95%",
+                    "100%, no se puede inferir si hay palabras desconocidas."
+                ],
+                answer: 2,
+                feedback: "La respuesta correcta es la C. Este porcentaje se menciona en la página 238, al discutir la importancia del vocabulario."
+            },
+            {
+                question: "Keith Stanovich se refirió a la creciente brecha en el vocabulario y la comprensión entre estudiantes adelantados y atrasados como el 'efecto Mateo'. ¿Qué implica este efecto?",
+                options: [
+                    "Que todos los estudiantes, independientemente de su nivel inicial, progresan al mismo ritmo.",
+                    "Que los estudiantes que comienzan con desventaja eventualmente superan a los más adelantados.",
+                    "Que 'al que tiene se le dará y tendrá en abundancia; pero al que no tiene incluso lo que tiene se le quitará', refiriéndose a cómo las ventajas iniciales se acumulan.",
+                    "Que la intervención temprana no tiene impacto significativo en cerrar las brechas de vocabulario."
+                ],
+                answer: 2,
+                feedback: "La respuesta correcta es la C. El 'efecto Mateo' se explica en la página 238."
+            },
+            {
+                question: "Aunque la mayor parte del crecimiento del vocabulario ocurre incidentalmente, ¿cuántas palabras aproximadamente estiman Isabel Beck y sus colegas que se pueden enseñar explícitamente por año en el colegio?",
+                options: [
+                    "Unas 50 palabras.",
+                    "Unas 400 palabras.",
+                    "Unas 2000 palabras.",
+                    "Unas 5000 palabras."
+                ],
+                answer: 1,
+                feedback: "La respuesta correcta es la B. Esta estimación se encuentra en la página 239, al hablar sobre el desarrollo de vocabulario explícito."
+            },
+            {
+                question: "Para comprender la frase 'Jones se sacrificó y golpeó en una corrida' en un artículo de béisbol, ¿qué es más crucial además del conocimiento general de las palabras?",
+                options: [
+                    "Haber jugado béisbol profesionalmente.",
+                    "Conocer las reglas gramaticales avanzadas del español.",
+                    "Tener un conocimiento previo del tema (béisbol) para entender el significado específico de las palabras en ese contexto.",
+                    "Ser capaz de decodificar las palabras con una velocidad excepcional."
+                ],
+                answer: 2,
+                feedback: "La respuesta correcta es la C. Este ejemplo se utiliza en la página 240 para ilustrar la importancia del conocimiento del tema."
+            },
+            {
+                question: "El autor argumenta que la comprensión del lenguaje (oral y escrito) requiere que los lectores/oyentes construyan activamente significados. ¿Qué término griego antiguo se refiere a un argumento implícito basado en conocimientos que se dan por sentado?",
+                options: [
+                    "Logos",
+                    "Pathos",
+                    "Ethos",
+                    "Enthymeme (Entimema)"
+                ],
+                answer: 3,
+                feedback: "La respuesta correcta es la D. El término 'enthymeme' (entimema) se explica en la página 242."
+            },
+            {
+                question: "¿Cuál es la principal crítica del autor a los programas actuales de Lenguaje en los primeros grados respecto al tipo de textos utilizados?",
+                options: [
+                    "Se enfocan demasiado en textos científicos complejos.",
+                    "Dedican tiempo excesivo a la poesía clásica.",
+                    "Se dedican abrumadoramente a la ficción, a menudo trivial en contenido, en lugar de poner más énfasis en la no ficción.",
+                    "Utilizan exclusivamente textos históricos que los niños encuentran aburridos."
+                ],
+                answer: 2,
+                feedback: "La respuesta correcta es la C. Esta crítica se encuentra en la página 246, discutiendo el contenido de los programas de Lenguaje."
+            },
+            {
+                question: "Según Barak Rosenshine, ¿cuál es el efecto de dedicar un tiempo excesivo (por ejemplo, 25 clases en lugar de 6) a enseñar estrategias formales de comprensión como la predicción o búsqueda de la idea principal?",
+                options: [
+                    "Se produce una mejora continua y proporcional en la comprensión lectora.",
+                    "Los efectos positivos alcanzan una meseta rápidamente, y la práctica adicional produce pocos beneficios.",
+                    "Los estudiantes se vuelven dependientes de las estrategias y no pueden leer sin ellas.",
+                    "Solo los estudiantes más avanzados se benefician de la práctica extendida."
+                ],
+                answer: 1,
+                feedback: "La respuesta correcta es la B. Los hallazgos de Rosenshine se discuten en las páginas 246-247."
+            },
+            {
+                question: "¿Cuál es el 'nexo lenguaje-conocimiento' que el autor considera un principio clave para un programa de Lenguaje eficaz?",
+                options: [
+                    "Que el lenguaje se aprende mejor de forma aislada, antes de introducir conocimientos del mundo.",
+                    "Que el conocimiento de un tema va automáticamente acompañado del uso del lenguaje que representa ese conocimiento, por lo que un programa coherente y extenso construye vocabulario más eficazmente.",
+                    "Que el conocimiento del mundo es menos importante que el conocimiento puramente lingüístico (gramática, sintaxis).",
+                    "Que el lenguaje y el conocimiento son entidades separadas que deben enseñarse en asignaturas distintas."
+                ],
+                answer: 1,
+                feedback: "La respuesta correcta es la B. Este principio se establece en la página 248."
+            },
+            {
+                question: "Según las conclusiones de James S. Coleman, ¿por qué un buen programa escolar es inherentemente igualitario y compensatorio?",
+                options: [
+                    "Porque ofrece los mismos recursos a todos los colegios, independientemente de su ubicación.",
+                    "Porque se enfoca únicamente en las necesidades de los estudiantes más aventajados.",
+                    "Porque tiene un mayor efecto en los alumnos de bajos ingresos (quienes dependen más del colegio para adquirir conocimientos) que en los de ingresos medianos, ayudándoles a ponerse al día.",
+                    "Porque elimina todas las diferencias de rendimiento entre los estudiantes en un corto período."
+                ],
+                answer: 2,
+                feedback: "La respuesta correcta es la C. Las conclusiones de Coleman sobre el efecto igualitario de un buen programa escolar se explican en la página 250."
+            }
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const pointsPerQuestion = 6.66;
+        let selectedOptionElement = null;
+
+        const quizArea = document.getElementById('quiz-area');
+        const resultsArea = document.getElementById('results-area');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackAreaEl = document.getElementById('feedback-area');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const scoreEl = document.getElementById('score');
+        const finalFeedbackEl = document.getElementById('final-feedback');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionCounterEl = document.getElementById('question-counter');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            shuffledQuestions = [...questions];
+            shuffleArray(shuffledQuestions);
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsArea.classList.add('hidden');
+            quizArea.classList.remove('hidden');
+            nextBtn.textContent = 'Siguiente Pregunta';
+            nextBtn.disabled = true;
+            feedbackAreaEl.textContent = '';
+            feedbackAreaEl.className = 'feedback';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                questionTextEl.textContent = currentQuestion.question;
+                optionsContainerEl.innerHTML = '';
+                selectedOptionElement = null; 
+
+                currentQuestion.options.forEach((option, index) => {
+                    const optionId = `option-${index}`;
+                    const label = document.createElement('label');
+                    label.htmlFor = optionId;
+                    label.textContent = option;
+                    label.classList.add('option-label');
+
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.id = optionId;
+                    radio.name = 'option';
+                    radio.value = index;
+                    radio.classList.add('hidden');
+
+                    radio.addEventListener('change', () => {
+                        if(selectedOptionElement) {
+                            selectedOptionElement.classList.remove('selected');
+                        }
+                        selectedOptionElement = label;
+                        label.classList.add('selected');
+                        nextBtn.disabled = false;
+                    });
+
+                    optionsContainerEl.appendChild(radio);
+                    optionsContainerEl.appendChild(label);
+                });
+                updateProgressBar();
+                questionCounterEl.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+                feedbackAreaEl.textContent = '';
+                feedbackAreaEl.className = 'feedback';
+                nextBtn.disabled = true;
+            } else {
+                showResults();
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            const selectedRadio = document.querySelector('input[name="option"]:checked');
+            if (selectedRadio) {
+                processAnswer(parseInt(selectedRadio.value));
+            }
+        });
+
+        function processAnswer(selectedIndex) {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const correctAnswerIndex = currentQuestion.answer;
+
+            if (selectedIndex === correctAnswerIndex) {
+                score += pointsPerQuestion;
+                feedbackAreaEl.textContent = "¡Correcto! " + currentQuestion.feedback;
+                feedbackAreaEl.classList.add('correct');
+            } else {
+                feedbackAreaEl.textContent = "Incorrecto. " + currentQuestion.feedback;
+                feedbackAreaEl.classList.add('incorrect');
+            }
+
+            const radioButtons = document.querySelectorAll('input[name="option"]');
+            radioButtons.forEach(radio => radio.disabled = true);
+            document.querySelectorAll('.option-label').forEach(label => {
+                label.style.cursor = 'default';
+                // Mantener el estilo seleccionado si es el que el usuario eligió
+                if (label.htmlFor !== `option-${selectedIndex}`) {
+                     label.classList.remove('selected');
+                }
+            });
+
+
+            nextBtn.disabled = false;
+            if (currentQuestionIndex < shuffledQuestions.length -1) {
+                 nextBtn.textContent = 'Siguiente Pregunta';
+                 nextBtn.onclick = () => {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                 };
+            } else {
+                nextBtn.textContent = 'Ver Resultados';
+                nextBtn.onclick = showResults;
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBarEl.style.width = `${progress}%`;
+        }
+
+        function showResults() {
+            quizArea.classList.add('hidden');
+            resultsArea.classList.remove('hidden');
+            // Redondear el puntaje a dos decimales o a un número cercano si es necesario
+            // El puntaje máximo teórico es 15 * 6.66 = 99.9
+            // Para evitar problemas de representación flotante, podemos redondearlo.
+            const finalScore = parseFloat(score.toFixed(2));
+            scoreEl.textContent = finalScore;
+
+
+            let feedbackMsg = "";
+            // Ajustar umbrales según el nuevo puntaje máximo (aprox 99.9)
+            if (finalScore >= (shuffledQuestions.length * pointsPerQuestion * 0.8)) { // 80%
+                feedbackMsg = "¡Excelente trabajo! Has demostrado un gran conocimiento del documento.";
+            } else if (finalScore >= (shuffledQuestions.length * pointsPerQuestion * 0.5)) { // 50%
+                feedbackMsg = "¡Buen esfuerzo! Hay algunos puntos que puedes repasar para mejorar aún más.";
+            } else {
+                feedbackMsg = "Sigue estudiando el documento. ¡La práctica te ayudará a comprender mejor los conceptos!";
+            }
+            finalFeedbackEl.textContent = feedbackMsg;
+        }
+
+        restartBtn.addEventListener('click', startQuiz);
+
+        startQuiz();
+    </script>
+
+</body>
+</html>

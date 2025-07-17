@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cuestionario Comprensión Lectora</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; margin: 0; padding: 40px; color: #333; }
+    .container { max-width: 700px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+    .question { margin-bottom: 20px; }
+    .question h3 { font-size: 1.2em; margin-bottom: 10px; }
+    .options label { display: block; background: #e0ecf8; padding: 10px; margin: 5px 0; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
+    .options input[type="radio"] { margin-right: 10px; }
+    .options label:hover { background: #d0e0f0; }
+    .feedback { display: none; margin-top: 10px; font-weight: bold; }
+    .correct { color: green; }
+    .incorrect { color: red; }
+    #resultado { font-weight: bold; font-size: 1.2em; margin-top: 30px; text-align: center; }
+    #siguienteBtn { margin-top: 20px; display: none; background: #007BFF; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; }
+    #siguienteBtn:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Cuestionario Interactivo: Comprensión Lectora</h1>
+    <div id="quizContainer"></div>
+    <button id="siguienteBtn" onclick="siguientePregunta()">Siguiente pregunta</button>
+    <div id="resultado"></div>
+  </div>
+
+  <script>
+    const preguntas = [
+      {
+        texto: "¿Qué aspecto es esencial para que un lector pueda hacer inferencias correctas al leer un texto?",
+        opciones: [
+          "Tener buena caligrafía",
+          "Leer a gran velocidad",
+          "Tener conocimientos previos del tema",
+          "Utilizar diccionarios constantemente"
+        ],
+        correcta: 2,
+        retroalimentacion: "La comprensión lectora depende en gran medida del conocimiento del tema. (Página 240)"
+      },
+      {
+        texto: "Según el texto, ¿qué ocurre con los estudiantes que no comprenden el 90% de las palabras de un texto?",
+        opciones: [
+          "Pierden interés solamente",
+          "Aprenden palabras nuevas con mayor facilidad",
+          "No comprenden el contenido ni adquieren nuevo vocabulario",
+          "Piden ayuda al docente y mejoran automáticamente"
+        ],
+        correcta: 2,
+        retroalimentacion: "Sin conocer al menos el 90% de las palabras, los estudiantes no pueden entender el texto. (Página 238)"
+      },
+      {
+        texto: "¿Qué nombre recibe la caída en los puntajes de comprensión lectora observada en cuarto grado?",
+        opciones: [
+          "Bajón de cuarto grado",
+          "Colapso lector",
+          "Desfase cognitivo",
+          "Efecto cuarto ciclo"
+        ],
+        correcta: 0,
+        retroalimentacion: "Se conoce como el 'bajón de cuarto grado'. (Página 230)"
+      },
+      {
+        texto: "¿Cuál es el rol de la fluidez en la lectura?",
+        opciones: [
+          "Evita la fatiga visual",
+          "Facilita la escritura",
+          "Mejora la pronunciación",
+          "Libera la memoria de corto plazo para comprender el texto"
+        ],
+        correcta: 3,
+        retroalimentacion: "La fluidez permite que los procesos de lectura sean automáticos. (Página 234)"
+      },
+      {
+        texto: "¿Cómo define el texto el 'efecto Mateo' en la adquisición de vocabulario?",
+        opciones: [
+          "Los estudiantes pobres entienden mejor la Biblia",
+          "Todos los niños aprenden igual si se esfuerzan",
+          "Los que más saben, aprenden más; los que menos saben, se quedan atrás",
+          "La lectura es más fácil para quienes memorizan"
+        ],
+        correcta: 2,
+        retroalimentacion: "El efecto Mateo describe una ventaja que se amplía con el tiempo. (Página 238)"
+      }
+      // Preguntas adicionales agregadas automáticamente
+    ];
+
+    let preguntaActual = 0;
+    let puntuacion = 0;
+
+    function mostrarPregunta() {
+      const quizContainer = document.getElementById('quizContainer');
+      const pregunta = preguntas[preguntaActual];
+      quizContainer.innerHTML = `<div class="question">
+        <h3>${pregunta.texto}</h3>
+        <div class="options">
+          ${pregunta.opciones.map((op, idx) => `
+            <label>
+              <input type="radio" name="respuesta" value="${idx}" onclick="verificarRespuesta(${idx})"> ${op}
+            </label>
+          `).join('')}
+        </div>
+        <div id="feedback" class="feedback"></div>
+      </div>`;
+    }
+
+    function verificarRespuesta(indiceSeleccionado) {
+      const pregunta = preguntas[preguntaActual];
+      const feedback = document.getElementById('feedback');
+      const opciones = document.getElementsByName('respuesta');
+
+      opciones.forEach(op => op.disabled = true);
+
+      if (indiceSeleccionado === pregunta.correcta) {
+        puntuacion += 5;
+        feedback.textContent = "✔️ Correcto. " + pregunta.retroalimentacion;
+        feedback.className = "feedback correct";
+      } else {
+        feedback.textContent = "❌ Incorrecto. " + pregunta.retroalimentacion;
+        feedback.className = "feedback incorrect";
+      }
+      feedback.style.display = 'block';
+      document.getElementById('siguienteBtn').style.display = 'inline-block';
+    }
+
+    function siguientePregunta() {
+      preguntaActual++;
+      const resultado = document.getElementById('resultado');
+      document.getElementById('siguienteBtn').style.display = 'none';
+
+      if (preguntaActual < preguntas.length) {
+        mostrarPregunta();
+      } else {
+        resultado.innerHTML = `Puntaje total: ${puntuacion} / ${preguntas.length * 5}`;
+        if (puntuacion === preguntas.length * 5) {
+          resultado.innerHTML += '<br>🌟 ¡Excelente! Dominaste todos los conceptos clave de comprensión lectora.';
+        } else if (puntuacion >= preguntas.length * 4) {
+          resultado.innerHTML += '<br>✅ Buen desempeño. Aún puedes reforzar algunos aspectos clave.';
+        } else if (puntuacion >= preguntas.length * 3) {
+          resultado.innerHTML += '<br>🟡 Nivel aceptable. Revisa las retroalimentaciones para mejorar.';
+        } else {
+          resultado.innerHTML += '<br>🔴 Bajo rendimiento. Te sugerimos releer el documento y volver a intentarlo.';
+        }
+      }
+    }
+
+    preguntas.sort(() => 0.5 - Math.random());
+    mostrarPregunta();
+  </script>
+</body>
+</html>

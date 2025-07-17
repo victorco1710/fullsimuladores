@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo: Leer y Escribir, desarrollado por Victor Crespo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-label {
+            display: block;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .option-label:hover {
+            background-color: #f7fafc;
+        }
+        .option-label.selected {
+            background-color: #ebf8ff;
+            border-color: #90cdf4;
+        }
+        .option-label.correct {
+            background-color: #c6f6d5;
+            border-color: #68d391;
+        }
+        .option-label.incorrect {
+            background-color: #fed7d7;
+            border-color: #fc8181;
+        }
+        /* Custom scrollbar for better aesthetics if needed */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-sky-100 to-indigo-200 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
+
+    <div id="quiz-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl transform transition-all duration-500">
+        <h1 class="text-2xl sm:text-3xl font-bold text-center text-indigo-700 mb-6">Cuestionario: Leer y Escribir</h1>
+
+        <div id="question-area" class="mb-6">
+            <h2 id="question-text" class="text-lg sm:text-xl font-semibold text-gray-800 mb-4"></h2>
+            <div id="options-container" class="space-y-3">
+                </div>
+        </div>
+
+        <div id="feedback-area" class="mb-6 p-3 rounded-md text-sm min-h-[60px]">
+            </div>
+
+        <div id="navigation-area" class="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+            <button id="submit-btn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                Enviar Respuesta
+            </button>
+            <div id="progress-text" class="text-sm text-gray-600">Pregunta 1 de 15</div>
+        </div>
+
+        <div id="score-area" class="hidden mt-8 text-center">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-2">Cuestionario Finalizado</h2>
+            <p class="text-xl text-gray-800 mb-1">Tu puntuación: <span id="final-score" class="font-bold"></span> puntos</p>
+            <p id="final-feedback" class="text-md text-gray-700 mb-6"></p>
+            <button id="restart-btn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-8 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                Reiniciar Cuestionario
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Definición de las Preguntas ---
+        const allQuestions = [
+            {
+                question: "¿Cuál es una interpretación errónea y frecuente del constructivismo en la enseñanza de la lectoescritura, según Ana María Kaufman?",
+                options: [
+                    "Confundirlo con una actitud de laissez-faire donde el docente acepta pasivamente los errores del niño.",
+                    "Considerarlo aplicable solo a los primeros grados.",
+                    "Enfocarlo exclusivamente en la adquisición del sistema de escritura.",
+                    "Priorizar la enseñanza explícita de reglas gramaticales."
+                ],
+                answer: 0,
+                feedbackText: "Página 7: Ana María Kaufman enfatiza que 'A esta altura no se puede seguir confundiendo constructivismo con laissez-faire...'."
+            },
+            {
+                question: "¿Qué característica principal define a los 'errores constructivos' según la perspectiva de Ana María Kaufman?",
+                options: [
+                    "Son fallos esporádicos debidos a la distracción del niño.",
+                    "Son errores sistemáticos que reflejan procesos de construcción de conocimiento subyacentes en todos los niños.",
+                    "Deben ser corregidos inmediatamente por el docente para evitar su fijación.",
+                    "Indican una falta de comprensión de las explicaciones del maestro."
+                ],
+                answer: 1,
+                feedbackText: "Páginas 7-8: Se describe que 'Los errores constructivos son errores sistemáticos, que aparecen en todos los niños en determinado momento, y que dan cuenta de procesos de construcción subyacentes.'"
+            },
+            {
+                question: "En el contexto de las reacciones frente a una perturbación cognitiva (Piaget), ¿cómo se manifiesta una 'reacción Alfa' en un niño aprendiendo a escribir, según el ejemplo de Raulito?",
+                options: [
+                    "El niño modifica parcialmente su hipótesis para acomodar el dato perturbador.",
+                    "El niño reestructura completamente su sistema de escritura para integrar la nueva información.",
+                    "El niño reconoce una contradicción en su escritura pero la ignora o no intenta resolverla activamente.",
+                    "El niño busca la ayuda directa del maestro para que le dé la respuesta correcta."
+                ],
+                answer: 2,
+                feedbackText: "Páginas 9-10: El ejemplo de Raulito, quien escribió EQ para 'perro' y EO para 'beso', ilustra una reacción Alfa: 'él sabía que algo no estaba bien, pero todavía no estaba en condiciones de intentar solucionar ese problema. Su reacción frente a la perturbación fue una típica reacción Alfa.'"
+            },
+            {
+                question: "¿Cuál es la intervención docente sugerida por Kaufman cuando un niño presenta predominantemente 'reacciones Alfa' ante conflictos cognitivos en la escritura?",
+                options: [
+                    "Insistir en plantearle los mismos conflictos hasta que logre una reacción Beta o Gamma.",
+                    "Evitar abrumarlo con situaciones conflictivas intencionales y, en su lugar, ofrecer información, contacto con textos e interacción, dándole tiempo.",
+                    "Corregir directamente sus producciones para mostrarle el modelo correcto.",
+                    "Simplificar las tareas al punto de eliminar cualquier posible conflicto cognitivo."
+                ],
+                answer: 1,
+                feedbackText: "Página 10: Se sugiere que 'el maestro debe comprender que no debe abrumar al alumno con situaciones potencialmente perturbadoras (...) y que debe darle un tiempo para que afiance más sus hipótesis...'"
+            },
+            {
+                question: "¿Qué caracteriza una 'reacción Beta' frente a una perturbación cognitiva en el aprendizaje de la lectoescritura, según lo expuesto por Kaufman?",
+                options: [
+                    "Una reestructuración completa y estable de sus hipótesis sobre la escritura.",
+                    "La negación total del problema o conflicto presentado.",
+                    "La repetición exacta del error sin ninguna modificación.",
+                    "El niño intenta conservar sus esquemas previos realizando una compensación parcial y a menudo precaria para asimilar el dato perturbador."
+                ],
+                answer: 3,
+                feedbackText: "Página 11: Se explica que en una reacción Beta, 'El niño (o el adulto) trata de conservar lo más posible de los esquemas que ya tenía... pero, a la vez, trata de asimilar el dato perturbador, de compensarlo aunque sea parcial y temporariamente.'"
+            },
+            {
+                question: "En el ejemplo de Juan, que escribe 'SACA' para 'casa', ¿qué logro fundamental representa su 'reacción Gamma' según Kaufman?",
+                options: [
+                    "Aprender a copiar correctamente las palabras que le muestra la maestra.",
+                    "Superar la hipótesis silábica y acceder a una hipótesis alfabética sui géneris, reformulando su sistema de escritura.",
+                    "Memorizar la forma correcta de escribir palabras específicas como 'casa'.",
+                    "Entender que cada letra representa un sonido único e invariable."
+                ],
+                answer: 1,
+                feedbackText: "Página 12: Se concluye sobre Juan que 'Está claro que Juan logró superar la hipótesis silábica y acceder a una hipótesis alfabética sui géneris.'"
+            },
+            {
+                question: "¿Cuál es la afirmación de Ana María Kaufman que define de manera contundente el rol del maestro en una propuesta pedagógica constructivista?",
+                options: [
+                    "'El maestro debe esperar con una sonrisa a que el niño construya su conocimiento.'",
+                    "'El maestro debe presentar conflictos constantemente para acelerar el aprendizaje.'",
+                    "'El rol del maestro no es pasivo, en absoluto, ya que planifica su labor, enseña y evalúa permanentemente.'",
+                    "'El maestro solo interviene cuando el niño comete errores no constructivos.'"
+                ],
+                answer: 2,
+                feedbackText: "Página 14: Se cita textualmente: 'En una propuesta pedagógica constructivista el rol del maestro no es pasivo, en absoluto, ya que planifica su labor, enseña y evalúa permanentemente.'"
+            },
+            {
+                question: "Kaufman distingue dos tipos principales de 'corrección'. ¿Cuál es la diferencia fundamental entre la corrección como 'proceso permanente' y la 'corrección' como marcación sistemática?",
+                options: [
+                    "La primera solo la hacen los niños y la segunda solo el maestro.",
+                    "La primera es una verificación y rectificación continua en el aula, mientras que la segunda es la marcación y rectificación de todos los errores por el maestro en el cuaderno.",
+                    "La primera se aplica a errores constructivos y la segunda a los no constructivos.",
+                    "La primera es opcional y la segunda es obligatoria en el enfoque constructivista."
+                ],
+                answer: 1,
+                feedbackText: "Página 15: Se describe la corrección como un 'verdadero proceso en el que se van rectificando cuestiones' (permanente) y 'el otro tipo de corrección (...) el único que es advertido como tal) es la marca gráfica sistemática de todos los errores'."
+            },
+            {
+                question: "Respecto a la práctica de marcar sistemáticamente todos los errores en los trabajos de los niños, ¿cuál es la postura de Ana María Kaufman?",
+                options: [
+                    "Se deben marcar todos los errores para asegurar un aprendizaje correcto.",
+                    "Nunca se deben marcar errores para no afectar la autoestima del niño.",
+                    "No es bueno marcar sistemáticamente todos los errores, pero tampoco es adecuado no rectificar nunca.",
+                    "Solo se deben marcar los errores ortográficos, ignorando los de contenido."
+                ],
+                answer: 2,
+                feedbackText: "Página 16: Kaufman afirma: 'Creo que no es bueno marcar sistemáticamente todos los errores, pero tampoco me parece adecuado no rectificarlos nunca'."
+            },
+            {
+                question: "En la alternativa de corrección propuesta, ¿qué significa que un trabajo sea marcado con una 'T' (Testimonial)?",
+                options: [
+                    "Es un trabajo que debe ser Totalmente rehecho por el niño.",
+                    "Es un trabajo que queda tal como el chico lo hizo, sin corrección del maestro, sirviendo como testimonio de su nivel en ese momento.",
+                    "Es un trabajo Temático que se evalúa por su contenido y no por su forma.",
+                    "Es un trabajo Transitorio que se descarta después de una revisión rápida."
+                ],
+                answer: 1,
+                feedbackText: "Páginas 17 y 19: Se explica que los trabajos 'T' son 'testimoniales del nivel del autor en el momento de su realización' (p.17) y 'quedan tal como el chico los hizo' (p.19)."
+            },
+            {
+                question: "Al planificar actividades de lectoescritura desde un enfoque constructivista, ¿qué dos aprendizajes simultáneos se deben contemplar según Kaufman?",
+                options: [
+                    "La memorización del abecedario y la copia de textos modelo.",
+                    "La expresión oral fluida y la comprensión lectora literal.",
+                    "El desarrollo de la motricidad fina y la correcta ortografía.",
+                    "El aprendizaje del sistema de escritura (letras, reglas) y el aprendizaje del lenguaje escrito (características de tipos de texto)."
+                ],
+                answer: 3,
+                feedbackText: "Página 20: Se aclara que se planifican situaciones para dos aprendizajes simultáneos: 'el aprendizaje del sistema de escritura y el aprendizaje del lenguaje escrito.'"
+            },
+            {
+                question: "¿Qué aspecto crucial se debe considerar al planificar situaciones de escritura, según Ana María Kaufman, para que estas sean significativas?",
+                options: [
+                    "Deben centrarse exclusivamente en la correcta aplicación de las reglas ortográficas.",
+                    "Las producciones escritas deben tener lectores potenciales, es decir, ser hechas 'para alguien y para algo'.",
+                    "Deben ser siempre individuales para evaluar el progreso personal.",
+                    "Deben basarse en temas exclusivamente lúdicos y de interés infantil."
+                ],
+                answer: 1,
+                feedbackText: "Página 22: Se destaca que 'Un aspecto importante para tener en cuenta al planificar situaciones de escritura es el siguiente: esas producciones deben tener lectores potenciales, deben ser hechas para alguien y para algo.'"
+            },
+            {
+                question: "En el estudio de la gramática textual, ¿cuál es la principal diferencia entre las relaciones referenciales endofóricas y las exofóricas?",
+                options: [
+                    "Las endofóricas se dan entre elementos dentro del mismo texto, mientras que las exofóricas relacionan elementos del texto con el contexto extralingüístico.",
+                    "Las endofóricas son siempre anafóricas y las exofóricas siempre catafóricas.",
+                    "Las endofóricas se refieren a la estructura de la oración y las exofóricas a la del párrafo.",
+                    "Las endofóricas son propias del lenguaje oral y las exofóricas del lenguaje escrito."
+                ],
+                answer: 0,
+                feedbackText: "Páginas 24-25: Se explica que las relaciones exofóricas son con 'datos que están fuera del texto (contexto)' y las endofóricas 'con otros elementos del mismo texto'."
+            },
+            {
+                question: "En el ejemplo 'Ella caminaba sin pausa... A las 4 de la tarde la princesa Grace dejó de caminar...', ¿qué función cumple el pronombre 'Ella' y qué tipo de relación referencial establece?",
+                options: [
+                    "Funciona como una anáfora, refiriéndose a un personaje ya introducido.",
+                    "Es un deíctico que señala directamente a una persona presente en la situación comunicativa.",
+                    "Funciona como una catáfora, creando suspenso al anticipar un referente ('la princesa Grace') que se revela después.",
+                    "Es un pronombre personal sin una función referencial específica en este contexto."
+                ],
+                answer: 2,
+                feedbackText: "Página 26: Se analiza el ejemplo: 'En este caso, el término \"ella\" se está refiriendo a \"la princesa Grace\". Como aparece antes y recién después se aclara de quién se trata, constituye una catáfora.'"
+            },
+            {
+                question: "¿Qué mecanismo de cohesión textual se ilustra en la frase 'Susana comió cinco chocolates. Ana, cuatro', según los ejemplos de Kaufman?",
+                options: [
+                    "Pronominalización, sustituyendo un nombre por un pronombre.",
+                    "Sustitución léxica, usando un sinónimo o hiperónimo.",
+                    "Uso de conectores lógicos para enlazar las ideas.",
+                    "Elipsis o supresión, donde se omite 'comió chocolates' en la segunda oración por estar sobrentendido."
+                ],
+                answer: 3,
+                feedbackText: "Página 28: Se menciona como regla de cohesión 'la elipsis o supresión (por ejemplo, \"Susana comió cinco chocolates. Ana, cuatro\")'."
+            }
+        ];
+
+        // --- Lógica del Cuestionario ---
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const pointsPerQuestion = 100 / allQuestions.length;
+
+        const quizContainer = document.getElementById('quiz-container');
+        const questionArea = document.getElementById('question-area');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackAreaEl = document.getElementById('feedback-area');
+        const navigationArea = document.getElementById('navigation-area');
+        const submitBtn = document.getElementById('submit-btn');
+        const progressTextEl = document.getElementById('progress-text');
+        const scoreAreaEl = document.getElementById('score-area');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalFeedbackEl = document.getElementById('final-feedback');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            shuffledQuestions = [...allQuestions];
+            shuffleArray(shuffledQuestions);
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreAreaEl.classList.add('hidden');
+            questionArea.classList.remove('hidden');
+            navigationArea.classList.remove('hidden');
+            submitBtn.textContent = 'Enviar Respuesta';
+            submitBtn.disabled = false;
+            feedbackAreaEl.textContent = '';
+            feedbackAreaEl.className = 'mb-6 p-3 rounded-md text-sm min-h-[60px]'; // Reset class
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                questionTextEl.textContent = currentQuestion.question;
+                optionsContainerEl.innerHTML = '';
+                currentQuestion.options.forEach((option, index) => {
+                    const optionId = `option-${index}`;
+                    const optionLabel = document.createElement('label');
+                    optionLabel.htmlFor = optionId;
+                    optionLabel.textContent = option;
+                    optionLabel.className = 'option-label';
+                    
+                    const optionInput = document.createElement('input');
+                    optionInput.type = 'radio';
+                    optionInput.name = 'option';
+                    optionInput.id = optionId;
+                    optionInput.value = index;
+                    optionInput.className = 'sr-only'; // Tailwind class for screen-reader only
+
+                    optionInput.addEventListener('change', () => {
+                        // Remove 'selected' from all labels
+                        document.querySelectorAll('.option-label').forEach(label => {
+                            label.classList.remove('selected');
+                        });
+                        // Add 'selected' to the clicked label
+                        optionLabel.classList.add('selected');
+                    });
+
+                    optionsContainerEl.appendChild(optionInput);
+                    optionsContainerEl.appendChild(optionLabel);
+                });
+                progressTextEl.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+                submitBtn.textContent = 'Enviar Respuesta';
+                submitBtn.disabled = false;
+                feedbackAreaEl.textContent = '';
+                feedbackAreaEl.className = 'mb-6 p-3 rounded-md text-sm min-h-[60px]';
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function handleSubmit() {
+            const selectedOptionInput = document.querySelector('input[name="option"]:checked');
+            if (!selectedOptionInput) {
+                feedbackAreaEl.textContent = 'Por favor, selecciona una opción.';
+                feedbackAreaEl.className = 'mb-6 p-3 rounded-md text-sm min-h-[60px] bg-yellow-100 text-yellow-700 border border-yellow-300';
+                return;
+            }
+
+            const selectedAnswer = parseInt(selectedOptionInput.value);
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const correctAnswer = currentQuestion.answer;
+            const optionsLabels = document.querySelectorAll('.option-label');
+
+            // Disable further selections
+            document.querySelectorAll('input[name="option"]').forEach(input => input.disabled = true);
+            
+            let feedbackHTML = '';
+
+            if (selectedAnswer === correctAnswer) {
+                score += pointsPerQuestion;
+                optionsLabels[selectedAnswer].classList.add('correct');
+                feedbackHTML = `<strong class="text-green-700">¡Correcto!</strong> ${currentQuestion.feedbackText}`;
+                feedbackAreaEl.className = 'mb-6 p-3 rounded-md text-sm min-h-[60px] bg-green-50 text-green-700 border border-green-200';
+            } else {
+                optionsLabels[selectedAnswer].classList.add('incorrect');
+                optionsLabels[correctAnswer].classList.add('correct'); // Show the correct one
+                feedbackHTML = `<strong class="text-red-700">Incorrecto.</strong> La respuesta correcta era la opción ${correctAnswer + 1}. ${currentQuestion.feedbackText}`;
+                feedbackAreaEl.className = 'mb-6 p-3 rounded-md text-sm min-h-[60px] bg-red-50 text-red-700 border border-red-200';
+            }
+            feedbackAreaEl.innerHTML = feedbackHTML;
+
+            submitBtn.textContent = 'Siguiente Pregunta';
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                submitBtn.textContent = 'Ver Resultados';
+            }
+            
+            // Unbind current submit, bind next action
+            submitBtn.removeEventListener('click', handleSubmit);
+            submitBtn.addEventListener('click', handleNext);
+        }
+
+        function handleNext() {
+            currentQuestionIndex++;
+             // Re-enable radio buttons for the next question
+            document.querySelectorAll('input[name="option"]').forEach(input => input.disabled = false);
+            submitBtn.removeEventListener('click', handleNext);
+            submitBtn.addEventListener('click', handleSubmit);
+            displayQuestion();
+        }
+
+
+        function showFinalScore() {
+            questionArea.classList.add('hidden');
+            navigationArea.classList.add('hidden');
+            feedbackAreaEl.classList.add('hidden');
+            scoreAreaEl.classList.remove('hidden');
+
+            finalScoreEl.textContent = score.toFixed(1); // Rounded to one decimal place
+            let overallFeedback = '';
+            const percentageScore = (score / 100) * 100; // score is already out of 100 effectively
+
+            if (percentageScore >= 80) {
+                overallFeedback = "¡Excelente! Demuestras un profundo entendimiento de los conceptos clave del texto.";
+                finalScoreEl.className = "font-bold text-green-600";
+            } else if (percentageScore >= 60) {
+                overallFeedback = "¡Muy bien! Tienes una buena comprensión general, aunque algunos detalles podrían revisarse.";
+                finalScoreEl.className = "font-bold text-yellow-600";
+            } else if (percentageScore >= 40) {
+                overallFeedback = "Regular. Comprendes algunos aspectos, pero es recomendable un repaso más detallado del material.";
+                finalScoreEl.className = "font-bold text-orange-600";
+            } else {
+                overallFeedback = "Necesitas mejorar. Te sugiero releer el documento con atención para afianzar los conceptos.";
+                finalScoreEl.className = "font-bold text-red-600";
+            }
+            finalFeedbackEl.textContent = overallFeedback;
+        }
+
+        submitBtn.addEventListener('click', handleSubmit);
+        restartBtn.addEventListener('click', startQuiz);
+
+        // Iniciar el cuestionario al cargar la página
+        startQuiz();
+    </script>
+
+</body>
+</html>

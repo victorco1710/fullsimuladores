@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Atlas Patrimonial de Bolivia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        .question-card {
+            background-color: #e2e8f0;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
+            background-color: #ffffff;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            color: #333;
+        }
+        .option-button:hover {
+            background-color: #f0f4f8;
+            border-color: #94a3b8;
+        }
+        .option-button.correct {
+            background-color: #d1fae5; /* green-100 */
+            border-color: #34d399; /* green-400 */
+        }
+        .option-button.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #f87171; /* red-400 */
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .feedback.correct {
+            background-color: #ecfdf5; /* green-50 */
+            color: #059669; /* green-700 */
+            border: 1px solid #a7f3d0; /* green-200 */
+        }
+        .feedback.incorrect {
+            background-color: #fff7ed; /* orange-50 */
+            color: #ea580c; /* orange-700 */
+            border: 1px solid #fed7aa; /* orange-200 */
+        }
+        .navigation-buttons button {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .navigation-buttons button:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+        .navigation-buttons button:disabled {
+            background-color: #93c5fd; /* blue-300 */
+            cursor: not-allowed;
+        }
+        .final-score-card {
+            background-color: #eff6ff; /* blue-50 */
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #64748b; /* slate-500 */
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center p-6">
+    <div id="quiz-container" class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Cuestionario: Atlas Patrimonial de Bolivia</h1>
+        <div id="question-area">
+            <!-- Questions will be loaded here -->
+        </div>
+        <div id="score-area" class="hidden">
+            <div class="final-score-card">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">¡Cuestionario Completado!</h2>
+                <p class="text-xl text-gray-700 mb-4">Tu puntuación final es: <span id="final-score" class="font-bold text-blue-600"></span> / 100</p>
+                <p id="overall-feedback" class="text-lg text-gray-600"></p>
+                <button id="restart-quiz" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md">Reiniciar Cuestionario</button>
+            </div>
+        </div>
+        <div class="footer">
+            <p>PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. ©  Victor</p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Qué ciudad fue considerada en el siglo XVI como el mayor complejo industrial del mundo y declarada Patrimonio Cultural y Natural de la Humanidad por la UNESCO en 1987?",
+                options: ["Sucre", "Tiwanaku", "Potosí", "Oruro"],
+                answer: "Potosí",
+                feedback: "Correcto. Potosí fue el principal centro minero de plata del mundo en el siglo XVI.",
+                page: "Página 7"
+            },
+            {
+                question: "¿Cuál era la principal fuente monetaria de España hacia el Viejo Mundo, según el documento?",
+                options: ["El oro de Potosí", "La plata extraída del Cerro Rico de Potosí", "Los textiles de Oruro", "Las joyas de Sucre"],
+                answer: "La plata extraída del Cerro Rico de Potosí",
+                feedback: "Correcto. La plata de Potosí engrandeció la economía española.",
+                page: "Página 7"
+            },
+            {
+                question: "¿Cuándo fueron declaradas las Misiones Jesuíticas de Chiquitos Patrimonio Cultural de la Humanidad por la UNESCO?",
+                options: ["1987", "2000", "1990", "2003"],
+                answer: "1990",
+                feedback: "Correcto. Las Misiones Jesuíticas de Chiquitos son un testimonio del mundo misional del siglo XVII.",
+                page: "Página 8"
+            },
+            {
+                question: "¿Qué tipo de música se destaca en las Misiones Jesuíticas de Chiquitos y cuyas partituras constituyen una colección única en América?",
+                options: ["Música folklórica", "Música barroca", "Música andina", "Música contemporánea"],
+                answer: "Música barroca",
+                feedback: "Correcto. La música barroca de las misiones se ejecuta en festivales internacionales.",
+                page: "Página 8"
+            },
+            {
+                question: "¿Cuál de las siguientes poblaciones misionales construyó su iglesia tras la expulsión de los jesuitas?",
+                options: ["San Francisco Javier", "Concepción", "Santa Ana", "San José"],
+                answer: "Santa Ana",
+                feedback: "Correcto. Santa Ana se distingue por haber construido su templo después de la partida de los jesuitas.",
+                page: "Página 8"
+            },
+            {
+                question: "¿Cuál es la capital constitucional e histórica de Bolivia, declarada Patrimonio Cultural de la Humanidad por la UNESCO en 1991?",
+                options: ["La Paz", "Potosí", "Sucre", "Santa Cruz"],
+                answer: "Sucre",
+                feedback: "Correcto. Sucre es conocida por su arquitectura hispánica bien conservada.",
+                page: "Página 9"
+            },
+            {
+                question: "¿Cuál fue el nombre original de Sucre cuando fue fundada en 1538?",
+                options: ["Ciudad Blanca", "La Culta", "Ciudad de La Plata", "Charcas"],
+                answer: "Ciudad de La Plata",
+                feedback: "Correcto. Sucre ha tenido varios nombres a lo largo de su historia.",
+                page: "Página 9"
+            },
+            {
+                question: "¿Qué monumento es considerado el más importante de Sucre por su protagonismo en la independencia de Bolivia?",
+                options: ["El Palacio de la Glorieta", "La vieja capilla franciscana", "La Casa de la Libertad", "El Templo de Tanga Tanga"],
+                answer: "La Casa de la Libertad",
+                feedback: "Correcto. Este edificio es un símbolo de la independencia boliviana.",
+                page: "Página 9"
+            },
+            {
+                question: "¿Qué tipo de yacimiento paleontológico concentra las pisadas de 294 especies de dinosaurios en Cal Orck’o?",
+                options: ["Un yacimiento de oro", "Un yacimiento de huellas de dinosaurios", "Un yacimiento de carbón", "Un yacimiento de fósiles marinos"],
+                answer: "Un yacimiento de huellas de dinosaurios",
+                feedback: "Correcto. Cal Orck’o es uno de los yacimientos paleontológicos más ricos del mundo.",
+                page: "Página 16"
+            },
+            {
+                question: "¿Cuál es el volcán más alto e imponente de Bolivia, mencionado en el Parque Nacional Sajama?",
+                options: ["Illimani", "Wayna Potosí", "Sajama", "Mururata"],
+                answer: "Sajama",
+                feedback: "Correcto. El Nevado Sajama es un pico imponente con 6.542 msnm.",
+                page: "Página 16"
+            },
+            {
+                question: "¿Qué es el Salar de Uyuni y dónde se ubica?",
+                options: ["Un lago artificial en La Paz", "Un desierto de arena en Santa Cruz", "Un antiguo lago salado prehistórico en Potosí", "Una montaña en Oruro"],
+                answer: "Un antiguo lago salado prehistórico en Potosí",
+                feedback: "Correcto. El Salar de Uyuni es una de las mayores atracciones turísticas de Bolivia.",
+                page: "Página 16"
+            },
+            {
+                question: "¿Cuál es el principal acontecimiento del Carnaval de Oruro que dura veinte horas sin interrupción?",
+                options: ["La Entrada de Comadres", "El rito de la Candelaria", "La 'entrada' de los bailarines", "La elección de la Reina del Folklore"],
+                answer: "La 'entrada' de los bailarines",
+                feedback: "Correcto. La 'entrada' es el desfile principal de danzas del Carnaval de Oruro.",
+                page: "Página 14"
+            },
+            {
+                question: "¿Qué fiesta tradicional fue transformada en ritual cristiano, celebrándose el 2 de febrero, según el texto del Carnaval de Oruro?",
+                options: ["La fiesta de Ito", "La Diablada", "La Kullawada", "El Tinku"],
+                answer: "La fiesta de Ito",
+                feedback: "Correcto. La fiesta de Ito se transformó en la Candelaria.",
+                page: "Página 14"
+            },
+            {
+                question: "¿En qué año fue declarado el Carnaval de Oruro 'Obra Maestra del Patrimonio Oral e Intangible de la Humanidad' por la UNESCO?",
+                options: ["1990", "2000", "2001", "2003"],
+                answer: "2001",
+                feedback: "Correcto. El Carnaval de Oruro es una de las manifestaciones culturales más importantes de Bolivia.",
+                page: "Página 14"
+            },
+            {
+                question: "¿Qué significa el nombre Kallawaya y a qué se dedica esta cultura?",
+                options: ["Pueblo de tejedores; al arte textil", "Pueblo de agricultores; a la agricultura", "País de los Médicos; a la medicina ancestral", "Gente de las montañas; a la minería"],
+                answer: "País de los Médicos; a la medicina ancestral",
+                feedback: "Correcto. Los Kallawayas son reconocidos por su vasta farmacopea.",
+                page: "Página 15"
+            },
+            {
+                question: "¿Qué tipo de ritos y ceremonias asocian los Kallawayas a su medicina ancestral?",
+                options: ["Ritos de guerra", "Ritos de fertilidad", "Ritos con el mundo botánico, animal y mineral", "Ritos funerarios"],
+                answer: "Ritos con el mundo botánico, animal y mineral",
+                feedback: "Correcto. La cosmovisión andina de los Kallawayas es fundamental en sus prácticas medicinales.",
+                page: "Página 15"
+            },
+            {
+                question: "¿En qué mes prefieren los Kallawayas realizar sus rituales (challar) para una mayor comunicación con los espíritus?",
+                options: ["Enero", "Mayo", "Agosto", "Diciembre"],
+                answer: "Agosto",
+                feedback: "Correcto. Agosto es un mes significativo para los rituales Kallawayas.",
+                page: "Página 15"
+            },
+            {
+                question: "¿Qué tipo de edificaciones se conservan casi intactas en el complejo arqueológico de Incallajta?",
+                options: ["Casas coloniales", "Una muralla defensiva, un torreón y la Kallanca", "Iglesias jesuitas", "Mercados prehispánicos"],
+                answer: "Una muralla defensiva, un torreón y la Kallanca",
+                feedback: "Correcto. Incallajta fue un importante centro del poder incaico.",
+                page: "Página 16"
+            },
+            {
+                question: "¿Qué significa la palabra aymara 'Alasita' y qué se celebra cada año a partir del 24 de enero?",
+                options: ["Danza ceremonial; el Tinku", "Cómprame; la feria de miniaturas y el Ekeko", "Festival de la cosecha; el Pujllay", "Encuentro; la Fiesta de Compadres"],
+                answer: "Cómprame; la feria de miniaturas y el Ekeko",
+                feedback: "Correcto. La Alasita es una festividad de abundancia y deseos.",
+                page: "Página 17"
+            },
+            {
+                question: "¿Qué es el Tinku según el documento?",
+                options: ["Una danza de celebración", "Un ritual prehispánico de 'encuentro' y combate", "Una festividad de agradecimiento a la tierra", "Un tipo de música andina"],
+                answer: "Un ritual prehispánico de 'encuentro' y combate",
+                feedback: "Correcto. El Tinku es un rito ceremonial que mezcla religión, costumbre y filosofía.",
+                page: "Página 17"
+            },
+            {
+                question: "¿Cuál es el principal elemento que anuncia el inicio del Carnaval Chapaco en Tarija?",
+                options: ["La Diablada", "El pujllay", "Jinete, caja y erque", "Las coplas tarijeñas"],
+                answer: "Jinete, caja y erque",
+                feedback: "Correcto. Estos elementos musicales marcan el comienzo de la celebración.",
+                page: "Página 17"
+            },
+            {
+                question: "¿Qué se celebra dos jueves antes del primer domingo de carnaval en Tarija?",
+                options: ["La Fiesta de Compadres", "La Entrada de Comadres", "La Batalla de Jumbate", "La Bendición del Ekeko"],
+                answer: "La Entrada de Comadres",
+                feedback: "Correcto. La Fiesta de Comadres es una celebración característica del Carnaval Tarijeño.",
+                page: "Página 17"
+            },
+            {
+                question: "¿Qué es el Qhapaq Ñan?",
+                options: ["Un camino ceremonial incaico", "La Red Vial de Integración Prehispánica del territorio andino", "Un complejo arqueológico en Bolivia", "Una danza tradicional andina"],
+                answer: "La Red Vial de Integración Prehispánica del territorio andino",
+                feedback: "Correcto. El Qhapaq Ñan es una vasta red de caminos que conectaba diversas culturas prehispánicas.",
+                page: "Página 18"
+            },
+            {
+                question: "¿Qué importante mina de plata en Bolivia, y la segunda más grande del mundo, es mencionada como Patrimonio Industrial Boliviano?",
+                options: ["El Cerro Rico de Potosí", "Las minas de Oruro", "El centro minero Pulacayo", "Las minas de Huanuni"],
+                answer: "El centro minero Pulacayo",
+                feedback: "Correcto. Pulacayo tiene una rica historia minera y sindical.",
+                page: "Página 18"
+            },
+            {
+                question: "¿Qué colección documental boliviana fue el primer registro declarado “Memoria del Mundo” por la UNESCO en 2007?",
+                options: ["El Fondo Documental de la Real Audiencia de La Plata", "La música americana colonial de los siglos XVI-XVIII", "Los vestuarios del Carnaval de Oruro", "Los códices Kallawayas"],
+                answer: "La música americana colonial, colecciones documentales de músicas de los siglos XVI-XVIII",
+                feedback: "Correcto. Este registro destaca la fusión cultural en la música del Nuevo Mundo.",
+                page: "Página 19"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredQuestionsCount = 0;
+        let shuffledQuestions = [];
+
+        const questionArea = document.getElementById('question-area');
+        const scoreArea = document.getElementById('score-area');
+        const finalScoreSpan = document.getElementById('final-score');
+        const overallFeedbackPara = document.getElementById('overall-feedback');
+        const restartQuizButton = document.getElementById('restart-quiz');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const q = shuffledQuestions[currentQuestionIndex];
+                const optionsHtml = q.options.map((option, index) => `
+                    <button class="option-button" data-option="${option}" data-index="${index}">${option}</button>
+                `).join('');
+
+                questionArea.innerHTML = `
+                    <div class="question-card">
+                        <p class="text-xl font-semibold text-gray-800 mb-4">${currentQuestionIndex + 1}. ${q.question}</p>
+                        <div class="options-container">
+                            ${optionsHtml}
+                        </div>
+                        <div id="feedback-${currentQuestionIndex}" class="feedback hidden"></div>
+                        <p class="text-sm text-gray-500 mt-2">Página en el PDF: ${q.page}</p>
+                        <p class="text-right text-sm text-gray-600 mt-4">Puntuación: ${answeredQuestionsCount * 4} / ${currentQuestionIndex * 4}</p>
+                    </div>
+                    <div class="navigation-buttons flex justify-between mt-6">
+                        <button id="prev-button" ${currentQuestionIndex === 0 ? 'disabled' : ''}>Anterior</button>
+                        <button id="next-button">${currentQuestionIndex === shuffledQuestions.length - 1 ? 'Ver Resultados' : 'Siguiente'}</button>
+                    </div>
+                `;
+
+                // Add event listeners for options
+                document.querySelectorAll('.option-button').forEach(button => {
+                    button.addEventListener('click', selectOption);
+                });
+
+                // Add event listeners for navigation
+                document.getElementById('prev-button').addEventListener('click', showPreviousQuestion);
+                document.getElementById('next-button').addEventListener('click', showNextQuestion);
+
+                // If the question was already answered, show the correct/incorrect state
+                const currentQuestionState = shuffledQuestions[currentQuestionIndex].state;
+                if (currentQuestionState) {
+                    const buttons = document.querySelectorAll('.option-button');
+                    buttons.forEach(button => {
+                        button.disabled = true; // Disable all buttons
+                        if (button.dataset.option === currentQuestionState.selectedOption) {
+                            if (currentQuestionState.isCorrect) {
+                                button.classList.add('correct');
+                            } else {
+                                button.classList.add('incorrect');
+                            }
+                        }
+                    });
+                    const feedbackDiv = document.getElementById(`feedback-${currentQuestionIndex}`);
+                    feedbackDiv.classList.remove('hidden');
+                    feedbackDiv.classList.add(currentQuestionState.isCorrect ? 'correct' : 'incorrect');
+                    feedbackDiv.innerHTML = `
+                        ${currentQuestionState.isCorrect ? '¡Correcto!' : 'Incorrecto.'} ${shuffledQuestions[currentQuestionIndex].feedback}
+                    `;
+                }
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function selectOption(event) {
+            const selectedOption = event.target.dataset.option;
+            const q = shuffledQuestions[currentQuestionIndex];
+            const isCorrect = selectedOption === q.answer;
+
+            // Disable all option buttons for this question
+            document.querySelectorAll('.option-button').forEach(button => {
+                button.disabled = true;
+            });
+
+            // Apply correct/incorrect styling
+            event.target.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+            // Show feedback
+            const feedbackDiv = document.getElementById(`feedback-${currentQuestionIndex}`);
+            feedbackDiv.classList.remove('hidden');
+            feedbackDiv.classList.add(isCorrect ? 'correct' : 'incorrect');
+            feedbackDiv.innerHTML = `
+                ${isCorrect ? '¡Correcto!' : 'Incorrecto.'} ${q.feedback}
+            `;
+
+            // Update score and state only if not previously answered
+            if (!shuffledQuestions[currentQuestionIndex].state) {
+                if (isCorrect) {
+                    score += 4;
+                }
+                answeredQuestionsCount++;
+                shuffledQuestions[currentQuestionIndex].state = { selectedOption, isCorrect }; // Store state
+            }
+        }
+
+        function showNextQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function showPreviousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function showFinalScore() {
+            questionArea.classList.add('hidden');
+            scoreArea.classList.remove('hidden');
+            finalScoreSpan.textContent = score;
+
+            let overallFeedback = '';
+            if (score === 100) {
+                overallFeedback = "¡Felicidades! Eres un experto en el patrimonio boliviano. ¡Perfecto!";
+            } else if (score >= 80) {
+                overallFeedback = "¡Excelente trabajo! Tienes un gran conocimiento sobre el Atlas Patrimonial de Bolivia.";
+            } else if (score >= 50) {
+                overallFeedback = "Buen esfuerzo. Sigue repasando para mejorar tu conocimiento.";
+            } else {
+                overallFeedback = "Necesitas repasar un poco más. ¡No te desanimes, sigue intentándolo!";
+            }
+            overallFeedbackPara.textContent = overallFeedback;
+        }
+
+        function initializeQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            answeredQuestionsCount = 0;
+            shuffledQuestions = shuffleArray([...questions]); // Ensure a fresh copy and shuffle
+            // Reset state for all questions
+            shuffledQuestions.forEach(q => delete q.state);
+
+            questionArea.classList.remove('hidden');
+            scoreArea.classList.add('hidden');
+            loadQuestion();
+        }
+
+        restartQuizButton.addEventListener('click', initializeQuiz);
+
+        // Initial load
+        initializeQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Biología Básica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        .question-card {
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+        .option-label {
+            display: block;
+            background-color: #edf2f7;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            color: #4a5568;
+            font-size: 1rem;
+        }
+        .option-label:hover {
+            background-color: #e0e7ee;
+            transform: translateY(-2px);
+        }
+        .option-label input[type="radio"] {
+            margin-right: 10px;
+        }
+        .option-label.selected {
+            background-color: #bee3f8;
+            border: 1px solid #63b3ed;
+        }
+        .option-label.correct {
+            background-color: #b9f2c7;
+            border: 1px solid #48bb78;
+            font-weight: 600;
+        }
+        .option-label.incorrect {
+            background-color: #fdb8b8;
+            border: 1px solid #e53e3e;
+            font-weight: 600;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .feedback.correct-feedback {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect-feedback {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-buttons button {
+            background-color: #4299e1;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .nav-buttons button:hover {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+        }
+        .nav-buttons button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .submit-button {
+            background-color: #48bb78;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            align-self: center;
+            margin-top: 20px;
+        }
+        .submit-button:hover {
+            background-color: #38a169;
+            transform: translateY(-2px);
+        }
+        .results-container {
+            background-color: #e0e7ee;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .results-container h2 {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        .results-container p {
+            font-size: 1.2rem;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        .results-container .score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #4299e1;
+            margin-bottom: 20px;
+        }
+        .credits {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-5">
+    <div id="quiz" class="quiz-container">
+        <!-- Questions will be loaded here -->
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es la molécula responsable de la organización de la materia inanimada en un sistema vivo, capaz de autoduplicarse?",
+                options: ["Proteína", "RNA", "Lípidos", "DNA"],
+                answer: "DNA",
+                feedback: "El DNA es la molécula portadora de la información genética. (Página 2)",
+                page: 2
+            },
+            {
+                question: "¿Qué se denomina gen?",
+                options: ["Un tipo de proteína en la célula.", "La unidad de información responsable de una función específica.", "Una estructura de la membrana celular.", "Un orgánulo celular."],
+                answer: "La unidad de información responsable de una función específica.",
+                feedback: "Un gen es la unidad de información hereditaria. (Página 3)",
+                page: 3
+            },
+            {
+                question: "¿Quiénes descubrieron la estructura en doble hélice del DNA en 1953?",
+                options: ["Erwin Chargaff y Rosalind Franklin", "Maurice Wilkins y Linus Pauling", "James Watson y Francis Crick", "Gregor Mendel y Thomas Hunt Morgan"],
+                answer: "James Watson y Francis Crick",
+                feedback: "Watson y Crick fueron los descubridores de la doble hélice del DNA. (Página 3)",
+                page: 3
+            },
+            {
+                question: "¿Cuál es la regla de apareamiento de bases en el DNA?",
+                options: ["A con G y C con T", "A con C y G con T", "A con T y G con C", "A con A y T con T"],
+                answer: "A con T y G con C",
+                feedback: "La adenina (A) siempre se enlaza con la timina (T), y la guanina (G) con la citosina (C). (Página 5)",
+                page: 5
+            },
+            {
+                question: "¿Qué proceso permite al DNA hacer copias idénticas de su molécula?",
+                options: ["Transcripción", "Traducción", "Replicación", "Mutación"],
+                answer: "Replicación",
+                feedback: "La replicación es el proceso de autoduplicación del DNA. (Página 5)",
+                page: 5
+            },
+            {
+                question: "¿Cómo se denomina el mecanismo de replicación del DNA?",
+                options: ["Conservativo", "Dispersivo", "Semiconservativo", "No conservativo"],
+                answer: "Semiconservativo",
+                feedback: "Cada nueva molécula de DNA conserva una cadena original y una recién sintetizada, lo que se denomina replicación semiconservativa. (Página 5)",
+                page: 5
+            },
+            {
+                question: "¿Qué son las mutaciones?",
+                options: ["Errores en la replicación que alteran la secuencia de bases del DNA.", "Cambios en el número de cromosomas.", "Procesos de recombinación genética.", "Alteraciones en la síntesis de proteínas."],
+                answer: "Errores en la replicación que alteran la secuencia de bases del DNA.",
+                feedback: "Las mutaciones son alteraciones del genoma, a menudo causadas por fallos en la replicación o agentes mutagénicos. (Página 8)",
+                page: 8
+            },
+            {
+                question: "¿Qué es un genoma?",
+                options: ["Un fragmento de DNA específico.", "El conjunto completo de DNA de un individuo con sus genes correspondientes.", "Una secuencia lineal de genes.", "Una molécula de RNA."],
+                answer: "El conjunto completo de DNA de un individuo con sus genes correspondientes.",
+                feedback: "El genoma es el conjunto completo de DNA de un individuo. (Página 8)",
+                page: 8
+            },
+            {
+                question: "¿Qué es la cromatina?",
+                options: ["Una proteína que compacta el DNA.", "La asociación de DNA y proteínas en el núcleo de la célula.", "Una estructura visible al microscopio óptico.", "Un fragmento de DNA."],
+                answer: "La asociación de DNA y proteínas en el núcleo de la célula.",
+                feedback: "La cromatina es la asociación de DNA y proteínas que ayuda a la compactación del DNA. (Página 8)",
+                page: 8
+            },
+            {
+                question: "¿Qué son las histonas?",
+                options: ["Enzimas que participan en la replicación del DNA.", "Proteínas estructurales que compactan y protegen la molécula de DNA.", "Segmentos de DNA que controlan la expresión genética.", "Moléculas señalizadoras en la célula."],
+                answer: "Proteínas estructurales que compactan y protegen la molécula de DNA.",
+                feedback: "Las histonas son proteínas que se asocian al DNA para formar la cromatina. (Página 8)",
+                page: 8
+            },
+            {
+                question: "¿Cuántos pares de cromosomas tiene la especie humana?",
+                options: ["20", "23", "30", "46"],
+                answer: "23",
+                feedback: "La especie humana tiene 23 pares de cromosomas. (Página 10)",
+                page: 10
+            },
+            {
+                question: "¿Qué significa que los cromosomas homólogos no tienen idéntica información genética?",
+                options: ["Tienen genes diferentes.", "Tienen los mismos genes pero pueden tener diferentes versiones (alelos) de ellos.", "No se pueden aparear.", "Son de diferentes especies."],
+                answer: "Tienen los mismos genes pero pueden tener diferentes versiones (alelos) de ellos.",
+                feedback: "Los cromosomas homólogos tienen los mismos genes, aunque pueden tener diferentes alelos. (Página 10)",
+                page: 10
+            },
+            {
+                question: "¿Cuál fue el hito en la historia de la humanidad logrado en el año 2001, relacionado con el genoma humano?",
+                options: ["La creación del primer organismo transgénico.", "El descubrimiento de la estructura del DNA.", "La secuenciación completa del genoma humano.", "La identificación de todas las enfermedades genéticas."],
+                answer: "La secuenciación completa del genoma humano.",
+                feedback: "El primer borrador de la secuencia del genoma humano se obtuvo en 2001. (Página 11)",
+                page: 11
+            },
+            {
+                question: "¿Qué porcentaje del genoma humano es considerado DNA 'basura' o altamente repetitivo, sin valor codificante para proteínas?",
+                options: ["10%", "25%", "50%", "75%"],
+                answer: "50%",
+                feedback: "Casi el 50% del total del genoma humano es DNA altamente repetitivo, o 'basura'. (Página 13)",
+                page: 13
+            },
+            {
+                question: "¿Qué significa que la vida es información digital escrita en el DNA?",
+                options: ["Que el DNA es una secuencia de bases.", "Que la biología se aproxima a la informática y la teoría de la información.", "Que el DNA se puede almacenar en ordenadores.", "Que la vida se puede simular en ordenadores."],
+                answer: "Que la biología se aproxima a la informática y la teoría de la información.",
+                feedback: "La biología actual se aproxima a las técnicas de la informática para interpretar la vida como información digital. (Página 13)",
+                page: 13
+            },
+            {
+                question: "¿Cuál es la secuencia de etapas en la transmisión de la información genética en la célula?",
+                options: ["Proteína → RNA → DNA", "DNA → RNA → Proteína", "RNA → DNA → Proteína", "DNA → Proteína → RNA"],
+                answer: "DNA → RNA → Proteína",
+                feedback: "El flujo de la información genética es DNA a RNA (transcripción) y luego a Proteína (traducción). (Página 22)",
+                page: 22
+            },
+            {
+                question: "¿Qué azúcar se encuentra en el RNA?",
+                options: ["Desoxirribosa", "Glucosa", "Ribosa", "Fructosa"],
+                answer: "Ribosa",
+                feedback: "El azúcar en el RNA es la ribosa. (Página 23)",
+                page: 23
+            },
+            {
+                question: "¿Qué base nitrogenada reemplaza a la timina (T) en el RNA?",
+                options: ["Adenina (A)", "Guanina (G)", "Citosina (C)", "Uracilo (U)"],
+                answer: "Uracilo (U)",
+                feedback: "En el RNA, el uracilo (U) reemplaza a la timina (T). (Página 23)",
+                page: 23
+            },
+            {
+                question: "¿Qué se denomina codón en el código genético?",
+                options: ["Una base nitrogenada.", "Un grupo de dos nucleótidos.", "Un grupo de tres nucleótidos.", "Un aminoácido."],
+                answer: "Un grupo de tres nucleótidos.",
+                feedback: "Cada grupo de tres nucleótidos se denomina codón. (Página 25)",
+                page: 25
+            },
+            {
+                question: "¿Cuál es una de las características del código genético?",
+                options: ["Es diferente para cada especie.", "Es universal para todos los seres vivos.", "Solo codifica un aminoácido por codón.", "Cambia con el tiempo."],
+                answer: "Es universal para todos los seres vivos.",
+                feedback: "El código genético es universal, es el mismo para todos los seres vivos. (Página 25)",
+                page: 25
+            },
+            {
+                question: "¿Qué enzimas son como 'tijeras moleculares' y cortan el DNA por una secuencia de bases específica?",
+                options: ["Ligasas", "Polimerasas", "Enzimas de restricción", "Helicasas"],
+                answer: "Enzimas de restricción",
+                feedback: "Las enzimas de restricción cortan el DNA por secuencias específicas. (Página 30)",
+                page: 30
+            },
+            {
+                question: "¿Qué tipo de reproducción se basa en la mitosis?",
+                options: ["Reproducción sexual", "Reproducción asexual", "Fecundación", "Meiosis"],
+                answer: "Reproducción asexual",
+                feedback: "La mitosis es la base de la reproducción asexual. (Página 45)",
+                page: 45
+            },
+            {
+                question: "¿Cuántas células hijas se forman al final de la meiosis?",
+                options: ["Una", "Dos", "Tres", "Cuatro"],
+                answer: "Cuatro",
+                feedback: "La meiosis produce cuatro células hijas con contenido genético diferente y la mitad de cromosomas. (Página 46)",
+                page: 46
+            },
+            {
+                question: "¿Cuál es una de las principales diferencias entre la mitosis y la meiosis?",
+                options: ["La mitosis ocurre en células sexuales, la meiosis en somáticas.", "La mitosis produce variabilidad genética, la meiosis no.", "La mitosis mantiene el número de cromosomas, la meiosis lo reduce a la mitad.", "La mitosis es un proceso más largo que la meiosis."],
+                answer: "La mitosis mantiene el número de cromosomas, la meiosis lo reduce a la mitad.",
+                feedback: "La mitosis produce células genéticamente idénticas y mantiene el número de cromosomas, mientras que la meiosis lo reduce a la mitad y genera variabilidad genética. (Página 49)",
+                page: 49
+            },
+            {
+                question: "¿Qué es un alelo?",
+                options: ["Un tipo de cromosoma.", "Cada una de las formas alternativas que presenta un gen.", "Un fragmento de DNA.", "Una proteína específica."],
+                answer: "Cada una de las formas alternativas que presenta un gen.",
+                feedback: "Un alelo es cada una de las formas alternativas que presenta un gen. (Página 59)",
+                page: 59
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = {}; // To store user's selected options for feedback
+        let shuffledQuestions = [];
+
+        const quizContainer = document.getElementById('quiz');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const q = shuffledQuestions[currentQuestionIndex];
+                let optionsHtml = q.options.map((option, index) => `
+                    <label class="option-label" data-option="${option}">
+                        <input type="radio" name="question${currentQuestionIndex}" value="${option}" ${userAnswers[currentQuestionIndex] === option ? 'checked' : ''} onclick="selectOption(${currentQuestionIndex}, '${option}')">
+                        ${option}
+                    </label>
+                `).join('');
+
+                quizContainer.innerHTML = `
+                    <div class="question-card">
+                        <div class="question-text">${currentQuestionIndex + 1}. ${q.question}</div>
+                        <form id="options-form">
+                            ${optionsHtml}
+                        </form>
+                        <div id="feedback-${currentQuestionIndex}" class="feedback hidden"></div>
+                    </div>
+                    <div class="nav-buttons">
+                        <button onclick="prevQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>Anterior</button>
+                        <button onclick="nextQuestion()" id="nextButton">${currentQuestionIndex === shuffledQuestions.length - 1 ? 'Finalizar Cuestionario' : 'Siguiente'}</button>
+                    </div>
+                    <div class="credits">Desarrollado por Victor Crespo</div>
+                `;
+
+                // If user has already answered this question, show feedback immediately
+                if (userAnswers[currentQuestionIndex]) {
+                    showFeedback(currentQuestionIndex);
+                }
+            } else {
+                showResults();
+            }
+        }
+
+        function selectOption(qIndex, selectedOption) {
+            userAnswers[qIndex] = selectedOption;
+            showFeedback(qIndex);
+        }
+
+        function showFeedback(qIndex) {
+            const q = shuffledQuestions[qIndex];
+            const feedbackDiv = document.getElementById(`feedback-${qIndex}`);
+            const selectedOption = userAnswers[qIndex];
+            const allOptions = document.querySelectorAll(`#options-form label`);
+
+            // Clear previous styles
+            allOptions.forEach(label => {
+                label.classList.remove('selected', 'correct', 'incorrect');
+                label.querySelector('input').disabled = false; // Enable radios initially
+            });
+
+            if (selectedOption) {
+                allOptions.forEach(label => {
+                    label.querySelector('input').disabled = true; // Disable radios after selection
+                    if (label.dataset.option === selectedOption) {
+                        if (selectedOption === q.answer) {
+                            label.classList.add('correct');
+                            feedbackDiv.classList.remove('hidden', 'incorrect-feedback');
+                            feedbackDiv.classList.add('correct-feedback');
+                            feedbackDiv.innerHTML = `¡Correcto! ${q.feedback}`;
+                        } else {
+                            label.classList.add('incorrect');
+                            feedbackDiv.classList.remove('hidden', 'correct-feedback');
+                            feedbackDiv.classList.add('incorrect-feedback');
+                            feedbackDiv.innerHTML = `Incorrecto. La respuesta correcta era: ${q.answer}. ${q.feedback}`;
+                        }
+                    } else if (label.dataset.option === q.answer) {
+                        // Highlight the correct answer if the user chose incorrectly
+                        label.classList.add('correct');
+                    }
+                });
+                // Ensure correct feedback class is applied when navigating back to an already answered question
+                if (selectedOption === q.answer) {
+                    feedbackDiv.classList.remove('incorrect-feedback');
+                    feedbackDiv.classList.add('correct-feedback');
+                } else {
+                    feedbackDiv.classList.remove('correct-feedback');
+                    feedbackDiv.classList.add('incorrect-feedback');
+                }
+                feedbackDiv.classList.remove('hidden');
+            } else {
+                feedbackDiv.classList.add('hidden');
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                calculateScore();
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function calculateScore() {
+            score = 0;
+            shuffledQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.answer) {
+                    score += 4;
+                }
+            });
+        }
+
+        function showResults() {
+            let feedbackText = "";
+            if (score >= 90) {
+                feedbackText = "¡Excelente trabajo! Tienes un gran conocimiento de la Biología Básica.";
+            } else if (score >= 70) {
+                feedbackText = "¡Buen esfuerzo! Tienes una buena base, sigue practicando.";
+            } else if (score >= 50) {
+                feedbackText = "Necesitas repasar algunos conceptos, pero vas por buen camino.";
+            } else {
+                feedbackText = "Sigue estudiando, puedes mejorar mucho. ¡No te rindas!";
+            }
+
+            quizContainer.innerHTML = `
+                <div class="results-container">
+                    <h2>Resultados del Cuestionario</h2>
+                    <p>Has respondido a ${shuffledQuestions.length} preguntas.</p>
+                    <p>Tu puntuación total es:</p>
+                    <div class="score">${score} / ${shuffledQuestions.length * 4} puntos</div>
+                    <p>${feedbackText}</p>
+                </div>
+                <div class="credits">Desarrollado por Victor Crespo</div>
+            `;
+        }
+
+        // Initialize quiz
+        document.addEventListener('DOMContentLoaded', () => {
+            shuffledQuestions = shuffleArray([...questions]); // Create a shallow copy to shuffle
+            loadQuestion();
+        });
+    </script>
+</body>
+</html>

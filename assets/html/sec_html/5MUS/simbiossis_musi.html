@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Música Boliviana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .question-card {
+            background-color: #e2e8f0;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            background-color: #cbd5e1;
+            border: 1px solid #a0aec0;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .option-button:hover:not(.correct):not(.incorrect) {
+            background-color: #a0aec0;
+        }
+        .option-button.selected {
+            border-color: #2b6cb0;
+            background-color: #bfdbfe;
+        }
+        .option-button.correct {
+            background-color: #a7f3d0;
+            border-color: #34d399;
+            font-weight: bold;
+        }
+        .option-button.incorrect {
+            background-color: #fecaca;
+            border-color: #ef4444;
+            font-weight: bold;
+        }
+        .feedback {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .feedback.correct {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .feedback.incorrect {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .nav-button:hover {
+            background-color: #3182ce;
+        }
+        .nav-button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .final-score {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 2rem;
+            background-color: #e0f2fe;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .credit {
+            text-align: right;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #666;
+            padding-right: 1.5rem;
+            padding-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center mb-6 text-blue-800">Cuestionario: Simbiosis Cultural de la Música Boliviana</h1>
+        <div id="quiz-container"></div>
+        <div class="navigation-buttons">
+            <button id="prev-button" class="nav-button" disabled>Anterior</button>
+            <button id="next-button" class="nav-button">Siguiente</button>
+        </div>
+        <div id="final-score-container" class="final-score hidden">
+            <h2 class="text-2xl font-bold mb-4 text-blue-700">Resultados del Cuestionario</h2>
+            <p id="score-text" class="text-xl mb-2"></p>
+            <p id="feedback-text" class="text-lg"></p>
+            <button id="restart-button" class="nav-button mt-4">Reiniciar Cuestionario</button>
+        </div>
+    </div>
+    <footer class="credit mt-auto">
+        PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © por Victor 
+    </footer>
+
+    <script>
+        // Preguntas del cuestionario con sus opciones, respuesta correcta, retroalimentación y página del PDF
+        const questions = [
+            {
+                question: "¿Cuál es el propósito principal de la introducción del documento 'Simbiosis Cultural de la Música Boliviana'?",
+                options: [
+                    "Establecer bases de estudio sobre los fenómenos psico-socio-culturales que influyeron en la creatividad musical boliviana.",
+                    "Criticar la falta de demanda de organismos estatales para estimular la creación musical.",
+                    "Remontarse a las sociedades cosmopolitas de la Colonia.",
+                    "Enumerar los compositores del Siglo XIX."
+                ],
+                answer: "Establecer bases de estudio sobre los fenómenos psico-socio-culturales que influyeron en la creatividad musical boliviana.",
+                feedback: "Correcto. La introducción busca establecer las bases para el estudio de los fenómenos que moldearon la música boliviana.",
+                page: 8
+            },
+            {
+                question: "¿Quién fue Juan de Araujo, y qué destaca de su obra en la época colonial?",
+                options: [
+                    "Un músico republicano autor de la 'Trilogía India'.",
+                    "Un compositor boliviano con doscientos títulos.",
+                    "Un autor de la época colonial, nacido en España, con una vasta obra que abarca unos doscientos títulos.",
+                    "Un director de orquesta del Siglo XIX."
+                ],
+                answer: "Un autor de la época colonial, nacido en España, con una vasta obra que abarca unos doscientos títulos.",
+                feedback: "Correcto. Juan de Araujo es un ejemplo elocuente de perseverancia en la época colonial.",
+                page: 8
+            },
+            {
+                question: "¿Qué tipo de música empezó a germinar al lado de la música culta o erudita desde épocas coloniales y republicanas?",
+                options: [
+                    "La música romántico-tardía y europeizante.",
+                    "La música nativa, folklórica y popular.",
+                    "Himnos departamentales y marchas cívicas.",
+                    "Música de cámara."
+                ],
+                answer: "La música nativa, folklórica y popular.",
+                feedback: "Correcto. Estas músicas fecundizaron el arte musical boliviano con identidades propias.",
+                page: 9
+            },
+            {
+                question: "Según Kurt Pahlen, un musicólogo vienés, ¿cuál es una de las razones por las que la música ha existido como manifestación espontánea?",
+                options: [
+                    "La aparición de la escritura musical.",
+                    "La difusión musical a través de la radio y la televisión.",
+                    "Nació al instante, fugaz como un sueño que se diluye en seguida.",
+                    "El invento del disco y la grabación."
+                ],
+                answer: "Nació al instante, fugaz como un sueño que se diluye en seguida.",
+                feedback: "Correcto. Pahlen describe la música como una manifestación espontánea y fugaz.",
+                page: 11
+            },
+            {
+                question: "¿Qué papel juega la música en la sociedad primitiva, según el texto?",
+                options: [
+                    "Era un medio de comunicación espiritual.",
+                    "Era utilizada para fines bélicos.",
+                    "Un medio de comunicación con sus dioses y deidades de origen extranatural.",
+                    "Era solo para el diletantismo."
+                ],
+                answer: "Un medio de comunicación con sus dioses y deidades de origen extranatural.",
+                feedback: "Correcto. La música era primordial en la sociedad primitiva para la comunicación con lo divino.",
+                page: 12
+            },
+            {
+                question: "¿Cuáles son los tres aspectos o formas en las que se materializa la creación musical?",
+                options: [
+                    "Instrumental, coral y sinfónica.",
+                    "Creatividad individual, creatividad del medio social y creativo de índole patológico.",
+                    "Religiosa, profana y cívica.",
+                    "Nativa, folklórica y popular."
+                ],
+                answer: "Creatividad individual, creatividad del medio social y creativo de índole patológico.",
+                feedback: "Correcto. Estos son los tres aspectos mencionados para la creación musical.",
+                page: 13
+            },
+            {
+                question: "¿Cuáles son los elementos vitales del sonido que, según el texto, constituyen el 'espectro sonoro' de la música?",
+                options: [
+                    "Melodía, armonía y ritmo.",
+                    "Ritmo, armonía, timbre (color) y melodía.",
+                    "Tonalidad, tempo y dinámica.",
+                    "Escalas, acordes y arpegios."
+                ],
+                answer: "Melodía, armonía, ritmo, y timbre (color).",
+                feedback: "Correcto. Estos elementos se combinan para formar el espectro sonoro.",
+                page: 13
+            },
+            {
+                question: "¿Qué opina el autor sobre la música nativa, folklórica y popular boliviana?",
+                options: [
+                    "Que carece de técnicas sencillas.",
+                    "Que ya no contiene elementos propios.",
+                    "Que aún subsiste en el país con técnicas sencillas y contiene elementos propios.",
+                    "Que solo es de interés de los musicólogos."
+                ],
+                answer: "Que aún subsiste en el país con técnicas sencillas y contiene elementos propios.",
+                feedback: "Correcto. Se destaca que esta música es practicada con elementos propios por la clase indígena y mayoritaria.",
+                page: 14
+            },
+            {
+                question: "Según la Dra. Rosalía Slaughter Morton, ¿qué efectos fisiológicos tiene la música?",
+                options: [
+                    "Aumenta el ritmo cardíaco.",
+                    "Acelera la circulación de la sangre y aumenta su capacidad para conducir el oxígeno, relaja los nervios y restaura el equilibrio de las glándulas endocrinas.",
+                    "Disminuye la presión arterial.",
+                    "Causa somnolencia."
+                ],
+                answer: "Acelera la circulación de la sangre y aumenta su capacidad para conducir el oxígeno, relaja los nervios y restaura el equilibrio de las glándulas endocrinas.",
+                feedback: "Correcto. La música tiene efectos positivos en el cuerpo humano.",
+                page: 15
+            },
+            {
+                question: "¿En qué año Mario Estenssoro fundó la Sección Musical de la Escuela Nacional de Maestros de Sucre?",
+                options: [
+                    "1944",
+                    "1936",
+                    "1925",
+                    "1931"
+                ],
+                answer: "1936",
+                feedback: "Correcto. Mario Estenssoro fundó la sección musical en 1936.",
+                page: 20
+            },
+            {
+                question: "¿Qué condecoración recibió Mario Estenssoro del Ministerio de Educación y Cultura de Bolivia en 1986?",
+                options: [
+                    "La Gran Orden de la Música.",
+                    "La Gran Orden del Mérito.",
+                    "La Gran Orden de la Educación en el Grado de 'Caballero'.",
+                    "El Cóndor de los Andes."
+                ],
+                answer: "La Gran Orden de la Educación en el Grado de 'Caballero'.",
+                feedback: "Correcto. Este reconocimiento fue por su labor en pro de la educación boliviana.",
+                page: 21
+            },
+            {
+                question: "¿Cuál fue la principal contribución de Emilio Hochmann a la educación boliviana?",
+                options: [
+                    "La fundación de la Orquesta Sinfónica Nacional.",
+                    "Su labor de 31 años en la formación de maestros de Educación Musical y co-fundador de la Academia de Música 'Man Césped'.",
+                    "La dirección del coro grande de Sucre.",
+                    "La composición de la ópera 'El indio huallpa'."
+                ],
+                answer: "Su labor de 31 años en la formación de maestros de Educación Musical y co-fundador de la Academia de Música 'Man Césped'.",
+                feedback: "Correcto. Hochmann tuvo una influencia significativa en la formación de maestros musicales.",
+                page: 22
+            },
+            {
+                question: "¿En qué año se naturalizó boliviano Emilio Hochmann?",
+                options: [
+                    "1898",
+                    "1970",
+                    "1948",
+                    "1918"
+                ],
+                answer: "1948",
+                feedback: "Correcto. Aunque nació en Viena, Hochmann se nacionalizó boliviano en 1948.",
+                page: 22
+            },
+            {
+                question: "¿Qué premio ganó el poema sinfónico 'El indio huallpa' de Emilio Hochmann?",
+                options: [
+                    "El Cóndor de los Andes.",
+                    "El premio nacional de música.",
+                    "El premio internacional a la 'Música'.",
+                    "La Gran Orden Boliviana de la Educación."
+                ],
+                answer: "El premio internacional a la 'Música'.",
+                feedback: "Correcto. Esta obra fue reconocida internacionalmente.",
+                page: 22
+            },
+            {
+                question: "¿Cuál era el apodo de Eric Eisner y por qué?",
+                options: [
+                    "El 'Oso' por su alta e imponente figura del maestro.",
+                    "El 'Maestro' por su dirección de orquesta.",
+                    "El 'Alemán' por su nacionalidad.",
+                    "No se menciona ningún apodo."
+                ],
+                answer: "No se menciona ningún apodo.",
+                feedback: "Incorrecto. El apodo 'Oso' correspondía a Juan Manuel Thórrez Rojas. Para Eric Eisner no se menciona ningún apodo.",
+                page: 23
+            },
+            {
+                question: "¿Quién es el autor de 'El encuentro de dos artistas y profesores en Sucre', que habla sobre la transformación musical del país?",
+                options: [
+                    "Mario Estenssoro Vásquez.",
+                    "Esther Deuer Lora.",
+                    "El autor del documento.",
+                    "Se desconoce el autor, pero menciona a Mario Estenssoro Vásquez y Esther Deuer Lora."
+                ],
+                answer: "Se desconoce el autor, pero menciona a Mario Estenssoro Vásquez y Esther Deuer Lora.",
+                feedback: "Correcto. El texto cita este fragmento, atribuyéndolo a un comentario en el ensayo, pero no nombra al autor específico del mismo.",
+                page: 24
+            },
+            {
+                question: "¿Qué es el 'folk' y el 'lore' en la palabra folklore?",
+                options: [
+                    "Música y danza.",
+                    "Tradición y costumbre.",
+                    "Pueblo y saber.",
+                    "Antiguo y nuevo."
+                ],
+                answer: "Pueblo y saber.",
+                feedback: "Correcto. Folklore se refiere a la sabiduría del pueblo.",
+                page: 28
+            },
+            {
+                question: "¿Quién utilizó por primera vez la palabra 'folklore' en su sentido actual y en qué año?",
+                options: [
+                    "Williams J. Thoms en 1846.",
+                    "Un autor anónimo en el Siglo XIX.",
+                    "Un musicólogo alemán en 1800.",
+                    "Mario Estenssoro en 1936."
+                ],
+                answer: "Williams J. Thoms en 1846.",
+                feedback: "Correcto. La palabra folklore es relativamente nueva como ciencia.",
+                page: 28
+            },
+            {
+                question: "¿Qué caracteriza a la música folklórica según el documento?",
+                options: [
+                    "Es compuesta por un autor conocido.",
+                    "Es anónima, oralmente transmitida de generación en generación.",
+                    "Tiene su origen en la necesidad expresiva del pueblo y es transmitida por medios de comunicación masiva.",
+                    "Siempre es de corta duración y tiene ocho compases."
+                ],
+                answer: "Es anónima, oralmente transmitida de generación en generación.",
+                feedback: "Correcto. La música folklórica es parte del patrimonio familiar y su autor es olvidado.",
+                page: 28
+            },
+            {
+                question: "¿Cuál es la principal diferencia entre la canción folklórica y la popular, en cuanto a su origen?",
+                options: [
+                    "La folklórica es anónima y la popular tiene autor.",
+                    "La folklórica es de corta duración y la popular es más larga.",
+                    "La folklórica es del altiplano y la popular de las ciudades.",
+                    "No hay diferencias sustanciales."
+                ],
+                answer: "La folklórica es anónima y la popular tiene autor.",
+                feedback: "Correcto. Esta es la distinción fundamental que hace el texto.",
+                page: 28
+            },
+            {
+                question: "¿Qué tipo de música ha sido tachada de elitista, según el documento?",
+                options: [
+                    "La música nativa.",
+                    "La música popular de moda.",
+                    "La música culta o académica.",
+                    "La nueva canción."
+                ],
+                answer: "La música culta o académica.",
+                feedback: "Correcto. Se menciona que es tachada de elitista por la clase dominante que la consume.",
+                page: 32
+            },
+            {
+                question: "¿Cuál es una de las críticas más severas a la música selecta boliviana, según el documento?",
+                options: [
+                    "La excesiva difusión de sus obras.",
+                    "La falta de interés de los jóvenes.",
+                    "El desconocimiento deliberado o no de ella y la poca difusión de sus obras orquestales.",
+                    "Su enfoque en temas extranjeros."
+                ],
+                answer: "El desconocimiento deliberado o no de ella y la poca difusión de sus obras orquestales.",
+                feedback: "Correcto. La falta de conocimiento y difusión son problemas señalados.",
+                page: 33
+            },
+            {
+                question: "¿Qué se requiere para comprender y gustar la música culta o académica?",
+                options: [
+                    "Ser de un país desarrollado.",
+                    "Tener estudios musicales avanzados.",
+                    "Simplemente 'escuchar', pero hacerlo con atención y verdadero interés.",
+                    "Ser un músico o compositor."
+                ],
+                answer: "Simplemente 'escuchar', pero hacerlo con atención y verdadero interés.",
+                feedback: "Correcto. El autor enfatiza la importancia de la escucha activa.",
+                page: 33
+            },
+            {
+                question: "¿Por qué la música culta debe enraizar en el pueblo de países en desarrollo?",
+                options: [
+                    "Porque es un artículo de lujo.",
+                    "Porque es la máxima expresión del espíritu humano, y le falta un incentivo económico permanente y una organización inteligente para su difusión.",
+                    "Porque es un atributo de países desarrollados.",
+                    "Para ser comparada con otras urbes del globo."
+                ],
+                answer: "Porque es la máxima expresión del espíritu humano, y le falta un incentivo económico permanente y una organización inteligente para su difusión.",
+                feedback: "Correcto. Se busca su difusión para que se convierta en parte de la cultura del pueblo.",
+                page: 34
+            },
+            {
+                question: "¿Cuál fue la principal característica de las obras de Eduardo Caba que sintetizan su pensamiento indoamericano?",
+                options: [
+                    "La culminación de acordes de séptima y novena.",
+                    "La continuidad coherente del empleo de temas andinos y la polirritmia sorprendente.",
+                    "La influencia del romanticismo francés.",
+                    "La transcripción de melodías de Debussy."
+                ],
+                answer: "La continuidad coherente del empleo de temas andinos y la polirritmia sorprendente.",
+                feedback: "Correcto. Estos elementos son clave en la expresión de la nueva música culta boliviana de Caba.",
+                page: 36
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = {}; // Para almacenar las respuestas del usuario
+        let questionOrder = []; // Almacena el orden aleatorio de las preguntas
+
+        const quizContainer = document.getElementById('quiz-container');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const finalScoreContainer = document.getElementById('final-score-container');
+        const scoreText = document.getElementById('score-text');
+        const feedbackText = document.getElementById('feedback-text');
+        const restartButton = document.getElementById('restart-button');
+
+        // Función para mezclar un array (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Inicializar el orden de las preguntas al cargar
+        function initializeQuiz() {
+            questionOrder = Array.from({ length: questions.length }, (_, i) => i);
+            shuffleArray(questionOrder); // Mezcla el orden de las preguntas
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = {};
+            finalScoreContainer.classList.add('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const questionData = questions[questionOrder[currentQuestionIndex]];
+            const questionHtml = `
+                <div class="question-card">
+                    <p class="text-xl font-semibold mb-4">${currentQuestionIndex + 1}. ${questionData.question}</p>
+                    <div class="options-container">
+                        ${questionData.options.map((option, index) => `
+                            <button
+                                class="option-button rounded-lg ${userAnswers[currentQuestionIndex] === option ? 'selected' : ''}"
+                                data-option="${option}"
+                                ${userAnswers[currentQuestionIndex] ? 'disabled' : ''}
+                            >
+                                ${option}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${currentQuestionIndex}" class="feedback ${userAnswers[currentQuestionIndex] ? (userAnswers[currentQuestionIndex] === questionData.answer ? 'correct' : 'incorrect') : 'hidden'}">
+                        ${userAnswers[currentQuestionIndex] === questionData.answer ? questionData.feedback : `Incorrecto. La respuesta correcta es: ${questionData.answer}.`} (Página PDF: ${questionData.page})
+                    </div>
+                </div>
+            `;
+            quizContainer.innerHTML = questionHtml;
+
+            const optionButtons = quizContainer.querySelectorAll('.option-button');
+            optionButtons.forEach(button => {
+                button.addEventListener('click', (event) => selectOption(event.target.dataset.option));
+            });
+
+            updateNavigationButtons();
+        }
+
+        function selectOption(selectedOption) {
+            const questionData = questions[questionOrder[currentQuestionIndex]];
+            if (userAnswers[currentQuestionIndex]) { // Si ya respondió, no hacer nada
+                return;
+            }
+
+            userAnswers[currentQuestionIndex] = selectedOption;
+
+            const feedbackDiv = document.getElementById(`feedback-${currentQuestionIndex}`);
+            const optionButtons = quizContainer.querySelectorAll('.option-button');
+
+            optionButtons.forEach(button => {
+                button.disabled = true; // Deshabilitar botones después de seleccionar una opción
+                if (button.dataset.option === questionData.answer) {
+                    button.classList.add('correct');
+                } else if (button.dataset.option === selectedOption) {
+                    button.classList.add('incorrect');
+                }
+            });
+
+            if (selectedOption === questionData.answer) {
+                score += 4;
+                feedbackDiv.classList.add('correct');
+                feedbackDiv.innerHTML = `${questionData.feedback} (Página PDF: ${questionData.page})`;
+            } else {
+                feedbackDiv.classList.add('incorrect');
+                feedbackDiv.innerHTML = `Incorrecto. La respuesta correcta es: ${questionData.answer}. (Página PDF: ${questionData.page})`;
+            }
+            feedbackDiv.classList.remove('hidden');
+        }
+
+        function updateNavigationButtons() {
+            prevButton.disabled = currentQuestionIndex === 0;
+            nextButton.disabled = currentQuestionIndex === questions.length - 1 && !userAnswers[currentQuestionIndex];
+            
+            if (currentQuestionIndex === questions.length - 1 && userAnswers[currentQuestionIndex]) {
+                nextButton.textContent = 'Ver Resultados';
+            } else {
+                nextButton.textContent = 'Siguiente';
+            }
+        }
+
+        function showFinalScore() {
+            quizContainer.classList.add('hidden');
+            prevButton.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            finalScoreContainer.classList.remove('hidden');
+
+            scoreText.textContent = `Puntuación Total: ${score} / ${questions.length * 4}`;
+            let generalFeedback = "";
+            if (score >= questions.length * 4 * 0.8) {
+                generalFeedback = "¡Excelente trabajo! Has demostrado un gran conocimiento sobre la simbiosis cultural de la música boliviana. ¡Felicidades!";
+            } else if (score >= questions.length * 4 * 0.5) {
+                generalFeedback = "Buen esfuerzo. Tienes un conocimiento sólido, pero hay áreas en las que puedes mejorar. ¡Sigue aprendiendo!";
+            } else {
+                generalFeedback = "Necesitas repasar más el material. No te desanimes, ¡sigue estudiando y lo lograrás!";
+            }
+            feedbackText.textContent = generalFeedback;
+        }
+
+        prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                if (userAnswers[currentQuestionIndex]) { // Solo avanzar si ya respondió la pregunta actual
+                    currentQuestionIndex++;
+                    renderQuestion();
+                } else {
+                    alert("Por favor, selecciona una opción antes de continuar.");
+                }
+            } else {
+                if (userAnswers[currentQuestionIndex]) { // Solo mostrar resultados si ya respondió la última pregunta
+                    showFinalScore();
+                } else {
+                    alert("Por favor, selecciona una opción antes de ver los resultados.");
+                }
+            }
+        });
+
+        restartButton.addEventListener('click', () => {
+            quizContainer.classList.remove('hidden');
+            prevButton.classList.remove('hidden');
+            nextButton.classList.remove('hidden');
+            initializeQuiz();
+        });
+
+        initializeQuiz(); // Iniciar el cuestionario al cargar la página
+    </script>
+</body>
+</html>

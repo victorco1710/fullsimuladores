@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo de Didáctica de las Matemáticas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+        }
+        .question-card {
+            background-color: #e0f2f7;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .question-card.answered {
+            opacity: 0.7;
+        }
+        .question-card p {
+            font-size: 1.1em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        .options-container label {
+            display: block;
+            background-color: #ffffff;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #d1e2eb;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            font-size: 1em;
+            color: #34495e;
+        }
+        .options-container label:hover {
+            background-color: #f0faff;
+            border-color: #a7d9ed;
+        }
+        .options-container input[type="radio"] {
+            margin-right: 10px;
+            accent-color: #3498db;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+        .feedback.correct {
+            background-color: #e6ffe6;
+            color: #0a3f17;
+            border: 1px solid #28a745;
+        }
+        .feedback.incorrect {
+            background-color: #ffe6e6;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+        .submit-btn, .next-btn, .restart-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        .submit-btn:hover, .next-btn:hover, .restart-btn:hover {
+            background-color: #2184c6;
+            transform: translateY(-2px);
+        }
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .score-section {
+            text-align: center;
+            padding: 30px;
+            background-color: #e8f5e9;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .score-section h2 {
+            font-size: 2em;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        .score-section p {
+            font-size: 1.2em;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+        .score-section .feedback-text {
+            font-style: italic;
+            color: #555;
+        }
+        .credits {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+    <div id="quiz" class="quiz-container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Cuestionario de Didáctica de las Matemáticas</h1>
+        <div id="question-display"></div>
+        <div id="navigation" class="navigation-buttons">
+            <button id="prev-btn" class="submit-btn hidden">Anterior</button>
+            <button id="next-btn" class="submit-btn hidden ml-auto">Siguiente</button>
+        </div>
+        <div id="quiz-summary" class="score-section hidden"></div>
+        <div class="credits">PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor</div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es uno de los principales objetivos de la educación matemática, según el documento, que el maestro en formación debe contemplar?",
+                options: [
+                    "Promover la memorización de fórmulas complejas.",
+                    "Fomentar el razonamiento matemático y la resolución de problemas.",
+                    "Limitar las clases a la colección de individuos.",
+                    "Enfatizar únicamente la verificación lógica de los resultados."
+                ],
+                answer: "Fomentar el razonamiento matemático y la resolución de problemas.",
+                feedback: "Correcto. El documento enfatiza el razonamiento matemático, la invención y la resolución de problemas sobre la memorización. (Página 10)",
+                page: 10
+            },
+            {
+                question: "Según el NCTM, ¿qué principio crucial debe guiar la educación matemática y considerar altas expectativas y apoyo para todos los estudiantes?",
+                options: [
+                    "Tecnología.",
+                    "Evaluación.",
+                    "Equidad.",
+                    "Currículo."
+                ],
+                answer: "Equidad.",
+                feedback: "Correcto. El principio de Equidad del NCTM establece la necesidad de altas expectativas y fuerte apoyo para todos los estudiantes. (Página 10)",
+                page: 10
+            },
+            {
+                question: "¿Qué se considera el punto de partida en el aprendizaje de las matemáticas, según la concepción constructivista mencionada en el texto?",
+                options: [
+                    "Las definiciones y propiedades axiomáticas.",
+                    "Las aplicaciones, tanto externas como internas.",
+                    "La axiomatización y generalización.",
+                    "La memorización de hechos."
+                ],
+                answer: "Las aplicaciones, tanto externas como internas.",
+                feedback: "Correcto. La concepción constructivista sugiere que las aplicaciones deben preceder y seguir a la creación de las matemáticas. (Página 20)",
+                page: 20
+            },
+            {
+                question: "¿Cuál es una de las razones por las que la 'transposición didáctica' es necesaria en la enseñanza de las matemáticas?",
+                options: [
+                    "Para mantener el conocimiento matemático en su forma pura y abstracta.",
+                    "Para complicar el lenguaje y los símbolos matemáticos.",
+                    "Para seleccionar y secuenciar las partes de las matemáticas que se van a enseñar.",
+                    "Para evitar cualquier tipo de simplificación."
+                ],
+                answer: "Para seleccionar y secuenciar las partes de las matemáticas que se van a enseñar.",
+                feedback: "Correcto. La transposición didáctica es crucial para adaptar el conocimiento matemático a la edad y nivel de los alumnos, seleccionando y secuenciando los contenidos. (Página 42)",
+                page: 42
+            },
+            {
+                question: "¿Qué tipo de razonamiento desempeña un papel más activo en la elaboración de nuevos conceptos en matemáticas, según el documento?",
+                options: [
+                    "Razonamiento deductivo.",
+                    "Razonamiento axiomático.",
+                    "Razonamiento empírico-inductivo.",
+                    "Razonamiento algorítmico."
+                ],
+                answer: "Razonamiento empírico-inductivo.",
+                feedback: "Correcto. El texto indica que el razonamiento empírico-inductivo es muy importante en la elaboración de nuevos conceptos. (Página 26)",
+                page: 26
+            },
+            {
+                question: "¿Cuál es el fin principal de la educación matemática, según el Cuestionario A del Capítulo 2?",
+                options: [
+                    "Asegurar el dominio de hechos básicos y reglas.",
+                    "Promover la comprensión y el pensamiento.",
+                    "Estimular la memorización de información.",
+                    "Transmitir información directamente a los niños."
+                ],
+                answer: "Promover la comprensión y el pensamiento.",
+                feedback: "Correcto. El cuestionario A presenta esta opción como el fin principal de la educación matemática. (Página 57)",
+                page: 57
+            },
+            {
+                question: "¿Qué implica la 'competencia' en el contexto del aprendizaje matemático, según el documento?",
+                options: [
+                    "Memorizar definiciones sin aplicarlas.",
+                    "Tener conocimiento práctico sobre algo y ser capaz de aplicar correctamente una técnica.",
+                    "Conocer solo la teoría sin la práctica.",
+                    "Ser capaz de identificar propiedades abstractas."
+                ],
+                answer: "Tener conocimiento práctico sobre algo y ser capaz de aplicar correctamente una técnica.",
+                feedback: "Correcto. La competencia se relaciona con el 'saber hacer' específico y la aplicación correcta de técnicas. (Página 59)",
+                page: 59
+            },
+            {
+                question: "¿Qué tipo de comprensión es más adaptable a nuevas tareas y más fácil de recordar a largo plazo, según Richard Skemp?",
+                options: [
+                    "Comprensión instrumental.",
+                    "Comprensión memorística.",
+                    "Comprensión relacional.",
+                    "Comprensión algorítmica."
+                ],
+                answer: "Comprensión relacional.",
+                feedback: "Correcto. Skemp argumenta que la comprensión relacional es más adaptable y duradera, aunque más difícil de aprender inicialmente. (Página 62)",
+                page: 62
+            },
+            {
+                question: "¿Cuál de los siguientes no es uno de los seis tipos de objetos que intervienen en la actividad matemática, según el modelo de análisis propuesto?",
+                options: [
+                    "Problemas y situaciones.",
+                    "Emociones y sentimientos.",
+                    "Lenguaje.",
+                    "Argumentaciones."
+                ],
+                answer: "Emociones y sentimientos.",
+                feedback: "Correcto. Los seis tipos son problemas, lenguaje, acciones, conceptos, propiedades y argumentaciones. Las emociones no se listan como un objeto matemático. (Página 37)",
+                page: 37
+            },
+            {
+                question: "¿Qué papel esencial tiene la resolución de problemas en el aprendizaje significativo de las matemáticas?",
+                options: [
+                    "Solo como un contenido adicional del currículo.",
+                    "Como un medio para memorizar fórmulas.",
+                    "Como uno de los vehículos principales del aprendizaje y fuente de motivación.",
+                    "Para evitar la contextualización de los conocimientos."
+                ],
+                answer: "Como uno de los vehículos principales del aprendizaje y fuente de motivación.",
+                feedback: "Correcto. La resolución de problemas dota de significado a las prácticas matemáticas y motiva a los alumnos. (Página 66)",
+                page: 66
+            },
+            {
+                question: "¿Qué es el 'contrato didáctico' en el aula de matemáticas?",
+                options: [
+                    "Un conjunto de reglas explícitas establecidas por el profesor.",
+                    "Las obligaciones o normas no explícitas que rigen las interacciones entre el profesor y los alumnos.",
+                    "Un documento formal que regula el currículo.",
+                    "La planificación de las actividades de evaluación."
+                ],
+                answer: "Las obligaciones o normas no explícitas que rigen las interacciones entre el profesor y los alumnos.",
+                feedback: "Correcto. El contrato didáctico son las normas implícitas que condicionan la interacción y el aprendizaje en el aula. (Página 72)",
+                page: 72
+            },
+            {
+                question: "¿Cuándo se considera que un alumno comete un 'error' en matemáticas, según el documento?",
+                options: [
+                    "Cuando muestra una actitud de indiferencia.",
+                    "Cuando su respuesta es diferente a la del profesor.",
+                    "Cuando realiza una práctica que no es válida desde el punto de vista de la institución matemática escolar.",
+                    "Cuando tarda mucho en resolver un problema."
+                ],
+                answer: "Cuando realiza una práctica que no es válida desde el punto de vista de la institución matemática escolar.",
+                feedback: "Correcto. Un error es una práctica no válida desde la perspectiva de la institución matemática escolar. (Página 73)",
+                page: 73
+            },
+            {
+                question: "¿Qué es una 'variable didáctica'?",
+                options: [
+                    "Una característica del alumno que no se puede modificar.",
+                    "Una variable de tarea o de la situación cuyo control puede considerarse un recurso del profesor y produce un cambio significativo en el aprendizaje.",
+                    "Una dificultad intrínseca del contenido matemático.",
+                    "Un error recurrente en el aprendizaje."
+                ],
+                answer: "Una variable de tarea o de la situación cuyo control puede considerarse un recurso del profesor y produce un cambio significativo en el aprendizaje.",
+                feedback: "Correcto. Las variables didácticas son aspectos controlables de la tarea o situación que influyen en el aprendizaje. (Página 130)",
+                page: 130
+            },
+            {
+                question: "¿Por qué el material manipulativo tangible es importante en las primeras etapas de la educación matemática?",
+                options: [
+                    "Porque los conceptos matemáticos son tangibles y visibles.",
+                    "Para fomentar un aprendizaje puramente memorístico.",
+                    "Porque ayuda a crear un dominio 'pseudo-concreto' para la comprensión de objetos abstractos.",
+                    "Para evitar el uso de cualquier sistema de signos."
+                ],
+                answer: "Porque ayuda a crear un dominio 'pseudo-concreto' para la comprensión de objetos abstractos.",
+                feedback: "Correcto. Los manipulativos ayudan a los alumnos a concretar ideas abstractas, preparando una comprensión posterior más formal. (Página 137)",
+                page: 137
+            },
+            {
+                question: "¿Qué tipo de recursos didácticos incluye los libros de texto, cuadernos de ejercicios y pruebas de autoevaluación?",
+                options: [
+                    "Materiales manipulativos.",
+                    "Ayudas al estudio.",
+                    "Recursos tecnológicos.",
+                    "Juegos educativos."
+                ],
+                answer: "Ayudas al estudio.",
+                feedback: "Correcto. Las ayudas al estudio asumen parte de la función del profesor organizando contenidos y presentando problemas. (Página 127)",
+                page: 127
+            },
+            {
+                question: "¿Cuál es el fin de la enseñanza de las matemáticas según los 'Estándares profesionales para la enseñanza de las matemáticas' del NCTM?",
+                options: [
+                    "Exclusivamente memorizar conceptos y procedimientos.",
+                    "Ayudar a los estudiantes a desarrollar su capacidad matemática.",
+                    "Limitar el aprendizaje a los estudiantes 'brillantes'.",
+                    "Reducir la enseñanza a un conjunto de recetas."
+                ],
+                answer: "Ayudar a los estudiantes a desarrollar su capacidad matemática.",
+                feedback: "Correcto. El NCTM busca fomentar el razonamiento, la comunicación, la resolución de problemas y las conexiones matemáticas. (Página 77)",
+                page: 77
+            },
+            {
+                question: "¿Qué aspecto de las matemáticas es resaltado por su enorme poder como instrumento de comunicación, conciso y sin ambigüedades?",
+                options: [
+                    "Su estructura interna.",
+                    "Su naturaleza relacional.",
+                    "Su lenguaje y comunicación.",
+                    "Su exactitud y aproximación."
+                ],
+                answer: "Su lenguaje y comunicación.",
+                feedback: "Correcto. El lenguaje matemático, con sus sistemas de notación simbólica, es clave para la comunicación precisa. (Página 28)",
+                page: 28
+            },
+            {
+                question: "¿Qué busca el análisis de la actividad matemática, según el modelo propuesto, para identificar las dificultades de los alumnos?",
+                options: [
+                    "Determinar las emociones de los alumnos.",
+                    "Reflexionar sobre los tipos de objetos que se ponen en juego y las relaciones entre ellos.",
+                    "Clasificar los libros de texto por dificultad.",
+                    "Ignorar los errores y solo centrarse en los aciertos."
+                ],
+                answer: "Reflexionar sobre los tipos de objetos que se ponen en juego y las relaciones entre ellos.",
+                feedback: "Correcto. El modelo busca entender los objetos matemáticos (problemas, lenguaje, acciones, conceptos, propiedades, argumentaciones) y sus interrelaciones. (Página 32)",
+                page: 32
+            },
+            {
+                question: "¿Por qué se considera que las matemáticas son más 'constructivas que deductivas' desde la perspectiva de su elaboración y adquisición?",
+                options: [
+                    "Porque la deducción formal siempre aparece primero.",
+                    "Porque implican la construcción de relaciones elaboradas a partir de la actividad sobre los objetos.",
+                    "Porque son una ciencia exacta e inmutable.",
+                    "Porque se basan únicamente en la memorización."
+                ],
+                answer: "Porque implican la construcción de relaciones elaboradas a partir de la actividad sobre los objetos.",
+                feedback: "Correcto. La naturaleza relacional y constructiva de las matemáticas se basa en la actividad y la construcción de relaciones. (Página 29)",
+                page: 29
+            },
+            {
+                question: "¿Cuál de los siguientes NO es un tipo de proceso matemático que se articula en el estudio de las matemáticas, según el NCTM 2000?",
+                options: [
+                    "Resolución de problemas.",
+                    "Representación.",
+                    "Aislamiento de conceptos.",
+                    "Comunicación."
+                ],
+                answer: "Aislamiento de conceptos.",
+                feedback: "Correcto. Los procesos son resolución de problemas, representación, comunicación, justificación, conexiones e institucionalización. El aislamiento no es un proceso. (Página 37)",
+                page: 37
+            },
+            {
+                question: "¿Qué principio fundamental debe seguir un currículo de matemáticas para ser efectivo, según el NCTM?",
+                options: [
+                    "Ser una colección de actividades aisladas.",
+                    "Centrarse en unas matemáticas importantes y bien articuladas a lo largo de los distintos niveles.",
+                    "Desafiar a los estudiantes solo en los niveles avanzados.",
+                    "Ignorar las aplicaciones en la vida diaria."
+                ],
+                answer: "Centrarse en unas matemáticas importantes y bien articuladas a lo largo de los distintos niveles.",
+                feedback: "Correcto. Un currículo efectivo debe ser coherente, centrado en matemáticas importantes y bien articulado. (Página 92)",
+                page: 92
+            },
+            {
+                question: "¿Qué tipo de evaluación se enfoca en el proceso de enseñanza y aprendizaje como un continuo y proporciona información constante para su regulación?",
+                options: [
+                    "Evaluación inicial.",
+                    "Evaluación sumativa.",
+                    "Evaluación final.",
+                    "Evaluación formativa o continua."
+                ],
+                answer: "Evaluación formativa o continua.",
+                feedback: "Correcto. La evaluación formativa o continua tiene un carácter regulador y autocorrector del proceso educativo. (Página 105)",
+                page: 105
+            },
+            {
+                question: "¿Por qué el profesor debe ser 'cuidadoso y hacer un uso crítico de los libros de texto'?",
+                options: [
+                    "Porque todos los libros de texto son igualmente valiosos.",
+                    "Porque la presentación agradable es lo único importante.",
+                    "Para asegurar que el contenido sea adecuado y que el significado de las matemáticas esté libre de sesgos.",
+                    "Porque el libro de texto es la única autoridad del conocimiento."
+                ],
+                answer: "Para asegurar que el contenido sea adecuado y que el significado de las matemáticas esté libre de sesgos.",
+                feedback: "Correcto. El profesor debe analizar críticamente el contenido y la visión de las matemáticas que presenta el libro. (Página 129)",
+                page: 129
+            },
+            {
+                question: "¿Cuál es una de las funciones del lenguaje matemático, además de la representacional?",
+                options: [
+                    "Distorsionar la información.",
+                    "Ser únicamente para la memorización.",
+                    "Ser una herramienta instrumental para hacer el trabajo matemático.",
+                    "Limitar la comunicación de ideas."
+                ],
+                answer: "Ser una herramienta instrumental para hacer el trabajo matemático.",
+                feedback: "Correcto. El lenguaje matemático es tanto representacional como instrumental. (Página 39)",
+                page: 39
+            },
+            {
+                question: "¿Qué se busca fomentar en los estudiantes al animar la discusión y la justificación de soluciones en las clases de matemáticas?",
+                options: [
+                    "La memorización de respuestas.",
+                    "La sumisión a la autoridad del profesor.",
+                    "Una mejor comprensión matemática y el desarrollo de un lenguaje preciso.",
+                    "El aislamiento en el trabajo individual."
+                ],
+                answer: "Una mejor comprensión matemática y el desarrollo de un lenguaje preciso.",
+                feedback: "Correcto. El diálogo y la justificación de ideas mejoran la comprensión y la comunicación matemática. (Página 40)",
+                page: 40
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredQuestions = {}; // {questionIndex: {selectedOptionIndex: 0, correct: true/false}}
+        let shuffledQuestions = [];
+
+        const questionDisplay = document.getElementById('question-display');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizSummary = document.getElementById('quiz-summary');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex < 0 || currentQuestionIndex >= shuffledQuestions.length) {
+                showQuizSummary();
+                return;
+            }
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            const isAnswered = answeredQuestions[currentQuestionIndex] !== undefined;
+
+            let optionsHtml = q.options.map((option, index) => `
+                <label class="rounded-lg shadow-sm">
+                    <input type="radio" name="question${currentQuestionIndex}" value="${option}" ${isAnswered ? 'disabled' : ''} ${answeredQuestions[currentQuestionIndex]?.selectedOption === option ? 'checked' : ''}>
+                    ${option}
+                </label>
+            `).join('');
+
+            let feedbackHtml = '';
+            if (isAnswered) {
+                const feedbackClass = answeredQuestions[currentQuestionIndex].correct ? 'correct' : 'incorrect';
+                const feedbackText = answeredQuestions[currentQuestionIndex].correct ? '¡Correcto!' : `Incorrecto. La respuesta correcta es: <strong>${q.answer}</strong>.`;
+                feedbackHtml = `
+                    <div class="feedback ${feedbackClass}">
+                        ${feedbackText} <br>
+                        Página de referencia en el PDF: ${q.page}
+                    </div>
+                `;
+            }
+
+            questionDisplay.innerHTML = `
+                <div class="question-card ${isAnswered ? 'answered' : ''}">
+                    <p>${currentQuestionIndex + 1}. ${q.question}</p>
+                    <div class="options-container">
+                        ${optionsHtml}
+                    </div>
+                    <button id="submit-answer-btn" class="submit-btn mt-4 w-full md:w-auto ${isAnswered ? 'hidden' : ''}">Comprobar Respuesta</button>
+                    ${feedbackHtml}
+                </div>
+            `;
+
+            const submitBtn = document.getElementById('submit-answer-btn');
+            if (submitBtn) {
+                submitBtn.onclick = () => checkAnswer(currentQuestionIndex);
+            }
+
+            updateNavigationButtons();
+        }
+
+        function checkAnswer(qIndex) {
+            const q = shuffledQuestions[qIndex];
+            const selectedOption = document.querySelector(`input[name="question${qIndex}"]:checked`);
+
+            if (!selectedOption) {
+                alert('Por favor, selecciona una opción antes de comprobar.');
+                return;
+            }
+
+            const isCorrect = selectedOption.value === q.answer;
+
+            answeredQuestions[qIndex] = {
+                selectedOption: selectedOption.value,
+                correct: isCorrect
+            };
+
+            if (isCorrect) {
+                score += 4; // Each question is worth 4 points
+            }
+
+            displayQuestion(); // Re-render to show feedback
+            updateNavigationButtons();
+        }
+
+        function updateNavigationButtons() {
+            prevBtn.classList.toggle('hidden', currentQuestionIndex === 0);
+            nextBtn.classList.toggle('hidden', currentQuestionIndex === shuffledQuestions.length - 1 && answeredQuestions[currentQuestionIndex] !== undefined);
+            nextBtn.textContent = currentQuestionIndex === shuffledQuestions.length - 1 ? 'Ver Resultados' : 'Siguiente';
+        }
+
+        function showQuizSummary() {
+            questionDisplay.classList.add('hidden');
+            document.getElementById('navigation').classList.add('hidden');
+            quizSummary.classList.remove('hidden');
+
+            let generalFeedback = '';
+            if (score >= 90) {
+                generalFeedback = "¡Felicidades! Tienes un excelente dominio de la didáctica de las matemáticas. Tu comprensión es sobresaliente.";
+            } else if (score >= 70) {
+                generalFeedback = "Buen trabajo. Has demostrado un sólido conocimiento de los conceptos clave. Sigue practicando para mejorar.";
+            } else if (score >= 50) {
+                generalFeedback = "Necesitas repasar algunos temas. Con un poco más de estudio, podrás mejorar significativamente.";
+            } else {
+                generalFeedback = "Es un buen comienzo. Te sugiero revisar el documento en profundidad para comprender mejor los conceptos fundamentales.";
+            }
+
+            quizSummary.innerHTML = `
+                <h2 class="font-semibold">¡Cuestionario Completado!</h2>
+                <p>Tu puntuación total es: <strong class="text-green-600">${score} puntos / ${questions.length * 4} puntos</strong></p>
+                <p class="feedback-text">${generalFeedback}</p>
+                <button id="restart-quiz-btn" class="restart-btn mt-6">Reiniciar Cuestionario</button>
+            `;
+            document.getElementById('restart-quiz-btn').onclick = restartQuiz;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            answeredQuestions = {};
+            shuffledQuestions = shuffleArray([...questions]);
+            quizSummary.classList.add('hidden');
+            questionDisplay.classList.remove('hidden');
+            document.getElementById('navigation').classList.remove('hidden');
+            displayQuestion();
+        }
+
+        prevBtn.addEventListener('click', () => {
+            currentQuestionIndex--;
+            displayQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                showQuizSummary();
+            } else {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        });
+
+        // Initialize quiz
+        shuffledQuestions = shuffleArray([...questions]);
+        displayQuestion();
+    </script>
+</body>
+</html>

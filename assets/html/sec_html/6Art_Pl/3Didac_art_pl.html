@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Didáctica de las Artes Plásticas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .question-card, .result-card {
+            background-color: #f9fafb;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            width: 100%;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+        .options-grid {
+            display: grid;
+            gap: 15px;
+        }
+        .option-button {
+            background-color: #e2e8f0;
+            color: #334155;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-align: left;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: 2px solid transparent;
+            font-weight: 500;
+        }
+        .option-button:hover {
+            background-color: #cbd5e1;
+        }
+        .option-button.selected {
+            border-color: #6366f1;
+            background-color: #e0e7ff;
+            color: #4338ca;
+        }
+        .option-button.correct {
+            background-color: #d1fae5;
+            border-color: #34d399;
+            color: #065f46;
+            font-weight: 600;
+        }
+        .option-button.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+            font-weight: 600;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+        .feedback.correct {
+            background-color: #ecfdf5;
+            color: #059669;
+            border: 1px solid #34d399;
+        }
+        .feedback.incorrect {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #ef4444;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .nav-button {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .primary-button {
+            background-color: #6366f1;
+            color: #ffffff;
+        }
+        .primary-button:hover:not(:disabled) {
+            background-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        .secondary-button {
+            background-color: #cbd5e1;
+            color: #334155;
+        }
+        .secondary-button:hover:not(:disabled) {
+            background-color: #94a3b8;
+            transform: translateY(-2px);
+        }
+        .credits {
+            margin-top: 30px;
+            font-size: 0.85em;
+            color: #64748b;
+            text-align: center;
+            width: 100%;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div id="quizApp" class="quiz-container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Cuestionario de Didáctica de las Artes Plásticas</h1>
+
+        <div id="quizContent" class="w-full">
+            <!-- Question content will be dynamically loaded here -->
+        </div>
+
+        <div id="navigation" class="navigation-buttons">
+            <button id="prevBtn" class="nav-button secondary-button" disabled>Anterior</button>
+            <button id="nextBtn" class="nav-button primary-button">Siguiente</button>
+            <button id="submitBtn" class="nav-button primary-button hidden">Finalizar Cuestionario</button>
+            <button id="restartBtn" class="nav-button primary-button hidden">Reiniciar Cuestionario</button>
+        </div>
+
+        <div class="credits">
+            PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es uno de los principales autores mencionados en la \"Didáctica de las Artes Plásticas\" que ha estudiado la importancia del arte en la educación?",
+                options: ["Albert Einstein", "Isaac Newton", "Lev Vygotsky", "Marie Curie"],
+                correct: "Lev Vygotsky",
+                feedback: "Correcto. Vygotsky es uno de los autores clave que ha investigado la relación entre el arte y la educación.",
+                page: 12
+            },
+            {
+                question: "Según el documento, ¿qué hemisferio cerebral se ha tendido a educar más tradicionalmente, siendo el \"racional, lógico, analítico y verbal\"?",
+                options: ["Derecho", "Izquierdo", "Frontal", "Parietal"],
+                correct: "Izquierdo",
+                feedback: "Correcto. Tradicionalmente se ha enfocado la educación en el hemisferio izquierdo, descuidando el derecho.",
+                page: 13
+            },
+            {
+                question: "¿Cuál de los siguientes no es un rincón de actividad propuesto en el manual para niños de 2 a 3 años?",
+                options: ["Rincón de la casita", "Rincón de manipulación y plástica", "Rincón del ordenador", "Rincón del jardín"],
+                correct: "Rincón del ordenador",
+                feedback: "Correcto. El rincón del ordenador no se menciona en la propuesta de rincones para esa edad.",
+                page: 14
+            },
+            {
+                question: "La diferencia básica entre lo \"visual\" y lo \"plástico\" se aborda en el capítulo de:",
+                options: ["Creatividad y motivación", "Aprendizaje y cultura visual en la infancia", "Desarrollo de la expresión plástica", "Fundamentos de la DEPV"],
+                correct: "Aprendizaje y cultura visual en la infancia",
+                feedback: "Correcto. Esta distinción se explica en el capítulo 3.",
+                page: 15
+            },
+            {
+                question: "Según Vygotsky, el acto creador o combinatorio se produce al combinar:",
+                options: ["Habilidades físicas y motoras", "Diversas ideas y conocimientos", "Experiencias de juego", "Instintos básicos"],
+                correct: "Diversas ideas y conocimientos",
+                feedback: "Correcto. Vygotsky relaciona la creatividad con la combinación de ideas y conocimientos.",
+                page: 20
+            },
+            {
+                question: "En la edad preescolar, la metodología de trabajo debe recaer en el \"cómo se conoce\", que se refiere a:",
+                options: ["Leer y memorizar", "Hacer y experimentar", "Observar y analizar", "Escuchar y repetir"],
+                correct: "Hacer y experimentar",
+                feedback: "Correcto. La afectividad y la experimentación son clave en la metodología preescolar.",
+                page: 21
+            },
+            {
+                question: "La motivación intrínseca se orienta al:",
+                options: ["Resultado", "Proceso", "Reconocimiento externo", "Recompensa material"],
+                correct: "Proceso",
+                feedback: "Correcto. La motivación intrínseca se relaciona con el fluir y el placer en la actividad misma.",
+                page: 22
+            },
+            {
+                question: "¿Cuál de las siguientes no es una de las \"fuerzas creativas\" de Jeff de Graff mencionadas en el texto?",
+                options: ["Crear", "Competir", "Criticar", "Colaborar"],
+                correct: "Criticar",
+                feedback: "Correcto. Las fuerzas creativas son Crear, Competir, Colaborar y Controlar.",
+                page: 23
+            },
+            {
+                question: "La principal justificación de la enseñanza del arte, según Eisner, descansa en sus contribuciones únicas, especialmente en la educación de la:",
+                options: ["Percepción motora", "Visión artística", "Memoria visual", "Habilidad de escritura"],
+                correct: "Visión artística",
+                feedback: "Correcto. Eisner enfatiza la misión especial de la educación del arte en educar la visión artística.",
+                page: 24
+            },
+            {
+                question: "Para que los programas curriculares de educación artística cobren sentido pleno, deben estar bien asentados en la red que se teje entre:",
+                options: ["Alumnos, padres y comunidad", "Docente, aula y escuela", "Contenidos, objetivos y evaluación", "Recursos, materiales y técnicas"],
+                correct: "Docente, aula y escuela",
+                feedback: "Correcto. La confluencia de estos tres factores es fundamental.",
+                page: 26
+            },
+            {
+                question: "El rizoma se presenta como un paradigma de enseñanza que no implica que el docente no tenga un papel relevante, sino que su diseño curricular ha de ser:",
+                options: ["Estricto y rígido", "Original para que el alumnado construya sus propias redes creativas", "Predeterminado por la institución", "Orientado a la memorización de conceptos"],
+                correct: "Original para que el alumnado construya sus propias redes creativas",
+                feedback: "Correcto. El rizoma sugiere una enseñanza flexible que fomente la creación de redes de conocimiento propias del alumno.",
+                page: 27
+            },
+            {
+                question: "¿Qué teoría de la percepción nacida a inicios del siglo XX sigue marcando el estudio de las representaciones visuales?",
+                options: ["Teoría del color", "Psicología de la Gestalt", "Teoría de las inteligencias múltiples", "Conductismo"],
+                correct: "Psicología de la Gestalt",
+                feedback: "Correcto. La Psicología de la Gestalt es fundamental en el estudio de cómo percibimos las formas visuales.",
+                page: 31
+            },
+            {
+                question: "La Ley de la buena forma, en la teoría de la Gestalt, establece que el cerebro prefiere formas:",
+                options: ["Irregulares y asimétricas", "Aleatorias y dispersas", "Regulares y simétricas con contornos delimitados", "Incompletas y abiertas"],
+                correct: "Regulares y simétricas con contornos delimitados",
+                feedback: "Correcto. El cerebro busca la simplicidad y la completitud en las formas.",
+                page: 32
+            },
+            {
+                question: "La unidad mínima de comunicación visual, a partir de la cual se derivan las demás, es:",
+                options: ["La línea", "El plano", "El punto", "El volumen"],
+                correct: "El punto",
+                feedback: "Correcto. El punto es el elemento fundamental del lenguaje visual.",
+                page: 35
+            },
+            {
+                question: "¿Qué elemento visual sugiere dinamismo y dirección en la representación visual, tanto bidimensional como tridimensional?",
+                options: ["La textura", "La escala", "El movimiento", "El contorno"],
+                correct: "El movimiento",
+                feedback: "Correcto. El movimiento es clave para transmitir dinamismo en una composición visual.",
+                page: 39
+            },
+            {
+                question: "En la teoría del color de Newton, ¿cuáles son considerados los colores primarios?",
+                options: ["Cian, Magenta, Amarillo", "Rojo, Verde, Azul", "Rojo, Amarillo, Azul", "Naranja, Violeta, Verde"],
+                correct: "Rojo, Amarillo, Azul",
+                feedback: "Correcto. Newton definió estos tres como colores primarios en su teoría corpuscular.",
+                page: 43
+            },
+            {
+                question: "Johann Wolfgang Von Goethe añadió un elemento crucial al estudio del color, diferenciándose de estudios anteriores. ¿Cuál fue este elemento?",
+                options: ["La composición química del pigmento", "La percepción subjetiva del color", "La velocidad de la luz", "La refracción en un prisma"],
+                correct: "La percepción subjetiva del color",
+                feedback: "Correcto. Goethe introdujo la idea de que la percepción del color es subjetiva y que ciertos colores transmiten sensaciones similares.",
+                page: 44
+            },
+            {
+                question: "La síntesis aditiva del color (RGB) se refiere a la mezcla de:",
+                options: ["Pigmentos sólidos", "Luces de colores", "Materiales reciclados", "Formas geométricas"],
+                correct: "Luces de colores",
+                feedback: "Correcto. La síntesis aditiva se utiliza en aparatos electrónicos como pantallas.",
+                page: 46
+            },
+            {
+                question: "Según María Acaso, la \"retórica visual\" es la herramienta de organización utilizada para:",
+                options: ["Crear dibujos abstractos", "Medir la escala de los objetos", "Interconectar los distintos significados de los componentes del producto visual", "Clasificar los colores primarios"],
+                correct: "Interconectar los distintos significados de los componentes del producto visual",
+                feedback: "Correcto. La retórica visual busca dar una mayor variedad de significados a la representación.",
+                page: 48
+            },
+            {
+                question: "En el dibujo infantil, ¿cuál es la primera representación figurativa que el niño suele realizar?",
+                options: ["Un paisaje", "Un animal", "La figura humana", "Un objeto inanimado"],
+                correct: "La figura humana",
+                feedback: "Correcto. La figura humana es el tema favorito y universalmente la primera representación figurativa.",
+                page: 63
+            },
+            {
+                question: "En la etapa pre-esquemática (4 a 7 años), el niño experimenta el entorno de forma egocéntrica. ¿Cómo transcribe esto en sus dibujos a los 4 años?",
+                options: ["Utilizando una línea base bien definida", "Los elementos \"flotan\" en el espacio sin relacionarse entre ellos, sino con él", "Representando la profundidad con perspectiva", "Dibujando objetos a menor tamaño cuando están lejos"],
+                correct: "Los elementos \"flotan\" en el espacio sin relacionarse entre ellos, sino con él",
+                feedback: "Correcto. A los 4 años, el espacio en el dibujo es egocéntrico, con elementos flotantes.",
+                page: 65
+            },
+            {
+                question: "¿Qué función cumple el color en los dibujos del niño durante la etapa pre-esquemática?",
+                options: ["Simular volumen y sombras", "Rellenar espacios cerrados configurados por la línea", "Representar la luz solar de forma realista", "Crear efectos de contraste dramático"],
+                correct: "Rellenar espacios cerrados configurados por la línea",
+                feedback: "Correcto. El uso del color es plano y se subordina a la forma en esta etapa.",
+                page: 67
+            },
+            {
+                question: "La educación artística debe entenderse como una forma de conocimiento que fomenta la adquisición de un pensamiento:",
+                options: ["Repetitivo y mecánico", "Crítico y creativo", "Lineal y secuencial", "Pasivo y receptivo"],
+                correct: "Crítico y creativo",
+                feedback: "Correcto. La educación artística va más allá de las manualidades, promoviendo el pensamiento crítico y creativo.",
+                page: 73
+            },
+            {
+                question: "¿Cuál de los siguientes artistas contemporáneos es conocido por utilizar a su perro como modelo y reflexionar sobre la identidad a través de la subversión del género del retrato?",
+                options: ["Banksy", "William Wegman", "Chema Madoz", "Vik Muniz"],
+                correct: "William Wegman",
+                feedback: "Correcto. William Wegman es conocido por sus obras con su perro Man Ray y Fay Ray.",
+                page: 75
+            },
+            {
+                question: "¿Qué artista contemporánea es conocida por su obra \"Fallen Princess\", que reinterpreta las princesas de cuentos de hadas en un contexto actual con problemas de la vida real?",
+                options: ["Annie Leibovitz", "Ouka Leele", "Dina Goldstein", "Yeondoo Jung"],
+                correct: "Dina Goldstein",
+                feedback: "Correcto. Dina Goldstein's \"Fallen Princess\" challenges the idyllic fairy tale endings.",
+                page: 77
+            }
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = []; // To store selected option index for each question
+        let score = 0;
+
+        const quizContent = document.getElementById('quizContent');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Initialize the quiz
+        function startQuiz() {
+            shuffledQuestions = shuffleArray([...questions]);
+            currentQuestionIndex = 0;
+            userAnswers = Array(shuffledQuestions.length).fill(null); // Initialize with null
+            score = 0;
+            renderQuestion();
+            submitBtn.classList.add('hidden');
+            restartBtn.classList.add('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function renderQuestion() {
+            if (currentQuestionIndex < 0 || currentQuestionIndex >= shuffledQuestions.length) {
+                console.error("Invalid question index.");
+                return;
+            }
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const currentAnswer = userAnswers[currentQuestionIndex];
+
+            let optionsHtml = questionData.options.map((option, index) => {
+                let buttonClass = 'option-button';
+                let isDisabled = '';
+                
+                // If an answer has been selected for this question
+                if (currentAnswer !== null) {
+                    isDisabled = 'disabled';
+                    if (option === questionData.correct) {
+                        buttonClass += ' correct';
+                    } else if (index === currentAnswer) {
+                        buttonClass += ' incorrect';
+                    }
+                } else {
+                    // Only add 'selected' class if an option is actively selected (before submission)
+                    if (index === currentAnswer) { // This condition will be true if currentAnswer is not null
+                        buttonClass += ' selected';
+                    }
+                }
+
+                return `
+                    <button class="${buttonClass}" data-index="${index}" ${isDisabled}>
+                        ${String.fromCharCode(97 + index)}. ${option}
+                    </button>
+                `;
+            }).join('');
+
+            let feedbackHtml = '';
+            if (currentAnswer !== null) {
+                const isCorrect = shuffledQuestions[currentQuestionIndex].options[currentAnswer] === questionData.correct;
+                feedbackHtml = `
+                    <div class="feedback ${isCorrect ? 'correct' : 'incorrect'}">
+                        ${isCorrect ? questionData.feedback : `Incorrecto. La respuesta correcta es: ${questionData.correct}. ${questionData.feedback}`}
+                        <p class="mt-2">Página del PDF: ${questionData.page}</p>
+                    </div>
+                `;
+            }
+
+            quizContent.innerHTML = `
+                <div class="question-card">
+                    <p class="text-xl font-semibold text-gray-800 mb-4">Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}:</p>
+                    <p class="text-lg text-gray-700 mb-6">${questionData.question}</p>
+                    <div class="options-grid" id="options">
+                        ${optionsHtml}
+                    </div>
+                    ${feedbackHtml}
+                </div>
+            `;
+
+            updateNavigationButtons();
+            addOptionEventListeners();
+        }
+
+        function addOptionEventListeners() {
+            const optionsContainer = document.getElementById('options');
+            if (!optionsContainer || userAnswers[currentQuestionIndex] !== null) {
+                // If optionsContainer doesn't exist or question is already answered, do nothing
+                return;
+            }
+
+            optionsContainer.addEventListener('click', (event) => {
+                const target = event.target.closest('.option-button');
+                if (target) {
+                    // Remove 'selected' from all buttons first
+                    optionsContainer.querySelectorAll('.option-button').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    // Add 'selected' to the clicked button
+                    target.classList.add('selected');
+                    userAnswers[currentQuestionIndex] = parseInt(target.dataset.index);
+                    
+                    // Immediately evaluate and show feedback
+                    evaluateAnswer(userAnswers[currentQuestionIndex]);
+                }
+            });
+        }
+
+        function evaluateAnswer(selectedIndex) {
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const selectedOption = questionData.options[selectedIndex];
+            const isCorrect = (selectedOption === questionData.correct);
+
+            // Update score only if it's a new correct answer (not re-evaluating an already answered question)
+            if (userAnswers[currentQuestionIndex] !== null && selectedIndex === userAnswers[currentQuestionIndex]) {
+                 // Check if it was previously incorrect and now made correct (shouldn't happen with disabled buttons)
+                 // Or if it's the first time evaluating this answer for this question
+                if (isCorrect && !questionData.answeredCorrectly) {
+                    score += 4;
+                    shuffledQuestions[currentQuestionIndex].answeredCorrectly = true; // Mark as correctly answered
+                } else if (!isCorrect && questionData.answeredCorrectly) {
+                    // This scenario means user changed a correct answer to incorrect,
+                    // which is prevented by disabling buttons.
+                    // But if it happened, you'd deduct points. For this quiz, disabled buttons prevent it.
+                }
+            }
+            
+            // Re-render to show feedback and disable options
+            renderQuestion();
+        }
+
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === shuffledQuestions.length - 1;
+
+            if (currentQuestionIndex === shuffledQuestions.length - 1 && userAnswers[currentQuestionIndex] !== null) {
+                submitBtn.classList.remove('hidden');
+            } else {
+                submitBtn.classList.add('hidden');
+            }
+        }
+
+        function showResults() {
+            let feedbackText = '';
+            if (score === shuffledQuestions.length * 4) {
+                feedbackText = '¡Excelente! Has respondido correctamente a todas las preguntas. ¡Dominas la didáctica de las artes plásticas!';
+            } else if (score >= (shuffledQuestions.length * 4) * 0.75) {
+                feedbackText = '¡Muy bien! Tienes un gran conocimiento sobre la didáctica de las artes plásticas. Sigue así.';
+            } else if (score >= (shuffledQuestions.length * 4) * 0.5) {
+                feedbackText = '¡Buen intento! Has respondido a varias preguntas correctamente. Un poco más de estudio y lo dominarás.';
+            } else {
+                feedbackText = 'Necesitas repasar algunos conceptos. ¡No te desanimes, el arte es un camino de aprendizaje constante!';
+            }
+
+            quizContent.innerHTML = `
+                <div class="result-card text-center">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Resultados del Cuestionario</h2>
+                    <p class="text-4xl font-extrabold text-indigo-600 mb-6">${score} / ${shuffledQuestions.length * 4} Puntos</p>
+                    <p class="text-lg text-gray-700">${feedbackText}</p>
+                </div>
+            `;
+            prevBtn.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            restartBtn.classList.remove('hidden');
+        }
+
+        // Event Listeners for navigation
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            // Ensure an answer is selected before moving next, unless it's the last question already answered
+            if (userAnswers[currentQuestionIndex] !== null || currentQuestionIndex === shuffledQuestions.length - 1) {
+                if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                    currentQuestionIndex++;
+                    renderQuestion();
+                }
+            } else {
+                 // You could add a message here for the user to select an answer
+                 // For now, we'll just prevent moving
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+        restartBtn.addEventListener('click', startQuiz);
+
+        // Initial quiz start
+        startQuiz();
+
+    </script>
+</body>
+</html>

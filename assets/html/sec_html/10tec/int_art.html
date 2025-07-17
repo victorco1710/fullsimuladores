@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo: Inteligencia Artificial</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative; /* For credits positioning */
+        }
+        .question-card {
+            background-color: #f7fafc;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background-color: #ffffff;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            color: #4a5568;
+            outline: none;
+        }
+        .option-button:hover {
+            border-color: #a0aec0;
+            background-color: #edf2f7;
+        }
+        .option-button.selected {
+            background-color: #bee3f8;
+            border-color: #63b3ed;
+            color: #2b6cb0;
+            font-weight: 600;
+        }
+        .option-button.correct {
+            background-color: #c6f6d5;
+            border-color: #48bb78;
+            color: #2f855a;
+            font-weight: 700;
+        }
+        .option-button.incorrect {
+            background-color: #fed7d7;
+            border-color: #f56565;
+            color: #c53030;
+            font-weight: 700;
+        }
+        .feedback-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 1rem;
+            line-height: 1.6;
+            background-color: #e2e8f0;
+            color: #2d3748;
+            border: 1px solid #cbd5e0;
+        }
+        .feedback-box.correct {
+            background-color: #d1fae5; /* green-100 */
+            border-color: #34d399; /* green-400 */
+            color: #065f46; /* green-800 */
+        }
+        .feedback-box.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+            color: #991b1b; /* red-900 */
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        .nav-button {
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:hover {
+            transform: translateY(-2px);
+        }
+        .nav-button-primary {
+            background-color: #4299e1; /* blue-500 */
+            color: white;
+            border: none;
+        }
+        .nav-button-primary:hover {
+            background-color: #3182ce; /* blue-600 */
+        }
+        .nav-button-secondary {
+            background-color: #e2e8f0; /* gray-200 */
+            color: #2d3748;
+            border: none;
+            margin-right: 15px;
+        }
+        .nav-button-secondary:hover {
+            background-color: #cbd5e0; /* gray-300 */
+        }
+        .quiz-finished-card {
+            text-align: center;
+            padding: 40px;
+            border-radius: 15px;
+            background-color: #f7fafc;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .credits {
+            font-size: 0.9rem;
+            color: #718096;
+            text-align: right;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .container {
+                margin: 20px 15px;
+                padding: 20px;
+            }
+            .option-button {
+                font-size: 1rem;
+                padding: 12px 15px;
+            }
+            .nav-button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            .navigation-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .nav-button-secondary {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div id="quiz-container" class="container">
+        <!-- Quiz content will be rendered here by JavaScript -->
+    </div>
+
+    <script>
+        const quizData = {
+            "questions": [
+                {
+                    "questionType": 0,
+                    "question": "Según el autor, ¿cuál es una definición simplificada de la Inteligencia Artificial (IA)?",
+                    "hint": "Piensa en la esencia de lo que la IA busca replicar de la capacidad humana.",
+                    "answerOptions": [
+                        {"text": "La habilidad de los ordenadores para hacer actividades que normalmente requieren inteligencia humana.", "isCorrect": true, "rationale": "Esta es la definición simplificada de la IA que el autor usa en sus seminarios, enfocándose en la capacidad de las máquinas para imitar la inteligencia humana en ciertas tareas.", "page": 17},
+                        {"text": "La capacidad de las máquinas para programarse a sí mismas.", "isCorrect": false, "rationale": "Aunque la IA involucra autonomía en el aprendizaje, la definición simplificada se centra en replicar la inteligencia humana para realizar actividades.", "page": 17},
+                        {"text": "Sistemas que solo procesan datos estructurados.", "isCorrect": false, "rationale": "La IA puede procesar ambos tipos de datos, estructurados y no estructurados, y esta no es su definición básica.", "page": 26},
+                        {"text": "Tecnología que reemplaza completamente a los humanos en todas las tareas.", "isCorrect": false, "rationale": "La IA ayuda a los humanos y se encarga de ciertas tareas, pero la definición simplificada no implica un reemplazo total en todas las actividades.", "page": 17}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "Desde un punto de vista más detallado, ¿qué capacidades se le atribuyen a la IA?",
+                    "hint": "Considera cómo la IA procesa información y toma decisiones, y sus ventajas sobre las capacidades humanas en ciertos aspectos.",
+                    "answerOptions": [
+                        {"text": "Usar algoritmos, aprender de los datos y utilizar lo aprendido en la toma de decisiones, con menor proporción de errores y sin necesidad de descanso.", "isCorrect": true, "rationale": "Esta definición detallada incluye el uso de algoritmos, el aprendizaje a partir de datos y la aplicación de ese conocimiento para tomar decisiones, destacando la eficiencia y menor tasa de error de las máquinas.", "page": 17},
+                        {"text": "Programar automáticamente nuevos software y hardware.", "isCorrect": false, "rationale": "Aunque la IA puede asistir en el desarrollo de software, su definición detallada se enfoca en el aprendizaje de datos y la toma de decisiones.", "page": 17},
+                        {"text": "Sentir emociones y tener conciencia propia.", "isCorrect": false, "rationale": "El documento no menciona estas cualidades humanas avanzadas como parte de la definición actual o detallada de la IA.", "page": null},
+                        {"text": "Reemplazar la creatividad humana en todas las industrias.", "isCorrect": false, "rationale": "La IA se centra en el procesamiento de información y la toma de decisiones basada en datos, no en la sustitución completa de la creatividad humana.", "page": 17}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuál de las siguientes afirmaciones describe un beneficio clave de la IA según el texto?",
+                    "hint": "Piensa en cómo la IA complementa las capacidades humanas y las áreas donde puede ser particularmente útil.",
+                    "answerOptions": [
+                        {"text": "Ayuda a los humanos a beneficiarse de mejoras significativas y mayor eficiencia, y permite a las máquinas realizar tareas difíciles, aburridas o peligrosas.", "isCorrect": true, "rationale": "El texto destaca cómo la IA contribuye a la eficiencia y a liberar a los humanos de tareas tediosas o riesgosas, permitiendo a las personas enfocarse en lo que antes era impensable.", "page": 17},
+                        {"text": "Elimina por completo la necesidad de intervención humana en cualquier proceso.", "isCorrect": false, "rationale": "El documento indica que la IA 'ayuda' a los humanos y mejora la eficiencia, no que elimina por completo la necesidad de su intervención.", "page": 17},
+                        {"text": "Garantiza la erradicación total de errores en todos los sistemas.", "isCorrect": false, "rationale": "Se menciona que la proporción de errores es 'significativamente menor', no que se erradiquen por completo todos los errores.", "page": 17},
+                        {"text": "Reduce la necesidad de datos para tomar decisiones.", "isCorrect": false, "rationale": "Por el contrario, la IA depende de grandes volúmenes de datos para funcionar eficazmente y tomar decisiones informadas.", "page": 25}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Qué término alternativo para 'inteligencia artificial' propone Sebastian Thrun para una mayor aceptación pública?",
+                    "hint": "El término busca ser menos intimidatorio y se relaciona con el manejo de información.",
+                    "answerOptions": [
+                        {"text": "Ciencia de datos.", "isCorrect": true, "rationale": "Sebastian Thrun sugiere 'ciencia de datos' como una expresión menos intimidatoria que 'inteligencia artificial' para fomentar una mayor aceptación general.", "page": 19},
+                        {"text": "Automatización avanzada.", "isCorrect": false, "rationale": "Aunque la IA implica automatización, este no es el término específico propuesto por Thrun en el texto.", "page": 19},
+                        {"text": "Análisis inteligente.", "isCorrect": false, "rationale": "Este término no fue el propuesto por Thrun; su propuesta buscaba una connotación menos intimidatoria para la IA.", "page": 19},
+                        {"text": "Robótica cognitiva.", "isCorrect": false, "rationale": "Aunque es un campo relacionado con la IA, no es el término alternativo que Sebastian Thrun sugirió para el público en general.", "page": 19}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Qué es el aprendizaje automático (machine learning)?",
+                    "hint": "La clave está en la autonomía del aprendizaje de la máquina.",
+                    "answerOptions": [
+                        {"text": "Un aspecto de la informática donde los ordenadores tienen la capacidad de aprender sin ser programados explícitamente para ello, resultando en sugerencias o predicciones.", "isCorrect": true, "rationale": "El aprendizaje automático se define como la capacidad de las máquinas para adquirir conocimiento y mejorar su rendimiento sin una programación explícita para cada tarea, generando predicciones o sugerencias.", "page": 19},
+                        {"text": "Un programa que sigue instrucciones fijas predefinidas.", "isCorrect": false, "rationale": "Esta descripción se aplica más a la programación tradicional, mientras que el aprendizaje automático implica que los ordenadores aprenden de los datos sin ser programados para cada acción.", "page": 19},
+                        {"text": "Una tecnología que solo se aplica en redes sociales.", "isCorrect": false, "rationale": "El aprendizaje automático tiene aplicaciones en una amplia gama de industrias, no se limita solo a las redes sociales.", "page": 19},
+                        {"text": "Un sistema que requiere intervención humana constante para cada decisión.", "isCorrect": false, "rationale": "El objetivo del aprendizaje automático es que los dispositivos puedan obtener experiencia y conocimientos de forma autónoma, sin una supervisión constante para cada decisión.", "page": 19}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuál de los siguientes es un ejemplo actual de aplicación del aprendizaje automático?",
+                    "hint": "Piensa en cómo los sistemas adaptan el contenido o clasifican información basándose en patrones aprendidos.",
+                    "answerOptions": [
+                        {"text": "Personalización de sitios de medios sociales y filtros de spam de correo electrónico.", "isCorrect": true, "rationale": "Estos son ejemplos claros mencionados en el texto de cómo el aprendizaje automático se utiliza para adaptar la experiencia del usuario y clasificar información automáticamente.", "page": 19},
+                        {"text": "La composición musical de sinfonías complejas.", "isCorrect": false, "rationale": "Aunque la IA puede componer música, los ejemplos específicos de aprendizaje automático en el texto se refieren a la personalización de medios sociales y filtros de spam.", "page": 19},
+                        {"text": "La conducción autónoma de vehículos sin ningún tipo de supervisión.", "isCorrect": false, "rationale": "Los vehículos autónomos utilizan aprendizaje automático, pero el texto da ejemplos más básicos como personalización de redes sociales y filtros de spam.", "page": 18},
+                        {"text": "La fabricación de componentes electrónicos en cadena de montaje.", "isCorrect": false, "rationale": "Esto se refiere más a la automatización industrial en general, y no es un ejemplo directo de aprendizaje automático como la personalización o el filtrado.", "page": null}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuáles son los tres subconjuntos del aprendizaje automático mencionados en el documento?",
+                    "hint": "Recuerda los enfoques principales en los que los algoritmos adquieren conocimiento.",
+                    "answerOptions": [
+                        {"text": "Aprendizaje supervisado, no supervisado y de refuerzo.", "isCorrect": true, "rationale": "El documento especifica claramente estos tres tipos como los subconjuntos del aprendizaje automático que pueden utilizarse.", "page": 20},
+                        {"text": "Aprendizaje programado, adaptable y evolutivo.", "isCorrect": false, "rationale": "Estos no son los términos utilizados en el documento para describir los tipos de aprendizaje automático.", "page": 20},
+                        {"text": "Aprendizaje cognitivo, perceptivo y analítico.", "isCorrect": false, "rationale": "Estos términos no corresponden a la clasificación de los subconjuntos del aprendizaje automático según el texto.", "page": 20},
+                        {"text": "Aprendizaje predictivo, descriptivo y prescriptivo.", "isCorrect": false, "rationale": "Estos son tipos de análisis de datos, no los tres subconjuntos principales de aprendizaje automático discutidos en el texto.", "page": null}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "En el aprendizaje supervisado, ¿cómo aprenden los algoritmos?",
+                    "hint": "Piensa en la ayuda que se le da al algoritmo al inicio de su aprendizaje.",
+                    "answerOptions": [
+                        {"text": "Usan datos que ya han sido etiquetados u organizados previamente, requiriendo intervención humana para retroalimentación.", "isCorrect": true, "rationale": "El aprendizaje supervisado se caracteriza por el uso de datos pre-etiquetados, donde la supervisión humana es necesaria para guiar el aprendizaje del algoritmo.", "page": 21},
+                        {"text": "Encuentran patrones en datos sin etiquetas previas y sin intervención humana.", "isCorrect": false, "rationale": "Esta descripción corresponde al aprendizaje no supervisado, donde los algoritmos operan sin etiquetas preexistentes.", "page": 21},
+                        {"text": "Aprenden de la experiencia a través de 'refuerzo positivo'.", "isCorrect": false, "rationale": "Esta es la característica distintiva del aprendizaje por refuerzo, no del aprendizaje supervisado.", "page": 21},
+                        {"text": "Se programan explícitamente para cada tarea específica.", "isCorrect": false, "rationale": "El aprendizaje supervisado implica que el algoritmo aprende de los datos, no que es programado explícitamente para cada tarea como en la programación tradicional.", "page": 21}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuál es la característica principal del aprendizaje no supervisado?",
+                    "hint": "El algoritmo actúa de manera autónoma en la clasificación de la información.",
+                    "answerOptions": [
+                        {"text": "Los algoritmos no usan datos etiquetados previamente y deben encontrar la manera de clasificar la información por sí mismos, sin intervención humana.", "isCorrect": true, "rationale": "El aprendizaje no supervisado permite a los algoritmos descubrir patrones y estructuras en los datos de forma autónoma, sin la necesidad de etiquetas o intervención humana previa.", "page": 21},
+                        {"text": "Depende de la retroalimentación constante de un experto humano.", "isCorrect": false, "rationale": "La dependencia de retroalimentación humana es una característica del aprendizaje supervisado, no del no supervisado.", "page": 21},
+                        {"text": "Aprende recompensando las acciones correctas del algoritmo.", "isCorrect": false, "rationale": "Este mecanismo de recompensa es propio del aprendizaje por refuerzo, no del no supervisado.", "page": 21},
+                        {"text": "Requiere un conjunto de reglas predefinidas por el programador.", "isCorrect": false, "rationale": "El aprendizaje no supervisado se distingue por su capacidad de operar sin reglas predefinidas para la clasificación, descubriendo sus propias categorías.", "page": 21}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cómo aprenden los algoritmos en el aprendizaje por refuerzo?",
+                    "hint": "Piensa en un sistema de recompensas para guiar el aprendizaje.",
+                    "answerOptions": [
+                        {"text": "Aprenden de la experiencia, recibiendo 'refuerzo positivo' cuando aciertan, similar a cómo se entrena a un perro.", "isCorrect": true, "rationale": "El aprendizaje por refuerzo se basa en un sistema de recompensas o 'refuerzo positivo' por acciones correctas, lo que permite al algoritmo aprender a través de la interacción con su entorno.", "page": 21},
+                        {"text": "Clasificando datos con etiquetas ya existentes.", "isCorrect": false, "rationale": "Esta metodología es característica del aprendizaje supervisado, donde se utilizan datos previamente etiquetados.", "page": 21},
+                        {"text": "Descubriendo estructuras en datos no etiquetados.", "isCorrect": false, "rationale": "Esta es la forma de aprendizaje no supervisado, que busca patrones sin la ayuda de etiquetas predefinidas.", "page": 21},
+                        {"text": "Siguiendo un conjunto estricto de instrucciones pre-programadas.", "isCorrect": false, "rationale": "El aprendizaje por refuerzo permite que el algoritmo desarrolle sus propias estrategias a través de la prueba y error, no siguiendo instrucciones rígidas.", "page": 21}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Qué es el aprendizaje profundo (deep learning) y cómo funciona?",
+                    "hint": "Recuerda la estructura subyacente que permite su funcionamiento y la cantidad de datos que necesita.",
+                    "answerOptions": [
+                        {"text": "Un subcampo del aprendizaje automático que resuelve problemas complejos usando redes neuronales organizadas en capas para reconocer patrones en grandes cantidades de datos.", "isCorrect": true, "rationale": "El aprendizaje profundo es un subcampo del aprendizaje automático que utiliza redes neuronales multicapa para analizar vastas cantidades de datos y resolver problemas de alta complejidad.", "page": 22},
+                        {"text": "Un método que solo requiere pequeñas cantidades de datos para funcionar.", "isCorrect": false, "rationale": "Por el contrario, el aprendizaje profundo requiere 'un enorme conjunto de información' para su funcionamiento eficaz.", "page": 22},
+                        {"text": "Es lo mismo que el aprendizaje automático, solo un nombre diferente.", "isCorrect": false, "rationale": "El aprendizaje profundo es un 'subcampo' del aprendizaje automático, no un sinónimo, y se diferencia por su uso de redes neuronales profundas.", "page": 22},
+                        {"text": "Se basa en reglas lógicas explícitamente programadas, no en redes neuronales.", "isCorrect": false, "rationale": "El aprendizaje profundo se fundamenta en redes neuronales para el reconocimiento de patrones, a diferencia de la programación basada en reglas explícitas.", "page": 22}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿En qué campos se utiliza actualmente el aprendizaje profundo?",
+                    "hint": "Piensa en las aplicaciones que involucran el procesamiento de información sensorial o lingüística compleja.",
+                    "answerOptions": [
+                        {"text": "Reconocimiento de voz, procesamiento del lenguaje natural, visión artificial y la identificación de vehículos en sistemas de asistencia al conductor, como se ve en las traducciones de Facebook.", "isCorrect": true, "rationale": "El texto menciona explícitamente estas áreas como aplicaciones actuales y potentes del aprendizaje profundo, incluyendo el ejemplo de las traducciones automáticas de Facebook.", "page": 22},
+                        {"text": "Solo en la automatización industrial básica.", "isCorrect": false, "rationale": "El aprendizaje profundo se utiliza en aplicaciones mucho más complejas y avanzadas que la automatización industrial básica.", "page": 22},
+                        {"text": "Exclusivamente en la creación de videojuegos.", "isCorrect": false, "rationale": "Aunque puede aplicarse en videojuegos, el texto enumera aplicaciones más amplias y críticas en el ámbito tecnológico y de procesamiento de información.", "page": 22},
+                        {"text": "Principalmente en la gestión de bases de datos estructuradas.", "isCorrect": false, "rationale": "El aprendizaje profundo es particularmente poderoso para analizar datos no estructurados y complejos, no se limita a bases de datos estructuradas.", "page": 22}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuáles son las tres capacidades que las tecnologías de IA están desarrollando como nunca antes?",
+                    "hint": "Estas capacidades replican sentidos y procesos cognitivos humanos.",
+                    "answerOptions": [
+                        {"text": "Ver (visión artificial), oír (reconocimiento de voz) y entender (procesamiento del lenguaje natural).", "isCorrect": true, "rationale": "El documento destaca estas tres capacidades —visión artificial, reconocimiento de voz y procesamiento del lenguaje natural— como las áreas donde la IA está haciendo avances significativos en su desarrollo.", "page": 23},
+                        {"text": "Crear, diseñar y construir.", "isCorrect": false, "rationale": "Aunque la IA puede asistir en estos procesos, no son las tres capacidades específicas de percepción y comprensión destacadas en el texto.", "page": 23},
+                        {"text": "Mover, sentir y pensar.", "isCorrect": false, "rationale": "Si bien la IA está relacionada con el 'pensamiento' (en términos de procesamiento de información), 'mover' y 'sentir' no son las tres capacidades exactas mencionadas como en desarrollo principal.", "page": 23},
+                        {"text": "Programar, depurar y ejecutar.", "isCorrect": false, "rationale": "Estas son funciones de desarrollo de software, no las capacidades perceptivas y de comprensión que la IA está adquiriendo.", "page": 23}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Qué significa la frase 'los datos son el nuevo petróleo' en el contexto de la IA?",
+                    "hint": "La analogía se refiere al valor y la importancia estratégica en la economía actual.",
+                    "answerOptions": [
+                        {"text": "Las empresas más poderosas tienen acceso a grandes cantidades de datos, y la calidad de los datos es crucial.", "isCorrect": true, "rationale": "La frase 'los datos son el nuevo petróleo' resalta el valor estratégico de los datos en la economía actual, similar al del petróleo en el pasado, enfatizando que las empresas con más datos de calidad son las más poderosas.", "page": 25},
+                        {"text": "Los datos son un recurso limitado y contaminante.", "isCorrect": false, "rationale": "La analogía se refiere al valor y la influencia, no a la escasez o al impacto ambiental de los datos.", "page": 25},
+                        {"text": "Solo las grandes corporaciones pueden beneficiarse de los datos.", "isCorrect": false, "rationale": "Aunque las grandes empresas se benefician enormemente, el autor sugiere que el acceso a datos gratuitos y el aprendizaje de IA permiten que más personas y compañías se beneficien.", "page": 25},
+                        {"text": "Los datos deben ser extraídos físicamente como el petróleo.", "isCorrect": false, "rationale": "Esta es una interpretación literal y errónea de la analogía; la comparación es sobre el valor, no sobre el método de extracción física.", "page": 25}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Por qué el autor cree que los datos son 'incluso mejores que el petróleo'?",
+                    "hint": "Piensa en quién puede acceder y beneficiarse de cada recurso en la era actual.",
+                    "answerOptions": [
+                        {"text": "Porque hoy en día, casi cualquier persona puede aprender principios básicos de IA y acceder a fuentes de datos gratuitos, democratizando el beneficio.", "isCorrect": true, "rationale": "El autor argumenta que, a diferencia del petróleo, el acceso a datos y el conocimiento de IA es más democrático, permitiendo que una gama más amplia de personas y empresas se beneficien.", "page": 25},
+                        {"text": "El petróleo es más fácil de refinar que los datos.", "isCorrect": false, "rationale": "Esta comparación de procesos no es el motivo por el cual el autor considera los datos superiores al petróleo en el contexto de la democratización de beneficios.", "page": 25},
+                        {"text": "Los datos no tienen ningún coste de producción.", "isCorrect": false, "rationale": "Aunque el acceso a algunos datos puede ser gratuito, su recolección y procesamiento no carecen de costo, y esta no es la razón principal dada por el autor.", "page": 25},
+                        {"text": "El petróleo es un recurso ilimitado, a diferencia de los datos.", "isCorrect": false, "rationale": "La afirmación es incorrecta; el petróleo es un recurso finito y la comparación del autor se centra en la accesibilidad y el beneficio, no en la limitación de los recursos.", "page": 25}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cómo influye el mayor acceso a los datos en el desarrollo de las tecnologías de IA?",
+                    "hint": "Considera la relación entre la cantidad de información disponible y la capacidad de mejora de la IA.",
+                    "answerOptions": [
+                        {"text": "Cuanto mayor sea el volumen de datos recopilados y analizados, más poderosas serán las tecnologías de IA en el futuro.", "isCorrect": true, "rationale": "El texto enfatiza que la abundancia y el análisis de grandes volúmenes de datos son un componente subyacente que impulsa el desarrollo y la mejora del rendimiento de los sistemas de IA.", "page": 26},
+                        {"text": "Un gran volumen de datos ralentiza el desarrollo de la IA.", "isCorrect": false, "rationale": "El documento indica lo contrario, que el acceso a más datos hace que las tecnologías sean 'aún más poderosas'.", "page": 26},
+                        {"text": "El acceso a datos solo es relevante para el software, no para el hardware de IA.", "isCorrect": false, "rationale": "El volumen de datos es fundamental para el rendimiento general de los sistemas de IA, que incluyen tanto software como su interacción con el hardware.", "page": 26},
+                        {"text": "La cantidad de datos no es tan importante como la velocidad de procesamiento.", "isCorrect": false, "rationale": "Aunque la velocidad de procesamiento es importante, el texto subraya el volumen de datos como un factor crucial para el poder y desarrollo de la IA.", "page": 26}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuál es la principal diferencia entre datos estructurados y no estructurados?",
+                    "hint": "Piensa en cómo se presenta la información y su formato.",
+                    "answerOptions": [
+                        {"text": "Los datos estructurados incluyen información numérica, fechas o direcciones, mientras que los no estructurados contienen textos, imágenes y vídeos.", "isCorrect": true, "rationale": "El texto distingue claramente los datos estructurados por su formato tabular y la facilidad de análisis, en contraste con los datos no estructurados que son más complejos y se presentan en formatos como texto, imagen o video.", "page": 26},
+                        {"text": "Los datos estructurados son más difíciles de analizar que los no estructurados.", "isCorrect": false, "rationale": "Tradicionalmente, los datos no estructurados eran más difíciles de analizar; el desarrollo de la IA ha hecho posible examinar más datos no estructurados.", "page": 26},
+                        {"text": "La IA solo puede procesar datos estructurados eficientemente.", "isCorrect": false, "rationale": "El documento afirma que el desarrollo de la IA ha permitido examinar más datos no estructurados, desmintiendo esta limitación.", "page": 26},
+                        {"text": "No hay diferencias significativas, ambos se procesan de la misma manera.", "isCorrect": false, "rationale": "El texto enfatiza la importancia de reconocer las diferencias entre estos dos tipos de datos, ya que su naturaleza y procesamiento varían.", "page": 26}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "Según Merrill Lynch, ¿por qué el análisis de datos no estructurados es extremadamente valioso?",
+                    "hint": "Considera la proporción de datos no estructurados y las implicaciones de poder procesarlos.",
+                    "answerOptions": [
+                        {"text": "Entre el 80 y el 90 por ciento de todos los datos de negocios no están estructurados, y su análisis puede generar beneficios como mejor atención médica o patrones de tráfico más seguros.", "isCorrect": true, "rationale": "Merrill Lynch estima que la gran mayoría de los datos de negocios son no estructurados, lo que hace que su análisis sea crucial para desbloquear una variedad de beneficios en la sociedad.", "page": 27},
+                        {"text": "Solo los datos no estructurados pueden ser monetizados.", "isCorrect": false, "rationale": "Ambos tipos de datos pueden ser monetizados y valiosos; la importancia de los no estructurados radica en su vasta cantidad y el potencial de análisis desbloqueado por la IA.", "page": 27},
+                        {"text": "Requiere menos capacidad de procesamiento que los datos estructurados.", "isCorrect": false, "rationale": "Por lo general, el análisis de datos no estructurados requiere una capacidad de procesamiento significativamente mayor debido a su complejidad.", "page": 22},
+                        {"text": "Su análisis es irrelevante para los beneficios sociales.", "isCorrect": false, "rationale": "El texto explícitamente menciona que el análisis de estos datos puede llevar a 'una serie de beneficios en nuestra sociedad', lo que contradice esta afirmación.", "page": 27}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "Según Kai-Fu Lee, ¿cuál es el primer paso fundamental para que las grandes empresas tecnológicas perfeccionen sus soluciones de IA?",
+                    "hint": "Piensa en el ciclo virtuoso que comienza con la información.",
+                    "answerOptions": [
+                        {"text": "Obtención de más datos, creando servicios tan útiles que los usuarios permitan el uso de sus datos.", "isCorrect": true, "rationale": "El primer paso, según Kai-Fu Lee, es atraer a los usuarios con servicios valiosos que los incentiven a compartir sus datos, lo cual es esencial para el ciclo de mejora de la IA.", "page": 28},
+                        {"text": "Contratar únicamente a los mejores científicos de IA.", "isCorrect": false, "rationale": "La atracción de expertos en IA es el quinto paso en el esquema de Kai-Fu Lee, que viene después de la obtención de datos y el crecimiento de usuarios.", "page": 28},
+                        {"text": "Aumentar los ingresos antes de desarrollar productos.", "isCorrect": false, "rationale": "El aumento de ingresos es un paso posterior que se deriva del crecimiento de usuarios impulsado por mejores productos, no es el punto de partida del ciclo.", "page": 28},
+                        {"text": "Reducir el número de usuarios para un control más fácil.", "isCorrect": false, "rationale": "El objetivo es aumentar el número de usuarios para obtener más datos y mejorar los productos, no reducirlo.", "page": 28}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuál es el segundo paso en el esquema de Kai-Fu Lee para perfeccionar las soluciones de IA en grandes compañías?",
+                    "hint": "Este paso se centra en la calidad y relevancia del servicio ofrecido.",
+                    "answerOptions": [
+                        {"text": "Mejores productos basados en la IA, personalizando la experiencia del usuario.", "isCorrect": true, "rationale": "El segundo paso de Kai-Fu Lee es utilizar los datos obtenidos para mejorar los productos existentes con IA, lo que permite una personalización que aumenta la relevancia para el usuario.", "page": 28},
+                        {"text": "Desarrollar una campaña de marketing masiva.", "isCorrect": false, "rationale": "Aunque el marketing es parte del crecimiento, el segundo paso se centra en la mejora intrínseca del producto a través de la IA, lo que lleva orgánicamente a más usuarios.", "page": 28},
+                        {"text": "Fusionarse con otras empresas tecnológicas.", "isCorrect": false, "rationale": "La fusión con otras empresas no es parte del ciclo interno de perfeccionamiento de la IA descrito por Kai-Fu Lee.", "page": 28},
+                        {"text": "Reducir el personal de ingeniería para ahorrar costos.", "isCorrect": false, "rationale": "El esquema de Lee implica invertir en talento para mejorar la IA, no reducir el personal de ingeniería.", "page": 28}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Qué sucede como el tercer paso en el modelo de Kai-Fu Lee?",
+                    "hint": "Una buena experiencia de usuario genera crecimiento.",
+                    "answerOptions": [
+                        {"text": "Mayor número de usuarios, ya que una experiencia satisfactoria con un producto o servicio lleva a la recomendación.", "isCorrect": true, "rationale": "El tercer paso es el crecimiento del número de usuarios, que se produce de forma orgánica a medida que las personas tienen experiencias positivas y recomiendan los productos o servicios basados en IA.", "page": 28},
+                        {"text": "Disminución de los ingresos.", "isCorrect": false, "rationale": "El aumento de usuarios en el ciclo de Kai-Fu Lee lleva a un aumento de ingresos, no a una disminución.", "page": 28},
+                        {"text": "Los productos se vuelven menos relevantes.", "isCorrect": false, "rationale": "Con la mejora de la IA y la personalización, los productos se vuelven más relevantes para los usuarios, no menos.", "page": 28},
+                        {"text": "Las empresas dejan de necesitar datos.", "isCorrect": false, "rationale": "El ciclo de Kai-Fu Lee enfatiza la continua necesidad de datos para el perfeccionamiento de la IA.", "page": 29}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuál es el cuarto paso en el ciclo de perfeccionamiento de IA de Kai-Fu Lee?",
+                    "hint": "Este paso es una consecuencia económica del crecimiento de usuarios.",
+                    "answerOptions": [
+                        {"text": "Mayores ingresos, directamente relacionados con un mayor número de usuarios.", "isCorrect": true, "rationale": "El cuarto paso en el ciclo es el incremento de ingresos, una consecuencia natural del aumento en la base de usuarios que disfrutan de productos mejorados por la IA.", "page": 28},
+                        {"text": "Necesidad de reducir el desarrollo de productos.", "isCorrect": false, "rationale": "El aumento de ingresos permite una mayor inversión en investigación y desarrollo de productos, no una reducción.", "page": 28},
+                        {"text": "Disminución del interés en la inteligencia artificial.", "isCorrect": false, "rationale": "El éxito y el aumento de ingresos alimentan un mayor interés e inversión en IA, no una disminución.", "page": 28},
+                        {"text": "Los usuarios se vuelven menos leales a la marca.", "isCorrect": false, "rationale": "Una experiencia de usuario mejorada por la IA tiende a aumentar la lealtad, no a disminuirla.", "page": 28}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuál es el quinto y último paso en el modelo de Kai-Fu Lee?",
+                    "hint": "Este paso cierra el ciclo, permitiendo que la empresa continúe mejorando su IA.",
+                    "answerOptions": [
+                        {"text": "Más expertos y científicos en IA, atraídos por el aumento de ingresos, lo que permite una investigación más importante y prepara a la empresa para el futuro.", "isCorrect": true, "rationale": "El último paso del ciclo es la capacidad de la empresa para atraer a los mejores talentos en IA gracias a sus mayores ingresos, lo que a su vez impulsa una investigación más profunda y asegura su liderazgo futuro.", "page": 28},
+                        {"text": "Las empresas se estancan y dejan de innovar.", "isCorrect": false, "rationale": "Este paso describe una aceleración de la innovación a través de la contratación de expertos, lo opuesto al estancamiento.", "page": 28},
+                        {"text": "Reducción de la inversión en investigación y desarrollo.", "isCorrect": false, "rationale": "El aumento de ingresos y la contratación de expertos permiten una mayor inversión en I+D, no una reducción.", "page": 28},
+                        {"text": "Disminución de la calidad de los productos de IA.", "isCorrect": false, "rationale": "La contratación de más expertos en IA conduce a una mejora continua de la calidad y la sofisticación de los productos de IA.", "page": 28}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Qué característica clave de la IA se destaca en relación con su velocidad de aprendizaje?",
+                    "hint": "Piensa en cómo la IA adquiere conocimiento de forma autónoma y su velocidad.",
+                    "answerOptions": [
+                        {"text": "Permite que las máquinas aprendan cosas nuevas en lugar de requerir programación específica, como se vio con OpenAI's Dota 2 AI que aprendió en un día lo que a un humano le tomaría 180 años.", "isCorrect": true, "rationale": "El texto subraya que la IA es capaz de aprender y mejorar por sí misma sin necesidad de programación explícita para cada nueva tarea, destacando la sorprendente velocidad de este aprendizaje en ejemplos como el de Dota 2.", "page": 30},
+                        {"text": "Su aprendizaje es siempre lineal y predecible.", "isCorrect": false, "rationale": "El documento explícitamente menciona que la IA aprende de forma exponencial, y que los humanos tienden a pensar de forma lineal, lo que hace difícil imaginar sus logros.", "page": 32},
+                        {"text": "Solo puede aprender si es programada para cada nueva tarea.", "isCorrect": false, "rationale": "Esta afirmación es contraria a la característica clave de la IA que permite aprender sin programación específica para nuevas tareas.", "page": 30},
+                        {"text": "Su velocidad de aprendizaje es insignificante en comparación con la de los humanos.", "isCorrect": false, "rationale": "El texto proporciona ejemplos que demuestran una velocidad de aprendizaje de la IA significativamente superior a la humana en ciertas tareas.", "page": 31}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Por qué Bill Gates consideró la victoria de la IA de OpenAI en Dota 2 como un 'hito inmensamente significativo' para el desarrollo de la IA?",
+                    "hint": "La importancia no radicaba solo en la victoria, sino en la naturaleza del desafío.",
+                    "answerOptions": [
+                        {"text": "Porque fue la primera vez que la IA ganó en un juego que requería trabajo en equipo y colaboración, con posibilidades futuras para resolver problemas complejos de la vida real.", "isCorrect": true, "rationale": "Bill Gates destacó este logro como significativo debido a la capacidad de la IA para colaborar y trabajar en equipo, abriendo la puerta a la resolución de problemas complejos del mundo real que requieren cooperación.", "page": 32},
+                        {"text": "Demostró que la IA es superior a los humanos en todos los juegos individuales.", "isCorrect": false, "rationale": "La importancia radicó en la capacidad de la IA para la colaboración y el trabajo en equipo, no solo en la superioridad en juegos individuales.", "page": 32},
+                        {"text": "Confirmó que la IA solo es útil para fines de entretenimiento.", "isCorrect": false, "rationale": "Gates enfatizó que este hito tiene implicaciones para resolver problemas complejos de la vida real, lo que va más allá del mero entretenimiento.", "page": 32},
+                        {"text": "La IA fue capaz de escribir su propio código para el juego.", "isCorrect": false, "rationale": "Aunque impresionante, el foco de la declaración de Gates no fue la autocodificación, sino la capacidad de la IA para la colaboración y resolución de problemas complejos.", "page": 32}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuál fue el logro de Deep Blue de IBM en 1996?",
+                    "hint": "Recuerda el famoso enfrentamiento en ajedrez.",
+                    "answerOptions": [
+                        {"text": "Ganó al mejor ajedrecista del mundo, Garry Kasparov.", "isCorrect": true, "rationale": "Deep Blue de IBM es famoso por su victoria sobre el campeón mundial de ajedrez Garry Kasparov en 1996.", "page": 31},
+                        {"text": "Venció a los mejores jugadores de Jeopardy.", "isCorrect": false, "rationale": "Watson de IBM fue el que ganó a los mejores jugadores de Jeopardy en 2011.", "page": 31},
+                        {"text": "Batió al mejor jugador de Go del mundo.", "isCorrect": false, "rationale": "DeepMind de Google fue la IA que batió al mejor jugador de Go del mundo en 2016.", "page": 31},
+                        {"text": "Ganó a los mejores jugadores de póquer del mundo.", "isCorrect": false, "rationale": "Libratus de la Universidad Carnegie Mellon fue el programa de IA que ganó a los mejores jugadores de póquer en 2017.", "page": 31}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Qué IA venció a los mejores jugadores de Jeopardy en 2011?",
+                    "hint": "Considera el nombre de la IA de IBM conocida por su habilidad en juegos de preguntas.",
+                    "answerOptions": [
+                        {"text": "Watson de IBM.", "isCorrect": true, "rationale": "Watson de IBM es la IA que se hizo famosa por derrotar a los campeones de Jeopardy en 2011.", "page": 31},
+                        {"text": "Deep Blue.", "isCorrect": false, "rationale": "Deep Blue fue la IA de IBM que destacó en ajedrez.", "page": 31},
+                        {"text": "AlphaGo Zero.", "isCorrect": false, "rationale": "AlphaGo Zero es la IA de DeepMind que se destacó en Go.", "page": 31},
+                        {"text": "Libratus.", "isCorrect": false, "rationale": "Libratus fue la IA que ganó en póquer.", "page": 31}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿En qué año y por qué IA fue batido el mejor jugador de Go del mundo?",
+                    "hint": "Recuerda el año y la empresa detrás de la IA que revolucionó el juego de Go.",
+                    "answerOptions": [
+                        {"text": "2016, por DeepMind de Google.", "isCorrect": true, "rationale": "En 2016, AlphaGo de DeepMind (propiedad de Google) batió al mejor jugador de Go del mundo, un hito significativo para la IA.", "page": 31},
+                        {"text": "2011, por Watson de IBM.", "isCorrect": false, "rationale": "Watson de IBM ganó en Jeopardy en 2011.", "page": 31},
+                        {"text": "1996, por Deep Blue de IBM.", "isCorrect": false, "rationale": "Deep Blue de IBM ganó en ajedrez en 1996.", "page": 31},
+                        {"text": "2017, por Libratus de Carnegie Mellon.", "isCorrect": false, "rationale": "Libratus de Carnegie Mellon ganó en póquer en 2017.", "page": 31}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Qué programa de IA ganó a los mejores jugadores de póquer del mundo en 2017?",
+                    "hint": "Busca el nombre de la IA desarrollada por la Universidad Carnegie Mellon.",
+                    "answerOptions": [
+                        {"text": "Libratus, desarrollado por la Universidad Carnegie Mellon.", "isCorrect": true, "rationale": "Libratus, creado por la Universidad Carnegie Mellon, logró vencer a los mejores jugadores de póquer del mundo en 2017.", "page": 31},
+                        {"text": "AlphaGo Zero.", "isCorrect": false, "rationale": "AlphaGo Zero se destacó en el juego de Go.", "page": 31},
+                        {"text": "Watson.", "isCorrect": false, "rationale": "Watson se destacó en Jeopardy.", "page": 31},
+                        {"text": "Deep Blue.", "isCorrect": false, "rationale": "Deep Blue se destacó en ajedrez.", "page": 31}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuál fue el logro de AlphaGo Zero en 2017 que lo hizo de 'otro nivel'?",
+                    "hint": "Piensa en cómo aprendió a jugar Go sin intervención humana.",
+                    "answerOptions": [
+                        {"text": "Alcanzó el nivel más alto de Go sin la introducción de ningún dato humano, simplemente enseñándose a sí mismo cómo jugar.", "isCorrect": true, "rationale": "AlphaGo Zero fue capaz de dominar el juego de Go sin ningún tipo de datos humanos, aprendiendo por sí mismo, lo que lo convirtió en un hito excepcional.", "page": 31},
+                        {"text": "Derrotó a un equipo humano en Dota 2.", "isCorrect": false, "rationale": "La IA de OpenAI fue la que derrotó a equipos humanos en Dota 2.", "page": 32},
+                        {"text": "Resolvió problemas complejos de infraestructura de transporte.", "isCorrect": false, "rationale": "Esta es una posibilidad futura de la IA de OpenAI, no un logro específico de AlphaGo Zero.", "page": 32},
+                        {"text": "Se convirtió en un asistente virtual que conocía más que amigos cercanos.", "isCorrect": false, "rationale": "Esto se refiere a los asistentes virtuales como Siri o Alexa, no a AlphaGo Zero.", "page": 30}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿Cuánto tiempo necesitaría un ser humano para adquirir los conocimientos y habilidades que la IA de OpenAI obtuvo en un día para Dota 2?",
+                    "hint": "Busca la comparación de tiempo de aprendizaje en el texto.",
+                    "answerOptions": [
+                        {"text": "Ciento ochenta años.", "isCorrect": true, "rationale": "La IA de OpenAI fue capaz de aprender en un día lo que a un ser humano le tomaría 180 años para dominar Dota 2, destacando la velocidad exponencial del aprendizaje de la IA.", "page": 32},
+                        {"text": "Un año.", "isCorrect": false, "rationale": "La diferencia de tiempo es mucho mayor que un año.", "page": 32},
+                        {"text": "Diez años.", "isCorrect": false, "rationale": "La cifra es significativamente superior a diez años.", "page": 32},
+                        {"text": "Cincuenta años.", "isCorrect": false, "rationale": "La cantidad de tiempo es mucho más elevada de lo que se menciona en esta opción.", "page": 32}
+                    ]
+                },
+                {
+                    "questionType": 0,
+                    "question": "¿En qué área la visión artificial podría ser la más importante según el documento, ofreciendo grandes ventajas?",
+                    "hint": "Piensa en las aplicaciones que dependen fuertemente de la capacidad de 'ver'.",
+                    "answerOptions": [
+                        {"text": "Vehículos autónomos, reconocimiento facial, seguridad pública y robótica.", "isCorrect": true, "rationale": "El documento menciona estas áreas como las de mayor ventaja para la visión artificial debido a su importancia y las amplias aplicaciones que ofrece.", "page": 24},
+                        {"text": "Procesamiento del lenguaje natural y traducción.", "isCorrect": false, "rationale": "Esto se refiere a la capacidad de 'entender', no primariamente a la visión artificial.", "page": 23},
+                        {"text": "Sistemas de contabilidad y auditoría financiera.", "isCorrect": false, "rationale": "Aunque la IA puede aplicarse en finanzas, la visión artificial no es la capacidad clave para estas tareas.", "page": 18},
+                        {"text": "Composición musical y creación artística.", "isCorrect": false, "rationale": "La visión artificial no es la capacidad principal para la creación artística, aunque la IA sí tiene aplicaciones en este campo.", "page": 30}
+                    ]
+                }
+            ]
+        };
+
+        const quizContainer = document.getElementById('quiz-container');
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswerIndex = null; // To store the user's selected option for the current question
+        let isAnswered = false; // To prevent multiple selections
+
+        // Function to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Function to render the current question
+        function renderQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const questionData = shuffledQuestions[currentQuestionIndex];
+                isAnswered = false;
+                selectedAnswerIndex = null; // Reset selected answer for the new question
+
+                let optionsHtml = '';
+                questionData.answerOptions.forEach((option, index) => {
+                    optionsHtml += `
+                        <button class="option-button" data-index="${index}">${option.text}</button>
+                    `;
+                });
+
+                quizContainer.innerHTML = `
+                    <div class="text-gray-600 mb-4 text-center text-sm">
+                        Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}
+                    </div>
+                    <div class="question-card">
+                        <p class="text-xl font-semibold text-gray-800 mb-4">${questionData.question}</p>
+                        <div id="options-container">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                    <div id="feedback-area" class="feedback-box hidden"></div>
+                    <div class="navigation-buttons">
+                        <button id="next-button" class="nav-button nav-button-primary" disabled>Siguiente</button>
+                    </div>
+                    <div class="credits">Desarrollado por Victor Crespo</div>
+                `;
+
+                // Add event listeners to option buttons
+                document.querySelectorAll('.option-button').forEach(button => {
+                    button.addEventListener('click', handleAnswerClick);
+                });
+
+                document.getElementById('next-button').addEventListener('click', handleNextQuestion);
+            } else {
+                showResults();
+            }
+        }
+
+        // Function to handle answer click
+        function handleAnswerClick(event) {
+            if (isAnswered) return; // Prevent multiple selections
+
+            isAnswered = true;
+            selectedAnswerIndex = parseInt(event.target.dataset.index);
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const selectedOption = questionData.answerOptions[selectedAnswerIndex];
+            const feedbackArea = document.getElementById('feedback-area');
+            const nextButton = document.getElementById('next-button');
+            const optionsContainer = document.getElementById('options-container');
+
+            // Disable all option buttons after selection
+            document.querySelectorAll('.option-button').forEach(button => {
+                button.disabled = true;
+                if (parseInt(button.dataset.index) === selectedAnswerIndex) {
+                    button.classList.add('selected'); // Highlight selected
+                }
+            });
+
+            // Show feedback
+            feedbackArea.classList.remove('hidden');
+            let feedbackClass = '';
+            let pageReference = selectedOption.page ? ` (página ${selectedOption.page} del PDF)` : '';
+
+            if (selectedOption.isCorrect) {
+                score += 4; // Each question is worth 4 points
+                feedbackArea.innerHTML = `<span class="font-bold">¡Correcto!</span> ${selectedOption.rationale}${pageReference}`;
+                feedbackClass = 'correct';
+            } else {
+                feedbackArea.innerHTML = `<span class="font-bold">Incorrecto.</span> ${selectedOption.rationale}${pageReference}`;
+                feedbackClass = 'incorrect';
+
+                // Highlight correct answer if incorrect option was chosen
+                questionData.answerOptions.forEach((option, index) => {
+                    const button = optionsContainer.querySelector(`[data-index="${index}"]`);
+                    if (option.isCorrect) {
+                        button.classList.add('correct');
+                    }
+                });
+            }
+
+            feedbackArea.classList.add(feedbackClass);
+            event.target.classList.add(selectedOption.isCorrect ? 'correct' : 'incorrect');
+
+            nextButton.disabled = false; // Enable next button
+            nextButton.textContent = (currentQuestionIndex === shuffledQuestions.length - 1) ? 'Ver Resultados' : 'Siguiente';
+        }
+
+        // Function to move to the next question
+        function handleNextQuestion() {
+            currentQuestionIndex++;
+            renderQuestion();
+        }
+
+        // Function to show results
+        function showResults() {
+            let generalFeedback = '';
+            const percentage = (score / (shuffledQuestions.length * 4)) * 100;
+
+            if (percentage === 100) {
+                generalFeedback = "¡Felicidades! Has respondido correctamente a todas las preguntas. Eres un experto en Inteligencia Artificial.";
+            } else if (percentage >= 80) {
+                generalFeedback = "¡Excelente trabajo! Has demostrado un gran conocimiento sobre la Inteligencia Artificial.";
+            } else if (percentage >= 60) {
+                generalFeedback = "Buen esfuerzo. Tienes una buena base, pero hay áreas en las que puedes mejorar.";
+            } else {
+                generalFeedback = "Sigue estudiando. La Inteligencia Artificial es un campo fascinante y con un poco más de dedicación, mejorarás tu comprensión.";
+            }
+
+            quizContainer.innerHTML = `
+                <div class="quiz-finished-card">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Cuestionario Completado</h2>
+                    <p class="text-2xl text-gray-800 mb-4">Tu puntuación total es: <span class="font-bold text-blue-600">${score} / ${shuffledQuestions.length * 4}</span></p>
+                    <p class="text-lg text-gray-700 mb-8">${generalFeedback}</p>
+                    <button onclick="restartQuiz()" class="nav-button nav-button-primary">Reiniciar Cuestionario</button>
+                </div>
+                <div class="credits">Desarrollado por Victor Crespo</div>
+            `;
+        }
+
+        // Function to restart the quiz
+        function restartQuiz() {
+            shuffledQuestions = [...quizData.questions]; // Create a shallow copy
+            shuffleArray(shuffledQuestions);
+            currentQuestionIndex = 0;
+            score = 0;
+            renderQuestion();
+        }
+
+        // Initialize the quiz
+        document.addEventListener('DOMContentLoaded', restartQuiz);
+    </script>
+</body>
+</html>

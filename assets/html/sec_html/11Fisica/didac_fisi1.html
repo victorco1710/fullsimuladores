@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Didáctica de la Física</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .question-card {
+            background-color: #e0f7fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #b2ebf2;
+        }
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #263238;
+        }
+        .option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .option:hover {
+            background-color: #e6f7ff;
+            border-color: #90caf9;
+        }
+        .option input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+            accent-color: #2196f3;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .feedback.correct {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+        .feedback.incorrect {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #f44336;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .navigation-buttons button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .navigation-buttons button:hover {
+            transform: translateY(-2px);
+        }
+        .navigation-buttons button:disabled {
+            background-color: #b0bec5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .prev-button {
+            background-color: #607d8b;
+            color: white;
+        }
+        .prev-button:hover {
+            background-color: #455a64;
+        }
+        .next-button {
+            background-color: #2196f3;
+            color: white;
+        }
+        .next-button:hover {
+            background-color: #1976d2;
+        }
+        .submit-button {
+            background-color: #4caf50;
+            color: white;
+            width: 100%;
+        }
+        .submit-button:hover {
+            background-color: #388e3c;
+        }
+        .results-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+        .results-container h2 {
+            font-size: 2rem;
+            color: #263238;
+            margin-bottom: 15px;
+        }
+        .results-container p {
+            font-size: 1.2rem;
+            color: #546e7a;
+            margin-bottom: 20px;
+        }
+        .score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2196f3;
+            margin-bottom: 20px;
+        }
+        .restart-button {
+            background-color: #ff9800;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .restart-button:hover {
+            background-color: #f57c00;
+            transform: translateY(-2px);
+        }
+        .footer-credits {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #78909c;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .quiz-container, .results-container {
+                padding: 20px;
+            }
+            .question-text {
+                font-size: 1rem;
+            }
+            .option {
+                padding: 8px;
+                font-size: 0.95rem;
+            }
+            .navigation-buttons {
+                flex-direction: column;
+            }
+            .navigation-buttons button {
+                width: 100%;
+            }
+            .results-container h2 {
+                font-size: 1.5rem;
+            }
+            .results-container p {
+                font-size: 1rem;
+            }
+            .score {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="quizApp" class="quiz-container">
+        <!-- Contenido del cuestionario se renderizará aquí -->
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Qué autor es citado al inicio del documento con la frase: 'Evite...el error de enseñar ahora en la misma forma como le enseñaron a usted.'?",
+                options: [
+                    "Piaget",
+                    "Arruti (1969, pág. 3)",
+                    "Popper",
+                    "Gramsci"
+                ],
+                correctAnswer: "Arruti (1969, pág. 3)",
+                feedback: "Correcto. Arruti es citado en la página 3.",
+                page: "3"
+            },
+            {
+                question: "¿De qué proviene el origen etimológico de la palabra Epistemología?",
+                options: [
+                    "Latín: 'episteme' (conocimiento) y 'logia' (estudio)",
+                    "Griego: 'episteme' (conocimiento) y '-logia' (estudio) (pág. 6)",
+                    "Griego: 'episteme' (razón) y '-logia' (teoría)",
+                    "Latín: 'episteme' (ciencia) y 'logos' (discurso)"
+                ],
+                correctAnswer: "Griego: 'episteme' (conocimiento) y '-logia' (estudio) (pág. 6)",
+                feedback: "Así es. El origen etimológico de la Epistemología se encuentra en la página 6.",
+                page: "6"
+            },
+            {
+                question: "¿Cuál es una de las funciones más importantes de la educación científica según el documento?",
+                options: [
+                    "Dotar a los alumnos de un lenguaje científico complejo.",
+                    "Enseñar a desmitificar y decodificar las creencias adheridas a la ciencia y a los científicos (pág. 11).",
+                    "Promover la neutralidad de la ciencia.",
+                    "Preparar a los estudiantes para carreras tecnológicas."
+                ],
+                correctAnswer: "Enseñar a desmitificar y decodificar las creencias adheridas a la ciencia y a los científicos (pág. 11).",
+                feedback: "¡Exacto! Esta función es clave para la alfabetización científica, como se menciona en la página 11.",
+                page: "11"
+            },
+            {
+                question: "¿Qué ámbitos principales abarca la Didáctica según el texto?",
+                options: [
+                    "Solo el ámbito escolar y sus problemas internos.",
+                    "El ámbito global y las organizaciones internacionales.",
+                    "Ambos: el ámbito escolar (interno) y el global (social-político) (pág. 12).",
+                    "Exclusivamente la relación entre el docente y los contenidos."
+                ],
+                correctAnswer: "Ambos: el ámbito escolar (interno) y el global (social-político) (pág. 12).",
+                feedback: "Correcto. La Didáctica tiene una doble dimensión de acción, explicada en la página 12.",
+                page: "12"
+            },
+            {
+                question: "¿Qué se propone en el documento para una visión didáctica que pretende entroncarse con la línea epistemológica en la enseñanza de la Física llevada a cabo en Santa Catalina (Brasil)?",
+                options: [
+                    "Un enfoque centrado en la disciplina únicamente.",
+                    "Rupturas, desequilibrios y conflictos para llevar a formas de conocimientos superiores (pág. 13).",
+                    "Un enfoque puramente conductista.",
+                    "La enseñanza de la Física de forma aislada."
+                ],
+                correctAnswer: "Rupturas, desequilibrios y conflictos para llevar a formas de conocimientos superiores (pág. 13).",
+                feedback: "Así es. Se busca una transformación que trascienda la individualidad, como se describe en la página 13.",
+                page: "13"
+            },
+            {
+                question: "¿Qué se busca con las 'rupturas intra-aula' desde el punto de vista didáctico?",
+                options: [
+                    "Rechazar completamente modelos de análisis del conocimiento.",
+                    "Plantear problemas sin solución.",
+                    "Mostrar el manejo por parte del alumno de un modelo de construcción teórica de la realidad y la manifestación de otras construcciones (pág. 16).",
+                    "Aislar al docente del quehacer educativo."
+                ],
+                correctAnswer: "Mostrar el manejo por parte del alumno de un modelo de construcción teórica de la realidad y la manifestación de otras construcciones (pág. 16).",
+                feedback: "Correcto. Las rupturas buscan un avance cognitivo y una nueva 'identidad' en el conocimiento científico, página 16.",
+                page: "16"
+            },
+            {
+                question: "¿Cuál es el papel del docente en el campo didáctico según la visión 'Crítico histórica'?",
+                options: [
+                    "Ser el poseedor único del conocimiento.",
+                    "Ser un guía del aprendizaje centrado en el alumno.",
+                    "Ser un mediador que considera los tres elementos (docente, materia, estudiante) y prioriza al estudiante (pág. 19).",
+                    "Trasladar al aula la asignatura sin modificaciones."
+                ],
+                correctAnswer: "Ser un mediador que considera los tres elementos (docente, materia, estudiante) y prioriza al estudiante (pág. 19).",
+                feedback: "¡Muy bien! La visión crítico-histórica enfatiza la complejidad y la centralidad del estudiante, página 19.",
+                page: "19"
+            },
+            {
+                question: "¿Qué implica la 'doble raíz epistemológica autónoma' en la Didáctica Específica de la Física?",
+                options: [
+                    "Separar la enseñanza de la física de la educación en general.",
+                    "Asumir la naturaleza doblemente epistemológica de la Didáctica, que vincula el saber y la acción de enseñanza (pág. 20).",
+                    "Concentrarse únicamente en los aspectos conceptuales de la física.",
+                    "Desvincular la física de otras ramas del conocimiento."
+                ],
+                correctAnswer: "Asumir la naturaleza doblemente epistemológica de la Didáctica, que vincula el saber y la acción de enseñanza (pág. 20).",
+                feedback: "Así es. La página 20 subraya la importancia de esta doble raíz para comprender la Didáctica de la Física.",
+                page: "20"
+            },
+            {
+                question: "¿Para qué enseñar física según la primera 'prioridad' establecida en el documento?",
+                options: [
+                    "Para preparar recursos humanos para la industria.",
+                    "Para inculcar una actitud acrítica y dogmática.",
+                    "Para enseñar una actitud crítica y, por lo tanto, liberadora (pág. 23).",
+                    "Para el estudio de los fenómenos cotidianos exclusivamente."
+                ],
+                correctAnswer: "Para enseñar una actitud crítica y, por lo tanto, liberadora (pág. 23).",
+                feedback: "Correcto. La emancipación del pensamiento es un objetivo fundamental, página 23.",
+                page: "23"
+            },
+            {
+                question: "¿Qué critica el documento sobre la 'mistificación de la Física'?",
+                options: [
+                    "La dificultad de la física como asignatura.",
+                    "La contribución de docentes y científicos a mostrar una concepción de ciencia rígida y de saberes indiscutibles (pág. 24).",
+                    "El enfoque de la física en lo cotidiano.",
+                    "La enseñanza de la física como una herramienta."
+                ],
+                correctAnswer: "La contribución de docentes y científicos a mostrar una concepción de ciencia rígida y de saberes indiscutibles (pág. 24).",
+                feedback: "Así es. La página 24 menciona cómo esta mistificación lleva a una enseñanza adoctrinadora.",
+                page: "24"
+            },
+            {
+                question: "¿Qué es la Planificación Educativa, según el título del Capítulo 2?",
+                options: [
+                    "Un listado de temas para el curso.",
+                    "Una herramienta de control para las autoridades.",
+                    "Un instrumento para la transformación de la enseñanza de la Física (pág. 29).",
+                    "Una actividad espontánea del docente."
+                ],
+                correctAnswer: "Un instrumento para la transformación de la enseñanza de la Física (pág. 29).",
+                feedback: "Exacto. La planificación se presenta como un medio para el cambio, página 29.",
+                page: "29"
+            },
+            {
+                question: "¿Por qué la planificación es considerada por algunos docentes como inadecuada o innecesaria?",
+                options: [
+                    "Porque fomenta la creatividad del docente.",
+                    "Porque frena su creatividad y es un control innecesario (pág. 31).",
+                    "Porque es muy sencilla de realizar.",
+                    "Porque es un requisito de los estudiantes."
+                ],
+                correctAnswer: "Porque frena su creatividad y es un control innecesario (pág. 31).",
+                feedback: "Así es. Estas son algunas de las objeciones comunes que se mencionan en la página 31.",
+                page: "31"
+            },
+            {
+                question: "¿Cuál es la principal diferencia de la concepción de la planificación desde la Didáctica Crítica?",
+                options: [
+                    "Es atemporal y estática.",
+                    "Es un elemento cultural de intercambio de ideas y contextual (pág. 32).",
+                    "Se basa en la libertad individual del docente.",
+                    "Es un instrumento de reproducción de conocimientos."
+                ],
+                correctAnswer: "Es un elemento cultural de intercambio de ideas y contextual (pág. 32).",
+                feedback: "Correcto. La página 32 destaca su carácter sociohistórico y contextual.",
+                page: "32"
+            },
+            {
+                question: "¿Qué significa que la planificación debe ser un proceso de 'organización y racionalización'?",
+                options: [
+                    "Que debe ser rígida y sin cambios.",
+                    "Que debe considerar márgenes de incertidumbre esperables y deseables (pág. 34).",
+                    "Que debe ser un instrumento de control absoluto.",
+                    "Que no debe interactuar con el contexto sociocultural."
+                ],
+                correctAnswer: "Que debe considerar márgenes de incertidumbre esperables y deseables (pág. 34).",
+                feedback: "Muy bien. La incertidumbre es vista como una oportunidad para el diálogo pedagógico, página 34.",
+                page: "34"
+            },
+            {
+                question: "¿Cuál es uno de los requisitos del profesor de física con respecto a la física para la realización de la planificación?",
+                options: [
+                    "Saber seleccionar los contenidos sin considerar el contexto.",
+                    "Conocer la asignatura a enseñar, su historia, su estructura conceptual y su base epistemológica (pág. 37).",
+                    "Acceder solo a producciones antiguas en el campo de la física.",
+                    "Impulsar una investigación sin relación con otros campos."
+                ],
+                correctAnswer: "Conocer la asignatura a enseñar, su historia, su estructura conceptual y su base epistemológica (pág. 37).",
+                feedback: "Correcto. Este conocimiento profundo es fundamental, como se indica en la página 37.",
+                page: "37"
+            },
+            {
+                question: "¿Qué nivel de planificación se enfoca en las acciones interáulicas y espacios extra aula como el laboratorio?",
+                options: [
+                    "En el aula (microeducativo).",
+                    "En el ámbito institucional (mesoeducativo) (pág. 38).",
+                    "En la esfera social (macroeducativo).",
+                    "Planificación diaria."
+                ],
+                correctAnswer: "En el ámbito institucional (mesoeducativo) (pág. 38).",
+                feedback: "Así es. El nivel institucional abarca la interacción dentro de la escuela pero fuera del aula individual, página 38.",
+                page: "38"
+            },
+            {
+                question: "¿Qué elemento del diseño del plan educativo se refiere a la determinación de las metas a alcanzar con una visión compleja de la realidad educativa?",
+                options: [
+                    "Selección y estructuración de contenidos.",
+                    "Actividades de enseñanza.",
+                    "Evaluación de los aprendizajes.",
+                    "Objetivos de enseñanza (pág. 42)."
+                ],
+                correctAnswer: "Objetivos de enseñanza (pág. 42).",
+                feedback: "Correcto. Los objetivos de enseñanza guían todo el proceso, como se detalla en la página 42.",
+                page: "42"
+            },
+            {
+                question: "¿Qué crítica se le hace a la evaluación en su concepción más restringida?",
+                options: [
+                    "Que es un proceso sistemático, continuo e integral.",
+                    "Que se la considera solo como parte final del acto educativo sobre el estudiante, traduciéndose en una calificación (pág. 62).",
+                    "Que siempre incluye al grupo y al propio docente.",
+                    "Que es un acto de reflexión crítica."
+                ],
+                correctAnswer: "Que se la considera solo como parte final del acto educativo sobre el estudiante, traduciéndose en una calificación (pág. 62).",
+                feedback: "Así es. Esta es una visión limitada de la evaluación, como se describe en la página 62.",
+                page: "62"
+            },
+            {
+                question: "¿Cuál es una de las funciones principales de la evaluación según Libaneo?",
+                options: [
+                    "Función de control únicamente.",
+                    "Función pedagógica-didáctica, diagnóstica y de control (pág. 65).",
+                    "Función de acreditación y certificación.",
+                    "Función de selección de estudiantes."
+                ],
+                correctAnswer: "Función pedagógica-didáctica, diagnóstica y de control (pág. 65).",
+                feedback: "Correcto. Libaneo destaca estas tres funciones interdependientes, página 65.",
+                page: "65"
+            },
+            {
+                question: "¿Qué aspecto de los conocimientos actitudinales se menciona como prioritario a desarrollar?",
+                options: [
+                    "Memorización de fórmulas.",
+                    "Resolución de problemas complejos.",
+                    "Respeto mutuo, intercambio de opiniones y trabajo docente de calidad (pág. 72).",
+                    "Conocimiento factual sin significado."
+                ],
+                correctAnswer: "Respeto mutuo, intercambio de opiniones y trabajo docente de calidad (pág. 72).",
+                feedback: "Así es. Estos valores son esenciales para el desarrollo actitudinal, página 72.",
+                page: "72"
+            },
+            {
+                question: "¿Qué es una de las 'perplejidades' o confusiones comunes con respecto a la evaluación?",
+                options: [
+                    "Confundir evaluación con experimentación.",
+                    "Confundir evaluación con verificación y medida (pág. 73).",
+                    "Confundir evaluación con la planificación anual.",
+                    "Confundir evaluación con la enseñanza."
+                ],
+                correctAnswer: "Confundir evaluación con verificación y medida (pág. 73).",
+                feedback: "Correcto. El documento aclara estas distinciones en la página 73.",
+                page: "73"
+            },
+            {
+                question: "¿Cuál es un 'abuso' de la evaluación relacionado con la promoción de expertos?",
+                options: [
+                    "La evaluación sirve para elogiar a quien patrocina.",
+                    "Se genera un documento donde el evaluador se luzca, sin importar los resultados (pág. 78).",
+                    "Se atribuyen las conclusiones a causas únicas.",
+                    "Se elige sesgadamente algunas partes que favorecen una determinada visión."
+                ],
+                correctAnswer: "Se genera un documento donde el evaluador se luzca, sin importar los resultados (pág. 78).",
+                feedback: "Así es. Este abuso desvirtúa el propósito de la evaluación, página 78.",
+                page: "78"
+            },
+            {
+                question: "¿Qué programa internacional de evaluación de estudiantes se menciona que el CODICEN de la ANEP incorporó?",
+                options: [
+                    "TIMSS",
+                    "PISA (Programa Internacional para Evaluación de Estudiantes) (pág. 82).",
+                    "Nuffield Sciencie Teaching Project",
+                    "Harvard Physics"
+                ],
+                correctAnswer: "PISA (Programa Internacional para Evaluación de Estudiantes) (pág. 82).",
+                feedback: "Correcto. PISA es un referente internacional mencionado en la página 82.",
+                page: "82"
+            },
+            {
+                question: "¿Qué se critica sobre los 'ejercicios cerrados' como forma de evaluación?",
+                options: [
+                    "Que fomentan la creatividad del alumno.",
+                    "Que limitan la enseñanza de la Física eliminando conocimientos 'desechables' y se vuelven repetitivos y memorísticos (pág. 93).",
+                    "Que permiten una evaluación objetiva de la creación personal.",
+                    "Que promueven problemas cualitativos."
+                ],
+                correctAnswer: "Que limitan la enseñanza de la Física eliminando conocimientos 'desechables' y se vuelven repetitivos y memorísticos (pág. 93).",
+                feedback: "Así es. Se argumenta que esta modalidad reduce la profundidad del aprendizaje, página 93.",
+                page: "93"
+            },
+            {
+                question: "¿Qué sugiere el documento como alternativa para los 'problemas' en la evaluación?",
+                options: [
+                    "Insistir en la memorización de fórmulas.",
+                    "Mantener siempre el mismo formato de resolución.",
+                    "Pedir la justificación de los supuestos, introducir problemas con varios tramos o problemas mal resueltos para su corrección (pág. 111).",
+                    "Limitarse a problemas cuantitativos con un solo resultado."
+                ],
+                correctAnswer: "Pedir la justificación de los supuestos, introducir problemas con varios tramos o problemas mal resueltos para su corrección (pág. 111).",
+                feedback: "Correcto. Estas alternativas buscan un análisis más profundo y crítico, página 111.",
+                page: "111"
+            },
+            {
+                question: "¿Cuál es la principal ventaja del examen como estímulo según Vaz Ferreira?",
+                options: [
+                    "Que siempre asegura un mínimo de instrucción (pág. 115).",
+                    "Que elimina la incertidumbre y el azar.",
+                    "Que siempre es objetivo y sin subjetividad.",
+                    "Que no genera estrés en los alumnos."
+                ],
+                correctAnswer: "Que siempre asegura un mínimo de instrucción (pág. 115).",
+                feedback: "Así es. Aunque con inconvenientes, esta es una de las ventajas señaladas, página 115.",
+                page: "115"
+            },
+            {
+                question: "¿Qué es una de las desventajas del examen en relación con la 'reacción del curso'?",
+                options: [
+                    "El curso regular no se ve afectado por el régimen de examen.",
+                    "Todo el proceso de enseñanza se convierte en una preparación para la instancia examinadora (pág. 117).",
+                    "El alumno aprende a profundizar las cuestiones.",
+                    "Los textos no están influenciados por los exámenes."
+                ],
+                correctAnswer: "Todo el proceso de enseñanza se convierte en una preparación para la instancia examinadora (pág. 117).",
+                feedback: "Correcto. Esto es una crítica importante, ya que el examen desvirtúa el proceso de aprendizaje, página 117.",
+                page: "117"
+            },
+            {
+                question: "¿Cuál es la primera tesis que plantea Díaz Barriga para una teoría de la evaluación?",
+                options: [
+                    "La evaluación es una actividad técnica y neutral.",
+                    "La evaluación es una actividad social (pág. 122).",
+                    "La evaluación se fundamenta en la teoría de la medición.",
+                    "La evaluación es un proceso individual del docente."
+                ],
+                correctAnswer: "La evaluación es una actividad social (pág. 122).",
+                feedback: "Así es. La evaluación está inmersa y condicionada por el contexto social, página 122.",
+                page: "122"
+            },
+            {
+                question: "¿Qué es una de las 'funciones primarias' ocultas de la evaluación en un sistema capitalista?",
+                options: [
+                    "Reforzamiento de la homogeneidad cultural.",
+                    "Valoración de aprendizajes y contenidos.",
+                    "Selección de individuos e ideología meritocrática (pág. 125).",
+                    "Motivación individual."
+                ],
+                correctAnswer: "Selección de individuos e ideología meritocrática (pág. 125).",
+                feedback: "Correcto. Estas funciones son a menudo implícitas pero fundamentales, página 125.",
+                page: "125"
+            },
+            {
+                question: "¿Qué se busca al estimular la creación de una 'cultura pedagógica' en la institución?",
+                options: [
+                    "Solo reunirse para acordar el examen.",
+                    "Trabajar sobre la fundamentación racional y científica de lo que se desea hacer (pág. 129).",
+                    "Imponer las propuestas de los más antiguos.",
+                    "Limitar las interacciones entre docentes."
+                ],
+                correctAnswer: "Trabajar sobre la fundamentación racional y científica de lo que se desea hacer (pág. 129).",
+                feedback: "Muy bien. Se busca una base sólida y colaborativa para la enseñanza, página 129.",
+                page: "129"
+            },
+            {
+                question: "¿Qué se debe considerar al momento de evaluar conocimientos factuales?",
+                options: [
+                    "Que siempre son de alta intensidad.",
+                    "Que pueden degenerar en memorización de baja intensidad si no se asocian a conceptos (pág. 70).",
+                    "Que solo se evalúan a través de ejercicios de sustitución.",
+                    "Que no requieren ninguna asociación con conceptos."
+                ],
+                correctAnswer: "Que pueden degenerar en memorización de baja intensidad si no se asocian a conceptos (pág. 70).",
+                feedback: "Correcto. La asociación con conceptos es clave para un aprendizaje significativo, página 70.",
+                page: "70"
+            },
+            {
+                question: "¿Qué se entiende por 'problemas' en el contexto de evaluación de la Física en el documento?",
+                options: [
+                    "Ejercicios cerrados y puramente cuantitativos (pág. 103).",
+                    "Situaciones sin relación con la realidad.",
+                    "Preguntas abiertas que no requieren fundamentación.",
+                    "Actividades que solo buscan un resultado único."
+                ],
+                correctAnswer: "Ejercicios cerrados y puramente cuantitativos (pág. 103).",
+                feedback: "Así es. El documento describe las características tradicionales de los problemas en Uruguay, página 103.",
+                page: "103"
+            },
+            {
+                question: "¿Qué es uno de los 'problemas' de los problemas en la evaluación de Física?",
+                options: [
+                    "Que son siempre abiertos y cualitativos.",
+                    "Que no cumplen una función paralizante.",
+                    "Que el sistema de evaluación a través de ellos no es un problema para los docentes de Física (pág. 107).",
+                    "Que son fáciles de aceptar por el docente sin complicaciones."
+                ],
+                correctAnswer: "Que el sistema de evaluación a través de ellos no es un problema para los docentes de Física (pág. 107).",
+                feedback: "Correcto. La falta de cuestionamiento de este sistema es una preocupación, página 107.",
+                page: "107"
+            },
+            {
+                question: "¿Qué se busca con la propuesta de 'diálogo conflictivo' en la evaluación oral?",
+                options: [
+                    "Inhibir al alumno y evitar preguntas.",
+                    "Que el alumno solo responda preguntas directas.",
+                    "Partir de conocimientos anteriores y fenómenos cotidianos para disparar el estudio, estimulando al alumno a explicitar dudas (pág. 109).",
+                    "Establecer calificaciones durante el diálogo."
+                ],
+                correctAnswer: "Partir de conocimientos anteriores y fenómenos cotidianos para disparar el estudio, estimulando al alumno a explicitar dudas (pág. 109).",
+                feedback: "Así es. Se busca una interacción dinámica que promueva la construcción del conocimiento, página 109.",
+                page: "109"
+            },
+            {
+                question: "¿Por qué el examen es considerado un 'muerto viviente'?",
+                options: [
+                    "Porque es una herramienta nueva de evaluación.",
+                    "Porque a pesar de sus inconvenientes, sigue perdurando como un lugar de privilegio por la meritocracia social (pág. 119).",
+                    "Porque siempre se niega su existencia en las reformas educativas.",
+                    "Porque no tiene ninguna ventaja."
+                ],
+                correctAnswer: "Porque a pesar de sus inconvenientes, sigue perdurando como un lugar de privilegio por la meritocracia social (pág. 119).",
+                feedback: "Correcto. La meritocracia lo mantiene relevante a pesar de sus fallas, página 119.",
+                page: "119"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let score = 0;
+        let shuffledQuestions = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderQuestion() {
+            const quizApp = document.getElementById('quizApp');
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                showResults();
+                return;
+            }
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const isAnswered = userAnswers[currentQuestionIndex] !== undefined;
+
+            let optionsHtml = questionData.options.map((option, index) => {
+                const optionId = `q${currentQuestionIndex}-option${index}`;
+                const checked = userAnswers[currentQuestionIndex] === option ? 'checked' : '';
+                const disabled = isAnswered ? 'disabled' : '';
+                return `
+                    <label class="option rounded-lg p-3 cursor-pointer bg-gray-50 hover:bg-blue-50 transition duration-200 ease-in-out">
+                        <input type="radio" name="question${currentQuestionIndex}" value="${option}" id="${optionId}" ${checked} ${disabled}>
+                        <span class="ml-3 text-gray-800">${option}</span>
+                    </label>
+                `;
+            }).join('');
+
+            let feedbackHtml = '';
+            if (isAnswered) {
+                const correct = userAnswers[currentQuestionIndex] === questionData.correctAnswer;
+                const feedbackClass = correct ? 'correct' : 'incorrect';
+                const feedbackText = correct ? questionData.feedback : `Incorrecto. La respuesta correcta es: ${questionData.correctAnswer}. ${questionData.feedback} (Pág. ${questionData.page})`;
+                feedbackHtml = `<div class="feedback ${feedbackClass} mt-4 p-3 rounded-lg">${feedbackText}</div>`;
+            }
+
+            quizApp.innerHTML = `
+                <div class="question-card rounded-lg p-5 bg-blue-50 border border-blue-200 shadow-sm">
+                    <div class="question-text text-lg font-semibold text-gray-800 mb-4">
+                        ${currentQuestionIndex + 1}. ${questionData.question}
+                    </div>
+                    <div class="options flex flex-col gap-2">
+                        ${optionsHtml}
+                    </div>
+                    ${feedbackHtml}
+                </div>
+                <div class="navigation-buttons flex justify-between mt-6">
+                    <button id="prevBtn" class="prev-button px-5 py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all duration-300" ${currentQuestionIndex === 0 ? 'disabled' : ''}>Anterior</button>
+                    <button id="nextBtn" class="next-button px-5 py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all duration-300">${currentQuestionIndex === shuffledQuestions.length - 1 ? 'Finalizar Cuestionario' : 'Siguiente'}</button>
+                </div>
+                <div class="footer-credits">
+                    Desarrollado por Victor Crespo
+                </div>
+            `;
+
+            document.querySelectorAll(`input[name="question${currentQuestionIndex}"]`).forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    if (!isAnswered) { // Solo permite seleccionar si la pregunta no ha sido respondida
+                        userAnswers[currentQuestionIndex] = event.target.value;
+                        if (event.target.value === questionData.correctAnswer) {
+                            score += 4; // Add points for correct answer
+                        } else {
+                            // If previously answered correctly and then changed to incorrect, subtract points
+                            if (Object.values(userAnswers).includes(questionData.correctAnswer)) { // Check if the correct answer was selected before
+                                // This logic might need adjustment if points are only awarded once.
+                                // For simplicity, we'll assume points are added only once when an answer is set.
+                            }
+                        }
+                        renderQuestion(); // Re-render to show feedback
+                    }
+                });
+            });
+
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                currentQuestionIndex--;
+                renderQuestion();
+            });
+
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (!isAnswered) {
+                    // If not answered, do not allow next
+                    // Optionally, show a message to the user
+                    return;
+                }
+                if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                    showResults();
+                } else {
+                    currentQuestionIndex++;
+                    renderQuestion();
+                }
+            });
+        }
+
+        function showResults() {
+            let finalFeedback = '';
+            if (score === shuffledQuestions.length * 4) {
+                finalFeedback = "¡Felicidades! Has respondido todas las preguntas correctamente. Demuestras un excelente dominio de la Didáctica de la Física.";
+            } else if (score >= (shuffledQuestions.length * 4) * 0.75) {
+                finalFeedback = "¡Buen trabajo! Has logrado una puntuación alta. Tienes un sólido conocimiento del tema.";
+            } else if (score >= (shuffledQuestions.length * 4) * 0.5) {
+                finalFeedback = "Has tenido un desempeño aceptable. Te recomiendo revisar las áreas donde tuviste más dificultades.";
+            } else {
+                finalFeedback = "Necesitas repasar más a fondo. No te desanimes, ¡cada error es una oportunidad para aprender!";
+            }
+
+            const quizApp = document.getElementById('quizApp');
+            quizApp.className = 'results-container'; // Change class for results styling
+            quizApp.innerHTML = `
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Resultados del Cuestionario</h2>
+                <p class="text-lg text-gray-600 mb-2">Tu puntuación total es:</p>
+                <div class="score text-5xl font-extrabold text-blue-600 mb-6">${score} / ${shuffledQuestions.length * 4}</div>
+                <p class="text-lg text-gray-700 mb-8">${finalFeedback}</p>
+                <button id="restartBtn" class="restart-button px-6 py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all duration-300">Reiniciar Cuestionario</button>
+                <div class="footer-credits">
+                    Desarrollado por Victor Crespo
+                </div>
+            `;
+            document.getElementById('restartBtn').addEventListener('click', restartQuiz);
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            score = 0;
+            shuffledQuestions = shuffleArray([...questions]);
+            const quizApp = document.getElementById('quizApp');
+            quizApp.className = 'quiz-container'; // Reset class
+            renderQuestion();
+        }
+
+        // Inicializar el cuestionario
+        window.onload = () => {
+            shuffledQuestions = shuffleArray([...questions]);
+            renderQuestion();
+        };
+    </script>
+</body>
+</html>

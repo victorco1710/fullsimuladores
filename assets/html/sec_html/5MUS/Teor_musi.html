@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Teoría Musical</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .feedback-correct {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .feedback-incorrect {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        .btn-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .btn-correct {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+            border-color: #16a34a !important; /* green-600 */
+        }
+        .btn-incorrect-selected {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #dc2626 !important; /* red-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex flex-col min-h-screen">
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div id="quiz-container" class="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 md:p-8 text-center">
+            
+            <!-- Pantalla de Inicio -->
+            <div id="start-screen">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Cuestionario de Teoría Musical</h1>
+                <p class="text-gray-600 mb-6">Pon a prueba tus conocimientos sobre los fundamentos de la música.</p>
+                <p class="text-gray-700 mb-8">Hay 25 preguntas. Cada respuesta correcta vale 4 puntos. ¡Mucha suerte!</p>
+                <button id="start-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 text-lg shadow-lg">
+                    Comenzar el Cuestionario
+                </button>
+            </div>
+
+            <!-- Pantalla del Cuestionario -->
+            <div id="question-screen" class="hidden">
+                <div id="progress-container" class="flex justify-between items-center mb-4">
+                    <p id="question-counter" class="text-sm font-semibold text-gray-600"></p>
+                    <p id="score" class="text-sm font-semibold text-blue-600"></p>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <h2 id="question-text" class="text-xl md:text-2xl font-semibold mb-8 min-h-[6rem] flex items-center justify-center"></h2>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Opciones se insertarán aquí -->
+                </div>
+                <div id="feedback-container" class="mt-6 p-4 rounded-lg text-sm md:text-base hidden"></div>
+                <button id="next-btn" class="w-full mt-6 bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all duration-300 text-lg hidden">Siguiente Pregunta</button>
+            </div>
+
+            <!-- Pantalla Final -->
+            <div id="end-screen" class="hidden">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">¡Cuestionario completado!</h2>
+                <p class="text-gray-600 mb-6">Este es tu resultado final:</p>
+                <div class="bg-blue-100 border-4 border-blue-500 rounded-full w-48 h-48 mx-auto flex flex-col justify-center items-center my-6 shadow-lg">
+                    <p class="text-5xl font-extrabold text-blue-600" id="final-score">100</p>
+                    <p class="text-gray-700 font-semibold">Puntos</p>
+                </div>
+                <p id="final-feedback" class="text-lg font-medium text-gray-800 mb-8"></p>
+                <button id="restart-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 text-lg shadow-lg">
+                    Intentar de nuevo
+                </button>
+            </div>
+        </div>
+    </main>
+    <footer class="w-full text-center p-4 text-gray-500 text-sm">
+        <p>PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor</p>
+    </footer>
+
+    <script>
+        const quizData = [
+            // PRIMERA PARTE
+            {
+                question: "¿De cuántas líneas y espacios se compone el PENTAGRAMA?",
+                options: ["5 líneas y 5 espacios", "4 líneas y 5 espacios", "5 líneas y 4 espacios", "6 líneas y 5 espacios"],
+                answer: "5 líneas y 4 espacios",
+                feedback: "Correcto. El pentagrama tiene 5 líneas y 4 espacios que se cuentan de abajo hacia arriba.",
+                page: 6
+            },
+            {
+                question: "¿Cuántas son las figuras de las notas?",
+                options: ["Cinco", "Siete", "Ocho", "Seis"],
+                answer: "Siete",
+                feedback: "Correcto. Son siete: Redonda, Blanca, Negra, Corchea, Semicorchea, Fusa y Semifusa.",
+                page: 7
+            },
+            {
+                question: "¿Cuál es el valor de una REDONDA?",
+                options: ["2 negras", "4 corcheas", "2 blancas", "2 fusas"],
+                answer: "2 blancas",
+                feedback: "Correcto. La Redonda vale 2 blancas, 4 negras, 8 corcheas, etc.",
+                page: 9
+            },
+            {
+                question: "¿Cuántos nombres de notas existen para expresar todos los sonidos?",
+                options: ["Doce", "Ocho", "Siete", "Nueve"],
+                answer: "Siete",
+                feedback: "Correcto. Son siete nombres: DO, RE, MI, FA, SOL, LA, SI.",
+                page: 11
+            },
+            {
+                question: "¿Para qué sirven las CLAVES?",
+                options: ["Para indicar el compás", "Para fijar el nombre de las notas", "Para indicar el ritmo", "Para señalar la intensidad"],
+                answer: "Para fijar el nombre de las notas",
+                feedback: "Correcto. Las claves se escriben al principio del pentagrama y sirven para fijar el nombre de las notas y su posición.",
+                page: 12
+            },
+            {
+                question: "¿Qué indican los SILENCIOS en la música?",
+                options: ["Una nota muy larga", "El final de la obra", "La ausencia momentánea del sonido", "Un cambio de tonalidad"],
+                answer: "La ausencia momentánea del sonido",
+                feedback: "Correcto. Los silencios son signos que indican la ausencia momentánea del sonido.",
+                page: 19
+            },
+            {
+                question: "¿Qué efecto tiene el PUNTILLO sobre una figura de nota?",
+                options: ["Duplica su valor", "Resta la mitad de su valor", "Aumenta la mitad de su valor", "No cambia su valor"],
+                answer: "Aumenta la mitad de su valor",
+                feedback: "Correcto. El puntillo, colocado después de una nota, aumenta su duración en la mitad de su valor.",
+                page: 17
+            },
+             {
+                question: "La LIGADURA es un signo que une dos notas...",
+                options: ["De diferente nombre y sonido", "Del mismo sonido y casi siempre del mismo nombre", "De diferente sonido pero mismo nombre", "De cualquier tipo, sin reglas"],
+                answer: "Del mismo sonido y casi siempre del mismo nombre",
+                feedback: "Correcto. La ligadura une el valor de dos notas del mismo sonido, sumando sus duraciones.",
+                page: 25
+            },
+            {
+                question: "¿Cuáles son las tres alteraciones principales?",
+                options: ["Fuerte, piano y mezzo", "Staccato, legato y tenuto", "Sostenido, bemol y becuadro", "Crescendo, diminuendo y ritardando"],
+                answer: "Sostenido, bemol y becuadro",
+                feedback: "Correcto. El sostenido sube, el bemol baja y el becuadro destruye el efecto de los anteriores.",
+                page: 21
+            },
+             {
+                question: "¿Qué es un TRESILLO?",
+                options: ["Un grupo de tres notas iguales", "La división ternaria de una figura de nota", "Un compás de tres tiempos", "Tres notas tocadas rápidamente"],
+                answer: "La división ternaria de una figura de nota",
+                feedback: "Correcto. El tresillo permite dividir una figura de valor binario en tres partes iguales.",
+                page: 23
+            },
+            // SEGUNDA PARTE
+            {
+                question: "En la escala diatónica, la distancia mayor entre dos grados se llama:",
+                options: ["Grado", "Semitono", "Tono", "Intervalo"],
+                answer: "Tono",
+                feedback: "Correcto. La distancia mayor entre grados de la escala se llama TONO y la menor SEMITONO.",
+                page: 26
+            },
+            {
+                question: "¿Qué es la ENARMONÍA?",
+                options: ["Una escala sin alteraciones", "La relación entre dos notas de distinto nombre pero mismo sonido", "Un intervalo mayor a una octava", "El primer grado de la escala"],
+                answer: "La relación entre dos notas de distinto nombre pero mismo sonido",
+                feedback: "Correcto. Por ejemplo, do# y re♭ son notas enarmónicas.",
+                page: 30
+            },
+            {
+                question: "Un intervalo que no excede la extensión de una octava se llama:",
+                options: ["Intervalo compuesto", "Intervalo aumentado", "Intervalo simple", "Intervalo disminuido"],
+                answer: "Intervalo simple",
+                feedback: "Correcto. Los intervalos simples son los que no superan la octava (segunda, tercera, cuarta, etc.).",
+                page: 32
+            },
+            {
+                question: "Al invertir un intervalo de 2ª, se convierte en un intervalo de:",
+                options: ["7ª", "6ª", "Octava", "Unísono"],
+                answer: "7ª",
+                feedback: "Correcto. La suma de un intervalo y su inversión siempre debe dar 9 (2 + 7 = 9).",
+                page: 41
+            },
+            {
+                question: "Un intervalo de 5ª justa contiene:",
+                options: ["3 tonos y 1 semitono diatónico", "2 tonos y 2 semitonos diatónicos", "3 tonos", "4 tonos"],
+                answer: "3 tonos y 1 semitono diatónico",
+                feedback: "Correcto. Esa es la composición exacta de una quinta justa, como la que existe entre do y sol.",
+                page: 36
+            },
+            {
+                question: "¿Cuáles son los dos tipos de semitonos que forman un tono?",
+                options: ["Mayor y menor", "Simple y compuesto", "Diatónico y cromático", "Justo y aumentado"],
+                answer: "Diatónico y cromático",
+                feedback: "Correcto. El tono se divide en dos semitonos de diferente naturaleza: uno diatónico y otro cromático.",
+                page: 28
+            },
+            // TERCERA PARTE
+            {
+                question: "¿Qué es la TONALIDAD?",
+                options: ["El volumen de una pieza musical", "La velocidad de una canción", "El conjunto de leyes que rigen la constitución de las escalas", "La nota más alta de una melodía"],
+                answer: "El conjunto de leyes que rigen la constitución de las escalas",
+                feedback: "Correcto. La tonalidad establece las relaciones jerárquicas entre las notas de una escala.",
+                page: 44
+            },
+             {
+                question: "¿Cómo se llama el primer grado de la escala?",
+                options: ["Dominante", "Sensible", "Tónica", "Mediante"],
+                answer: "Tónica",
+                feedback: "Correcto. El primer grado se llama TÓNICA porque da su nombre a la misma escala.",
+                page: 47
+            },
+            {
+                question: "¿Cuál es el orden correcto de los sostenidos en la armadura?",
+                options: ["Fa, Do, Sol, Re, La, Mi, Si", "Si, Mi, La, Re, Sol, Do, Fa", "Do, Re, Mi, Fa, Sol, La, Si", "Sol, Re, La, Mi, Si, Fa, Do"],
+                answer: "Fa, Do, Sol, Re, La, Mi, Si",
+                feedback: "Correcto. Este es el orden en que aparecen los sostenidos en la armadura de clave.",
+                page: 51
+            },
+            {
+                question: "Una escala mayor y su relativa menor comparten la misma...",
+                options: ["Tónica", "Armadura de clave", "Nota sensible", "Dominante"],
+                answer: "Armadura de clave",
+                feedback: "Correcto. Comparten las mismas alteraciones en la clave. Por ejemplo, Do mayor y La menor no tienen alteraciones.",
+                page: 63
+            },
+            {
+                question: "La escala CROMÁTICA está compuesta únicamente por:",
+                options: ["Tonos", "Semitonos", "Terceras", "Quintas"],
+                answer: "Semitonos",
+                feedback: "Correcto. La escala cromática se forma por la sucesión de los doce semitonos diatónicos y cromáticos.",
+                page: 68
+            },
+             // CUARTA PARTE
+            {
+                question: "¿Qué es el COMPÁS?",
+                options: ["La velocidad de la música", "La división de un trozo de música en partes iguales", "La altura de los sonidos", "La intensidad del sonido"],
+                answer: "La división de un trozo de música en partes iguales",
+                feedback: "Correcto. El compás divide la música en fragmentos de igual duración mediante las líneas divisorias.",
+                page: 80
+            },
+            {
+                question: "En un compás de 4/4, ¿qué figura vale un tiempo?",
+                options: ["La blanca", "La redonda", "La corchea", "La negra"],
+                answer: "La negra",
+                feedback: "Correcto. El numerador (4) indica el número de tiempos y el denominador (4) indica que la negra es la figura que vale un tiempo.",
+                page: 83
+            },
+            {
+                question: "Un sonido articulado sobre un tiempo débil y prolongado sobre uno fuerte se llama:",
+                options: ["Contratiempo", "Síncopa", "Acento", "Ritmo"],
+                answer: "Síncopa",
+                feedback: "Correcto. La síncopa es un efecto rítmico que desplaza el acento natural del compás.",
+                page: 93
+            },
+             {
+                question: "¿Qué indica el término de movimiento 'Adagio'?",
+                options: ["Muy rápido", "Moderado", "Lento", "Alegre"],
+                answer: "Lento",
+                feedback: "Correcto. Adagio es uno de los términos italianos que indican un movimiento o aire lento.",
+                page: 95
+            },
+        ];
+
+        const startScreen = document.getElementById('start-screen');
+        const questionScreen = document.getElementById('question-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const questionCounter = document.getElementById('question-counter');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const finalScoreDisplay = document.getElementById('final-score');
+        const finalFeedback = document.getElementById('final-feedback');
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function startQuiz() {
+            shuffledQuestions = shuffleArray([...quizData]);
+            currentQuestionIndex = 0;
+            score = 0;
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            feedbackContainer.classList.add('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            questionCounter.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+            scoreDisplay.textContent = `Puntuación: ${score}`;
+            progressBar.style.width = `${((currentQuestionIndex) / shuffledQuestions.length) * 100}%`;
+
+            questionText.textContent = currentQuestion.question;
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('btn-option', 'w-full', 'bg-white', 'border-2', 'border-gray-300', 'p-4', 'rounded-lg', 'text-left', 'hover:bg-gray-200', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-400', 'text-gray-700', 'font-semibold');
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackContainer.classList.add('hidden');
+            feedbackContainer.className = 'feedback-container mt-6 p-4 rounded-lg text-sm md:text-base hidden';
+            while(optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const correct = selectedBtn.textContent === shuffledQuestions[currentQuestionIndex].answer;
+            
+            if (correct) {
+                score += 4;
+                feedbackContainer.innerHTML = `<strong>¡Correcto!</strong> ${shuffledQuestions[currentQuestionIndex].feedback} <br><em class="text-xs">(Ver pág. ${shuffledQuestions[currentQuestionIndex].page} del PDF)</em>`;
+                feedbackContainer.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-300', 'feedback-correct');
+                selectedBtn.classList.add('btn-correct');
+            } else {
+                feedbackContainer.innerHTML = `<strong>Incorrecto.</strong> La respuesta correcta es "<strong>${shuffledQuestions[currentQuestionIndex].answer}</strong>". <br><em class="text-xs">(Ver pág. ${shuffledQuestions[currentQuestionIndex].page} del PDF)</em>`;
+                feedbackContainer.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-300', 'feedback-incorrect');
+                selectedBtn.classList.add('btn-incorrect-selected');
+            }
+
+            Array.from(optionsContainer.children).forEach(button => {
+                if (button.textContent === shuffledQuestions[currentQuestionIndex].answer) {
+                    button.classList.add('btn-correct');
+                }
+                button.disabled = true; // Deshabilitar opciones
+            });
+
+            feedbackContainer.classList.remove('hidden');
+            scoreDisplay.textContent = `Puntuación: ${score}`;
+            
+            if (shuffledQuestions.length > currentQuestionIndex + 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                progressBar.style.width = '100%';
+                setTimeout(showEndScreen, 2000);
+            }
+        }
+
+        function showEndScreen() {
+            questionScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            finalScoreDisplay.textContent = score;
+
+            let feedbackText = '';
+            const percentage = (score / (shuffledQuestions.length * 4)) * 100;
+
+            if (percentage >= 90) {
+                feedbackText = '¡Excelente! Tienes un dominio impresionante de la teoría musical. ¡Eres un verdadero maestro!';
+            } else if (percentage >= 70) {
+                feedbackText = '¡Muy bien! Tienes un conocimiento sólido de los conceptos. Sigue practicando para perfeccionarlo.';
+            } else if (percentage >= 50) {
+                feedbackText = '¡Buen intento! Conocés bastante, pero hay algunos temas que puedes repasar. ¡No te rindas!';
+            } else {
+                feedbackText = '¡Sigue estudiando! Este es un buen punto de partida. Repasa el material y vuelve a intentarlo.';
+            }
+            finalFeedback.textContent = feedbackText;
+        }
+
+        function handleNextButton() {
+            currentQuestionIndex++;
+            progressBar.style.width = `${((currentQuestionIndex) / shuffledQuestions.length) * 100}%`;
+            showQuestion();
+        }
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', handleNextButton);
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

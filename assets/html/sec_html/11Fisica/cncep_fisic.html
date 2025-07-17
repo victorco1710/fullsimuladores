@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo de Física</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-btn {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .correct {
+            background-color: #22c55e !important;
+            color: white !important;
+        }
+        .incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="w-full max-w-2xl bg-white dark:bg-gray-800 shadow-2xl rounded-2xl p-6 md:p-8">
+        
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Cuestionario de Física</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">Pon a prueba tus conocimientos sobre "Física, Conceptos y Aplicaciones".</p>
+            <button id="start-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-lg shadow-lg">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="mb-6 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-blue-500 dark:text-blue-400">Pregunta <span id="question-number"></span> de 25</h2>
+                <div class="text-lg font-semibold">Puntuación: <span id="score">0</span></div>
+            </div>
+            
+            <p id="question" class="text-xl md:text-2xl font-semibold mb-6"></p>
+            
+            <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Las opciones se generarán aquí -->
+            </div>
+
+            <div id="feedback-container" class="mt-6 p-4 rounded-lg text-white hidden">
+                <p id="feedback" class="font-medium"></p>
+                <p id="page-reference" class="text-sm mt-2"></p>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button id="next-btn" class="bg-gray-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors duration-300 hidden">
+                    Siguiente Pregunta
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold mb-4">Cuestionario Finalizado</h2>
+            <p class="text-xl mb-2">Tu puntuación total es:</p>
+            <p id="final-score" class="text-5xl font-bold text-blue-600 dark:text-blue-400 mb-6"></p>
+            <p id="final-feedback" class="text-lg mb-8"></p>
+            <button id="restart-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-lg shadow-lg">
+                Intentar de Nuevo
+            </button>
+        </div>
+    </div>
+    
+    <footer class="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p>desarrollado por Victor Crespo</p>
+    </footer>
+
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es la Primera Ley de Newton del movimiento?",
+                options: ["Fuerza = masa × aceleración", "A cada acción hay una reacción igual y opuesta", "Un objeto en reposo permanece en reposo y un objeto en movimiento permanece en movimiento", "La energía no se crea ni se destruye"],
+                answer: "Un objeto en reposo permanece en reposo y un objeto en movimiento permanece en movimiento",
+                page: 27,
+                explanation: "La Primera Ley de Newton, también conocida como la ley de la inercia, establece que un objeto continúa en su estado de reposo o de movimiento uniforme en línea recta a menos que una fuerza externa actúe sobre él."
+            },
+            {
+                question: "Según la Segunda Ley de Newton, la aceleración de un objeto es...",
+                options: ["Directamente proporcional a su masa", "Inversamente proporcional a la fuerza neta", "Directamente proporcional a la fuerza neta e inversamente proporcional a su masa", "Igual a la fuerza de gravedad"],
+                answer: "Directamente proporcional a la fuerza neta e inversamente proporcional a su masa",
+                page: 64,
+                explanation: "¡Exacto! La Segunda Ley de Newton se resume en la fórmula a = F_neta / m. La aceleración es directamente proporcional a la fuerza neta y tiene su misma dirección."
+            },
+             {
+                question: "La Tercera Ley de Newton establece que a cada acción corresponde una reacción...",
+                options: ["De mayor magnitud pero en la misma dirección", "De menor magnitud y en dirección opuesta", "De igual magnitud y en dirección opuesta", "Que ocurre un instante después"],
+                answer: "De igual magnitud y en dirección opuesta",
+                page: 75,
+                explanation: "Las fuerzas siempre ocurren en pares. Si un objeto A ejerce una fuerza sobre un objeto B, el objeto B ejerce una fuerza igual y opuesta sobre el objeto A."
+            },
+            {
+                question: "¿Qué principio establece que la cantidad de movimiento de un sistema permanece constante en ausencia de fuerzas externas?",
+                options: ["Conservación de la energía", "Conservación de la cantidad de movimiento", "Principio de Pascal", "Ley de Ohm"],
+                answer: "Conservación de la cantidad de movimiento",
+                page: 98,
+                explanation: "El principio de conservación de la cantidad de movimiento es fundamental en la física y explica el comportamiento de los objetos en colisiones."
+            },
+            {
+                question: "¿Cuándo se realiza trabajo sobre un objeto?",
+                options: ["Cuando se le aplica una fuerza, sin importar si se mueve", "Cuando se mueve, sin importar si hay fuerza", "Cuando una fuerza aplicada provoca un desplazamiento", "Cuando el objeto tiene mucha energía potencial"],
+                answer: "Cuando una fuerza aplicada provoca un desplazamiento",
+                page: 110,
+                explanation: "El trabajo en física se define como el producto de la fuerza por la distancia que se mueve un objeto en la dirección de la fuerza (T = Fd)."
+            },
+            {
+                question: "¿Qué tipo de energía posee un objeto debido a su movimiento?",
+                options: ["Energía potencial", "Energía térmica", "Energía química", "Energía cinética"],
+                answer: "Energía cinética",
+                page: 114,
+                explanation: "La energía cinética (EC = 1/2 mv²) es la energía del movimiento. Un objeto en reposo tiene cero energía cinética."
+            },
+            {
+                question: "El principio de Arquímedes establece que un cuerpo sumergido experimenta un empuje hacia arriba igual a...",
+                options: ["El peso del propio cuerpo", "El volumen del fluido desplazado", "El peso del fluido que desplaza", "La densidad del fluido"],
+                answer: "El peso del fluido que desplaza",
+                page: 253,
+                explanation: "Esta fuerza, conocida como fuerza de flotabilidad, es la razón por la que los objetos parecen pesar menos en el agua."
+            },
+            {
+                question: "¿Qué principio explica el funcionamiento de una prensa hidráulica?",
+                options: ["Principio de Bernoulli", "Principio de Pascal", "Principio de Arquímedes", "Ley de Hooke"],
+                answer: "Principio de Pascal",
+                page: 258,
+                explanation: "El principio de Pascal establece que un cambio de presión en cualquier parte de un fluido confinado se transmite íntegro a todos los puntos del fluido."
+            },
+            {
+                question: "La Ley de Boyle describe la relación entre...",
+                options: ["Presión y temperatura", "Volumen y temperatura", "Presión y volumen de un gas", "Densidad y presión de un líquido"],
+                answer: "Presión y volumen de un gas",
+                page: 274,
+                explanation: "La Ley de Boyle establece que, a temperatura constante, el producto de la presión y el volumen de un gas es constante (P₁V₁ = P₂V₂)."
+            },
+            {
+                question: "La temperatura es una medida de...",
+                options: ["La energía térmica total de una sustancia", "El calor de una sustancia", "La energía cinética de traslación promedio de las partículas", "La cantidad de moléculas calientes"],
+                answer: "La energía cinética de traslación promedio de las partículas",
+                page: 290,
+                explanation: "La temperatura indica qué tan caliente o frío está un objeto, y está relacionada con la energía cinética promedio por partícula, no con la energía total."
+            },
+            {
+                question: "El calor se transfiere de un objeto caliente a uno frío por conducción, convección y...",
+                options: ["Radiación", "Condensación", "Evaporación", "Fricción"],
+                answer: "Radiación",
+                page: 310,
+                explanation: "La radiación es la transferencia de energía a través de ondas electromagnéticas, como la energía que recibimos del Sol."
+            },
+            {
+                question: "¿Qué establece la Primera Ley de la Termodinámica?",
+                options: ["El calor fluye de frío a caliente", "La entropía siempre aumenta", "La energía no se crea ni se destruye, solo se transforma", "Es imposible alcanzar el cero absoluto"],
+                answer: "La energía no se crea ni se destruye, solo se transforma",
+                page: 344,
+                explanation: "Esta ley es una reformulación de la ley de la conservación de la energía, aplicada para incluir el calor como una transferencia de energía."
+            },
+            {
+                question: "¿Cuál es el origen de todas las ondas sonoras?",
+                options: ["Campos electromagnéticos", "Vibraciones de objetos materiales", "Cambios de temperatura en el aire", "Movimiento de electrones"],
+                answer: "Vibraciones de objetos materiales",
+                page: 380,
+                explanation: "¡Así es! El sonido necesita un medio material (sólido, líquido o gas) para propagarse a través de las vibraciones de sus partículas."
+            },
+            {
+                question: "El cambio en la frecuencia percibida de una onda debido al movimiento de la fuente o del observador se conoce como...",
+                options: ["Efecto fotoeléctrico", "Efecto Doppler", "Principio de superposición", "Refracción"],
+                answer: "Efecto Doppler",
+                page: 372,
+                explanation: "El efecto Doppler explica por qué el tono de la sirena de una ambulancia cambia cuando se acerca y se aleja de nosotros."
+            },
+            {
+                question: "Cuando la frecuencia de una vibración forzada coincide con la frecuencia natural de un objeto, se produce un aumento de amplitud llamado...",
+                options: ["Reverberación", "Difracción", "Interferencia", "Resonancia"],
+                answer: "Resonancia",
+                page: 388,
+                explanation: "La resonancia es responsable de muchos fenómenos, desde el colapso de puentes hasta cómo se afinan los instrumentos musicales."
+            },
+            {
+                question: "La Ley de Coulomb establece que la fuerza eléctrica entre dos cargas es inversamente proporcional a...",
+                options: ["La distancia entre ellas", "La suma de las cargas", "El producto de las masas", "El cuadrado de la distancia entre ellas"],
+                answer: "El cuadrado de la distancia entre ellas",
+                page: 414,
+                explanation: "La fuerza eléctrica disminuye rápidamente con la distancia. Si la distancia se duplica, la fuerza se reduce a una cuarta parte."
+            },
+            {
+                question: "La Ley de Ohm establece la relación entre voltaje, corriente y...",
+                options: ["Potencia", "Energía", "Resistencia", "Carga"],
+                answer: "Resistencia",
+                page: 439,
+                explanation: "La Ley de Ohm (Corriente = Voltaje / Resistencia) es una de las relaciones más fundamentales en los circuitos eléctricos."
+            },
+            {
+                question: "¿Cuál es una regla fundamental de los polos magnéticos?",
+                options: ["Los polos iguales se atraen", "Un polo norte puede existir sin un polo sur", "Los polos opuestos se atraen", "Los polos magnéticos se pueden aislar"],
+                answer: "Los polos opuestos se atraen",
+                page: 459,
+                explanation: "Así como en las cargas eléctricas, en el magnetismo los polos opuestos se atraen y los polos iguales se repelen."
+            },
+            {
+                question: "La Ley de Faraday establece que se induce un voltaje en una bobina de alambre al cambiar...",
+                options: ["La corriente en la bobina", "El campo magnético dentro de la bobina", "La resistencia de la bobina", "La temperatura de la bobina"],
+                answer: "El campo magnético dentro de la bobina",
+                page: 478,
+                explanation: "Este principio de inducción electromagnética es la base de los generadores eléctricos y transformadores."
+            },
+            {
+                question: "Cuando la luz rebota en una superficie, se habla de _____; cuando se desvía al pasar de un medio a otro, es _____.",
+                options: ["Refracción; Reflexión", "Reflexión; Refracción", "Dispersión; Difracción", "Polarización; Interferencia"],
+                answer: "Reflexión; Refracción",
+                page: 530,
+                explanation: "La reflexión ocurre en espejos, mientras que la refracción explica por qué una cuchara parece 'doblada' en un vaso de agua."
+            },
+            {
+                question: "¿Cuáles son los colores primarios aditivos de la luz?",
+                options: ["Rojo, Amarillo, Azul", "Magenta, Cian, Amarillo", "Rojo, Verde, Azul", "Naranja, Verde, Violeta"],
+                answer: "Rojo, Verde, Azul",
+                page: 518,
+                explanation: "Al mezclar luces de estos tres colores en diferentes proporciones, podemos crear casi cualquier color, incluyendo el blanco."
+            },
+            {
+                question: "El cielo se ve azul porque las moléculas de la atmósfera...",
+                options: ["Absorben la luz azul", "Son de color azul", "Dispersan la luz de alta frecuencia (azul y violeta)", "Reflejan la luz azul del océano"],
+                answer: "Dispersan la luz de alta frecuencia (azul y violeta)",
+                page: 521,
+                explanation: "Este fenómeno, llamado dispersión de Rayleigh, es más efectivo para la luz de longitudes de onda cortas, como el azul y el violeta."
+            },
+             {
+                question: "¿Qué fenómeno demuestra que la luz es una onda transversal?",
+                options: ["Reflexión", "Refracción", "Polarización", "Difracción"],
+                answer: "Polarización",
+                page: 570,
+                explanation: "La polarización consiste en alinear las vibraciones de las ondas transversales. Las ondas longitudinales, como el sonido, no pueden ser polarizadas."
+            },
+            {
+                question: "El efecto fotoeléctrico, explicado por Einstein, demuestra que la luz se comporta como...",
+                options: ["Una onda continua", "Partículas (fotones)", "Un fluido", "Un campo magnético"],
+                answer: "Partículas (fotones)",
+                page: 603,
+                explanation: "Este efecto muestra que la energía de la luz se entrega en paquetes discretos llamados fotones, una idea clave de la física cuántica."
+            },
+            {
+                question: "¿Cuál es el segundo postulado de la teoría de la relatividad especial de Einstein?",
+                options: ["El tiempo es absoluto", "Las leyes de la física son diferentes en todos los marcos de referencia", "La velocidad de la luz es constante para todos los observadores", "La gravedad afecta la trayectoria de la luz"],
+                answer: "La velocidad de la luz es constante para todos los observadores",
+                page: 688,
+                explanation: "Este postulado revolucionario significa que, sin importar qué tan rápido te muevas, siempre medirás que la luz viaja a la misma velocidad c."
+            }
+        ];
+
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const questionNumber = document.getElementById('question-number');
+        const scoreElement = document.getElementById('score');
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackElement = document.getElementById('feedback');
+        const pageReferenceElement = document.getElementById('page-reference');
+        const nextBtn = document.getElementById('next-btn');
+        
+        const finalScoreElement = document.getElementById('final-score');
+        const finalFeedbackElement = document.getElementById('final-feedback');
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function shuffle(array) {
+            let currentIndex = array.length,  randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            shuffledQuestions = shuffle([...quizData]);
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            nextBtn.classList.add('hidden');
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            questionNumber.textContent = currentQuestionIndex + 1;
+            questionElement.textContent = currentQuestion.question;
+            
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-btn', 'w-full', 'bg-gray-200', 'dark:bg-gray-700', 'p-4', 'rounded-lg', 'text-left', 'hover:bg-blue-200', 'dark:hover:bg-blue-900');
+                button.addEventListener('click', selectAnswer);
+                optionsElement.appendChild(button);
+            });
+        }
+        
+        function resetState() {
+            while(optionsElement.firstChild) {
+                optionsElement.removeChild(optionsElement.firstChild);
+            }
+            feedbackContainer.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const isCorrect = selectedBtn.textContent === currentQuestion.answer;
+            
+            if (isCorrect) {
+                score += 4;
+                scoreElement.textContent = score;
+                feedbackContainer.classList.remove('bg-red-500');
+                feedbackContainer.classList.add('bg-green-500');
+                feedbackElement.textContent = "¡Correcto! " + currentQuestion.explanation;
+            } else {
+                feedbackContainer.classList.remove('bg-green-500');
+                feedbackContainer.classList.add('bg-red-500');
+                feedbackElement.textContent = `Incorrecto. La respuesta correcta es "${currentQuestion.answer}". ` + currentQuestion.explanation;
+            }
+            
+            pageReferenceElement.textContent = `Referencia: Página ${currentQuestion.page} del PDF.`;
+            feedbackContainer.classList.remove('hidden');
+            
+            // Mark the options
+            Array.from(optionsElement.children).forEach(button => {
+                if(button.textContent === currentQuestion.answer) {
+                    button.classList.add('correct');
+                }
+                button.disabled = true;
+            });
+            if (!isCorrect) {
+                 selectedBtn.classList.add('incorrect');
+            }
+
+
+            if (shuffledQuestions.length > currentQuestionIndex + 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                showResults();
+            }
+        }
+        
+        function showNextQuestion() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+        
+        function showResults() {
+            setTimeout(() => {
+                quizScreen.classList.add('hidden');
+                resultScreen.classList.remove('hidden');
+                finalScoreElement.textContent = `${score} / 100`;
+
+                let feedback = '';
+                if (score >= 80) {
+                    feedback = '¡Excelente! Tienes un gran dominio de los conceptos de física.';
+                } else if (score >= 60) {
+                    feedback = '¡Buen trabajo! Has entendido bien la mayoría de los conceptos.';
+                } else if (score >= 40) {
+                    feedback = 'No está mal, pero hay margen de mejora. ¡Sigue repasando!';
+                } else {
+                    feedback = 'Parece que necesitas repasar un poco más. ¡No te rindas!';
+                }
+                finalFeedbackElement.textContent = feedback;
+            }, 2000); // Wait 2 seconds before showing results
+        }
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', showNextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+
+</body>
+</html>

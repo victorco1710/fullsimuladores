@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario: Protocolo de Prevención de Violencia</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general body */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            color: #333;
+            line-height: 1.6;
+        }
+        /* Styling for the main quiz container */
+        .quiz-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative; /* For score positioning */
+        }
+        /* Question styling */
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2c5282; /* Darker blue for questions */
+        }
+        /* Option styling */
+        .option-label {
+            display: block;
+            background-color: #e2e8f0; /* Light gray for options */
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .option-label:hover {
+            background-color: #cbd5e0; /* Slightly darker on hover */
+            transform: translateY(-2px);
+        }
+        .option-label input[type="radio"] {
+            margin-right: 0.75rem;
+            accent-color: #4299e1; /* Blue accent for radio buttons */
+        }
+        /* Feedback styling */
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .feedback.correct {
+            background-color: #d4edda; /* Light green */
+            color: #155724; /* Dark green */
+            border: 1px solid #28a745;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da; /* Light red */
+            color: #721c24; /* Dark red */
+            border: 1px solid #dc3545;
+        }
+        /* Button styling */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #4299e1; /* Blue */
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background-color: #3182ce; /* Darker blue */
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: #a0aec0; /* Gray */
+            color: #ffffff;
+        }
+        .btn-secondary:hover {
+            background-color: #718096; /* Darker gray */
+            transform: translateY(-1px);
+        }
+        /* Score display */
+        .score-display {
+            position: absolute;
+            top: 25px;
+            right: 1px;
+            background-color: #e75512; /* Dark blue */
+            color: #ffffff;
+            padding: 8px 15px;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            z-index: 10; /* Ensure it's above other content */
+        }
+        /* Final results styling */
+        .final-results {
+            text-align: center;
+            padding: 2rem;
+            background-color: #e0f2f7; /* Lighter blue */
+            border-radius: 1rem;
+            margin-top: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .final-results h2 {
+            font-size: 2rem;
+            color: #2c5282;
+            margin-bottom: 1rem;
+        }
+        .final-results p {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+        .final-results .score-final {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #007bff; /* Bright blue */
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        /* Credits styling */
+        .credits {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #cbd5e0;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .quiz-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            .score-display {
+                position: static; /* Stack on smaller screens */
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+            .question-text {
+                font-size: 1.1rem;
+            }
+            .option-label {
+                padding: 0.8rem;
+                font-size: 0.95rem;
+            }
+            .btn {
+                width: 100%;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="score-display" class="score-display">Puntuación: 0</div>
+
+        <div id="quiz-content">
+            <!-- Questions will be loaded here by JavaScript -->
+            <h2 class="text-2xl font-bold text-center mb-6 text-blue-800">Cuestionario: Protocolo de Prevención de Violencia</h2>
+            <div id="question-container" class="mb-6">
+                <p id="question-number" class="text-lg font-semibold text-gray-700 mb-2"></p>
+                <p id="question-text" class="question-text"></p>
+                <div id="options-container">
+                    <!-- Options will be loaded here -->
+                </div>
+            </div>
+            <div id="feedback-container" class="feedback hidden"></div>
+            <div class="flex justify-between mt-6">
+                <button id="submit-btn" class="btn btn-primary">Responder</button>
+                <button id="next-btn" class="btn btn-secondary hidden">Siguiente Pregunta</button>
+            </div>
+        </div>
+
+        <div id="final-results-container" class="final-results hidden">
+            <h2>Cuestionario Finalizado</h2>
+            <p>¡Has completado el cuestionario!</p>
+            <p class="text-xl font-semibold mt-4">Tu puntuación total es:</p>
+            <p id="final-score" class="score-final"></p>
+            <p id="final-feedback" class="text-lg"></p>
+            <button id="restart-btn" class="btn btn-primary mt-6">Reiniciar Cuestionario</button>
+        </div>
+
+        <div class="credits">
+            PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025.<br>
+            © Victor
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál de los siguientes NO es un principio bajo el cual se rige el Protocolo de Prevención, Actuación y Denuncia en casos de violencia?",
+                options: [
+                    "Interés superior de la niña, del niño o adolescente.",
+                    "Prioridad absoluta y atención preferente.",
+                    "Centralización de la información en una única instancia.",
+                    "Corresponsabilidad de los miembros de la comunidad educativa."
+                ],
+                answer: "Centralización de la información en una única instancia.",
+                feedback: "La centralización de la información en una única instancia NO es un principio. El protocolo se rige por principios como el interés superior, la cultura de paz, la lucha contra el racismo, el respeto a la identidad, la prioridad absoluta, la equidad de género, el desarrollo integral, la oportunidad y celeridad, la corresponsabilidad y la participación. (Página 15)",
+                page: 15
+            },
+            {
+                question: "La violencia por omisión o negligencia se describe como una forma pasiva de violencia. ¿Cuál de las siguientes situaciones NO se considera un ejemplo de este tipo de violencia en el ámbito educativo?",
+                options: [
+                    "No proveer de alimentación, teniendo los recursos.",
+                    "La inasistencia e impuntualidad de las y los maestros en sus horas de clase.",
+                    "Un maestro que grita e insulta a un estudiante.",
+                    "No realizar un seguimiento adecuado a estudiantes con necesidades educativas especiales."
+                ],
+                answer: "Un maestro que grita e insulta a un estudiante.",
+                feedback: "Un maestro que grita e insulta a un estudiante es un ejemplo de violencia psicológica, no de violencia por omisión o negligencia. (Página 16-17)",
+                page: 16
+            },
+            {
+                question: "Según el Protocolo, ¿cuál es el plazo máximo para que los abogados defensores del Ministerio de Educación denuncien nuevos hechos de violencia sexual ante la autoridad competente?",
+                options: [
+                    "24 horas.",
+                    "48 horas.",
+                    "72 horas.",
+                    "5 días hábiles."
+                ],
+                answer: "48 horas.",
+                feedback: "Los abogados defensores del Ministerio de Educación deben denunciar nuevos hechos de violencia sexual ante la autoridad competente en un plazo máximo de 48 horas. (Página 30)",
+                page: 30
+            },
+            {
+                question: "¿Qué instancia es la responsable de iniciar el proceso disciplinario a maestras/maestros, directoras/directores y personal administrativo acusados de ejercer violencia, según el Protocolo?",
+                options: [
+                    "El Ministerio Público.",
+                    "La Dirección Departamental de Educación.",
+                    "La Dirección Distrital Educativa.",
+                    "La Defensoría de la Niñez y Adolescencia."
+                ],
+                answer: "La Dirección Distrital Educativa.",
+                feedback: "La Dirección Distrital Educativa es la instancia que inicia el proceso disciplinario. (Página 31 y Página 57)",
+                page: 31
+            },
+            {
+                question: "¿Cuál de las siguientes afirmaciones es FALSA respecto a la actuación de maestras y maestros en la prevención de la violencia?",
+                options: [
+                    "Deben fortalecer la educación integral en sexualidad y autocuidado.",
+                    "Pueden programar actividades curriculares en sus domicilios u oficinas si es con consentimiento de los padres.",
+                    "No deben permanecer a solas con un estudiante en el aula u otro ambiente.",
+                    "Deben intervenir inmediatamente ante conflictos y situaciones de violencia leves."
+                ],
+                answer: "Pueden programar actividades curriculares en sus domicilios u oficinas si es con consentimiento de los padres.",
+                feedback: "Es FALSO. Los maestros NO pueden programar actividades para ser desarrolladas en sus domicilios u oficinas, ni en la casa del o la estudiante. (Página 42)",
+                page: 42
+            },
+            {
+                question: "En el contexto de la detección de violencia, ¿cuál de los siguientes NO es un indicador físico que pueda alertar sobre una posible situación de violencia?",
+                options: [
+                    "Moretones o contusiones.",
+                    "Embarazo adolescente.",
+                    "Uso de vestimenta inadecuada para el clima (para ocultar lesiones).",
+                    "Disminución del rendimiento escolar."
+                ],
+                answer: "Disminución del rendimiento escolar.",
+                feedback: "La disminución del rendimiento escolar es un indicador psicológico, emocional o conductual, no físico. (Página 47)",
+                page: 47
+            },
+            {
+                question: "¿Qué se establece en el Protocolo sobre la obligatoriedad de la denuncia de una situación de violencia?",
+                options: [
+                    "Es opcional, dependiendo de la gravedad del caso.",
+                    "Es obligatoria y quien no la realice puede ser acusado de complicidad por omisión.",
+                    "Solo es obligatoria si la víctima es menor de 14 años.",
+                    "La denuncia debe ser realizada únicamente por la dirección de la unidad educativa."
+                ],
+                answer: "Es obligatoria y quien no la realice puede ser acusado de complicidad por omisión.",
+                feedback: "La denuncia de una situación de violencia no es opcional; es obligatoria y quien no la ponga en conocimiento de la autoridad competente está vulnerando la normativa penal. (Página 53)",
+                page: 53
+            },
+            {
+                question: "¿Cuál de las siguientes acciones NO se recomienda durante el proceso de contención emocional de una víctima de violencia?",
+                options: [
+                    "Escuchar sin interrumpir, evitando inculpar o revictimizar.",
+                    "Expresar juicios de valor sobre la persona agresora.",
+                    "Garantizar la seguridad, protección y estabilidad emocional y física de la víctima.",
+                    "Respetar si la víctima quiere hablar o no."
+                ],
+                answer: "Expresar juicios de valor sobre la persona agresora.",
+                feedback: "NO se recomienda expresar juicios de valor sobre la víctima ni sobre la agresora o el agresor, ya que la víctima podría sentirse juzgada. (Página 52)",
+                page: 52
+            },
+            {
+                question: "¿Qué ley establece que la Jueza o el Juez Público en materia de Niñez y Adolescencia es la autoridad que conocerá y sancionará infracciones por violencia a denuncia de la Defensoría de la Niñez y Adolescencia?",
+                options: [
+                    "Ley N° 070 de Educación.",
+                    "Ley N° 348 Integral para Garantizar a las Mujeres una Vida Libre de Violencia.",
+                    "Ley N° 548, Código Niña, Niño y Adolescente.",
+                    "Ley N° 264 de Seguridad Ciudadana."
+                ],
+                answer: "Ley N° 548, Código Niña, Niño y Adolescente.",
+                feedback: "El Artículo 153 de la Ley N° 548, Código Niña, Niño y Adolescente, establece que la Jueza o el Juez Público en materia de Niñez y Adolescencia es la autoridad competente. (Página 57)",
+                page: 57
+            },
+            {
+                question: "¿Cuál es una de las principales funciones del Ministerio de Educación en el marco de este Protocolo, según la Presentación?",
+                options: [
+                    "La creación de nuevas unidades educativas en zonas rurales.",
+                    "El desarrollo de políticas educativas con enfoque de descolonización, despatriarcalización e interculturalidad para vivir bien.",
+                    "La gestión exclusiva de los recursos económicos para la educación.",
+                    "La implementación de programas de intercambio estudiantil internacional."
+                ],
+                answer: "El desarrollo de políticas educativas con enfoque de descolonización, despatriarcalización e interculturalidad para vivir bien.",
+                feedback: "El Ministerio de Educación tiene, entre sus principales funciones, el desarrollo de políticas educativas con enfoque de descolonización, despatriarcalización e interculturalidad para vivir bien. (Página 7)",
+                page: 7
+            },
+            {
+                question: "Según el Artículo 147, párrafo I, de la Ley N° 548, ¿qué constituye violencia?",
+                options: [
+                    "Únicamente la acción que ocasione lesiones físicas visibles.",
+                    "La acción u omisión, por cualquier medio, que ocasione privaciones, lesiones, daños, sufrimientos, perjuicios en la salud física, mental, afectiva, sexual, desarrollo deficiente e incluso la muerte.",
+                    "Solo los actos de agresión verbal directa.",
+                    "Cualquier comportamiento que genere incomodidad leve."
+                ],
+                answer: "La acción u omisión, por cualquier medio, que ocasione privaciones, lesiones, daños, sufrimientos, perjuicios en la salud física, mental, afectiva, sexual, desarrollo deficiente e incluso la muerte.",
+                feedback: "El Artículo 147, párrafo I, de la Ley N° 548 define la violencia de manera integral, incluyendo acciones u omisiones que causen diversos tipos de daño. (Página 15)",
+                page: 15
+            },
+            {
+                question: "¿Cuál de las siguientes es una manifestación de violencia sexual según el Protocolo?",
+                options: [
+                    "Un comentario peyorativo sobre la apariencia física.",
+                    "Forzar a una niña, un niño o adolescente a tocar las partes íntimas de la persona agresora.",
+                    "La ausencia de supervisión adecuada en el recreo.",
+                    "Un empujón accidental durante un juego."
+                ],
+                answer: "Forzar a una niña, un niño o adolescente a tocar las partes íntimas de la persona agresora.",
+                feedback: "Forzar a tocar partes íntimas es una de las manifestaciones explícitas de violencia sexual mencionadas. (Página 18)",
+                page: 18
+            },
+            {
+                question: "¿Qué tipo de consecuencias a mediano plazo puede experimentar una víctima de violencia, según la Tabla 2 del documento?",
+                options: [
+                    "Sentimientos de tristeza y sensación de desamparo.",
+                    "Trastornos del sueño: terrores nocturnos, insomnio o exceso de sueño durante el día.",
+                    "Comportamientos adictivos (consumo de alcohol y/o otras drogas).",
+                    "Disminución del desempeño cognitivo en ámbito escolar y generalizado."
+                ],
+                answer: "Trastornos del sueño: terrores nocturnos, insomnio o exceso de sueño durante el día.",
+                feedback: "La Tabla 2 detalla los trastornos del sueño como una consecuencia emocional a mediano plazo. (Página 22, Tabla 2)",
+                page: 22
+            },
+            {
+                question: "¿Cuál es una de las medidas preventivas que deben implementar las directoras o directores de unidades educativas y centros de educación especial?",
+                options: [
+                    "Permitir el ingreso libre de cualquier persona ajena a la institución.",
+                    "Prohibir las llamadas telefónicas o comunicación por mensajería de los maestros con los estudiantes de manera individual.",
+                    "No involucrarse en la identificación de lugares inseguros dentro de la unidad educativa.",
+                    "Restringir el ingreso de estudiantes que lleguen fuera del horario establecido."
+                ],
+                answer: "Prohibir las llamadas telefónicas o comunicación por mensajería de los maestros con los estudiantes de manera individual.",
+                feedback: "El protocolo prohíbe las llamadas o mensajería individual de maestros con estudiantes, salvo comunicación a través de padres y dirección. (Página 39)",
+                page: 39
+            },
+            {
+                question: "¿Qué se espera del personal administrativo y auxiliar en relación con la interacción con los estudiantes?",
+                options: [
+                    "Pueden permanecer a solas con un estudiante si es para fines académicos.",
+                    "No deben permanecer a solas con una o un estudiante en un ambiente de la unidad educativa.",
+                    "Tienen la potestad de delegar sus funciones de portería a terceros en caso de necesidad.",
+                    "No es su responsabilidad reportar situaciones de riesgo si ocurren fuera de su vista directa."
+                ],
+                answer: "No deben permanecer a solas con una o un estudiante en un ambiente de la unidad educativa.",
+                feedback: "El personal administrativo y auxiliar tiene prohibido permanecer a solas con estudiantes en cualquier ambiente de la unidad educativa. (Página 40)",
+                page: 40
+            },
+            {
+                question: "Según el Protocolo, ¿cuál de las siguientes es una responsabilidad de las madres, padres y/o tutores?",
+                options: [
+                    "Asumir la dirección de los planes de convivencia armónica y pacífica.",
+                    "Coordinar y programar con la o el director de la unidad educativa la realización de todas las actividades dentro de los predios de la misma.",
+                    "Realizar el seguimiento de los casos de violencia solo si son directamente afectados.",
+                    "Intervenir directamente en el proceso disciplinario de maestros."
+                ],
+                answer: "Coordinar y programar con la o el director de la unidad educativa la realización de todas las actividades dentro de los predios de la misma.",
+                feedback: "Las madres, padres y/o tutores deben coordinar y programar con la dirección las actividades escolares dentro de la unidad educativa. (Página 42)",
+                page: 42
+            },
+            {
+                question: "¿Cuál es una de las responsabilidades de los estudiantes en la prevención de la violencia?",
+                options: [
+                    "Asumir la responsabilidad de la seguridad de la infraestructura.",
+                    "Conocer y comprender el alcance de sus derechos, deberes y obligaciones.",
+                    "Realizar acciones de prevención que requieran erogación de recursos económicos.",
+                    "Mantener en secreto cualquier conducta o situación de violencia que conozcan."
+                ],
+                answer: "Conocer y comprender el alcance de sus derechos, deberes y obligaciones.",
+                feedback: "Es fundamental que los estudiantes conozcan sus derechos, deberes y obligaciones, incluyendo los mecanismos de denuncia. (Página 43)",
+                page: 43
+            },
+            {
+                question: "En el proceso de intervención, si un miembro de la comunidad educativa escucha el relato de una víctima de violencia, ¿qué NO debe hacer?",
+                options: [
+                    "Agradecer la confianza al contar lo sucedido.",
+                    "Poner en duda el relato de la víctima.",
+                    "Informar que se tomarán medidas para proteger a la niña, niño o adolescente.",
+                    "Asegurarse de que las acciones garanticen el interés superior del estudiante."
+                ],
+                answer: "Poner en duda el relato de la víctima.",
+                feedback: "Es crucial nunca poner en duda el relato de la víctima y siempre creerle. (Página 49)",
+                page: 49
+            },
+            {
+                question: "¿Qué institución es la principal encargada de garantizar la vigencia de los derechos de niñas, niños y adolescentes a través de equipos interdisciplinarios, según el Protocolo?",
+                options: [
+                    "El Ministerio Público.",
+                    "Los Servicios Legales Integrales Municipales (SLIM).",
+                    "La Defensoría de la Niñez y Adolescencia (DNA).",
+                    "Los Centros Especializados de Prevención y Atención Terapéutica (CEPAT)."
+                ],
+                answer: "La Defensoría de la Niñez y Adolescencia (DNA).",
+                feedback: "La DNA es la instancia principal para garantizar los derechos de niños, niñas y adolescentes. (Página 55)",
+                page: 55
+            },
+            {
+                question: "¿Qué debe garantizar la directora o el director de la unidad educativa en caso de que un estudiante víctima de violencia requiera ausentarse por recuperación psicoafectiva?",
+                options: [
+                    "Que el estudiante pierda el año escolar.",
+                    "Que los maestros realicen adaptaciones curriculares para compensar los días de inasistencia.",
+                    "Que el estudiante sea retirado de la unidad educativa temporalmente.",
+                    "Que el caso se mantenga en estricta confidencialidad sin informar a nadie."
+                ],
+                answer: "Que los maestros realicen adaptaciones curriculares para compensar los días de inasistencia.",
+                feedback: "Se deben realizar adaptaciones curriculares para que el estudiante no se vea perjudicado académicamente por su ausencia. (Página 55)",
+                page: 55
+            },
+            {
+                question: "¿Qué establece el Decreto Supremo N° 1302 en relación con la obligación de denunciar para las Direcciones Departamentales de Educación y el Ministerio de Educación?",
+                options: [
+                    "Tienen la opción de denunciar si lo consideran pertinente.",
+                    "Tienen la obligación de denunciar y coadyuvar en la acción penal contra el personal sindicado de delitos contra la vida, integridad física, psicológica y/o sexual de estudiantes.",
+                    "Solo deben intervenir si el delito es de violencia sexual.",
+                    "Deben esperar la sentencia ejecutoriada para iniciar cualquier acción."
+                ],
+                answer: "Tienen la obligación de denunciar y coadyuvar en la acción penal contra el personal sindicado de delitos contra la vida, integridad física, psicológica y/o sexual de estudiantes.",
+                feedback: "El Decreto Supremo N° 1302 establece la obligación de denunciar y coadyuvar en acciones penales. (Página 57)",
+                page: 57
+            },
+            {
+                question: "¿Cuál es el propósito principal del sistema de registro de casos detectados y denunciados que debe llevar cada unidad educativa?",
+                options: [
+                    "Sancionar directamente a los agresores.",
+                    "Principalmente estadístico para orientar acciones de prevención.",
+                    "Publicar los nombres de las víctimas para concientización.",
+                    "Determinar la culpabilidad en casos de violencia."
+                ],
+                answer: "Principalmente estadístico para orientar acciones de prevención.",
+                feedback: "El registro tiene un propósito estadístico para orientar futuras acciones de prevención. (Página 58)",
+                page: 58
+            },
+            {
+                question: "¿Qué tipo de falta se considera la 'invitación al uso de substancias indebidas y peligrosas, corrupción, acoso sexual, estupro, violencia o intimidación física o psíquica, violación y organización de bandas delincuenciales' según el Reglamento de Faltas y Sanciones del Magisterio?",
+                options: [
+                    "Falta leve.",
+                    "Falta grave.",
+                    "Falta muy grave.",
+                    "No está tipificado en este reglamento."
+                ],
+                answer: "Falta muy grave.",
+                feedback: "Estas conductas están tipificadas como 'falta muy grave' en el Reglamento de Faltas y Sanciones del Magisterio. (Página 57)",
+                page: 57
+            },
+            {
+                question: "En el marco de la prevención de la violencia, ¿qué valor se debe fortalecer para que los estudiantes desarrollen un pensamiento reflexivo y crítico, estimulando su capacidad de opinar y disentir respetuosamente?",
+                options: [
+                    "La obediencia ciega a la autoridad.",
+                    "La autonomía y la participación.",
+                    "La competencia individual.",
+                    "El conformismo social."
+                ],
+                answer: "La autonomía y la participación.",
+                feedback: "Fomentar un pensamiento crítico y la capacidad de disentir respetuosamente se alinea con la autonomía y participación de los estudiantes. (Página 36)",
+                page: 36
+            },
+            {
+                question: "Según la Ley N° 070 de Educación 'Avelino Siñani - Elizardo Pérez', ¿cuál es uno de los pilares fundamentales de la educación en relación con la violencia?",
+                options: [
+                    "La promoción de la excelencia académica a toda costa.",
+                    "La erradicación de toda forma de violencia en el ámbito educativo, para el desarrollo de una sociedad sustentada en la cultura de paz.",
+                    "La priorización de la disciplina estricta para evitar conflictos.",
+                    "El fomento de la competencia individual entre estudiantes."
+                ],
+                answer: "La erradicación de toda forma de violencia en el ámbito educativo, para el desarrollo de una sociedad sustentada en la cultura de paz.",
+                feedback: "La Ley N° 070 plantea la convivencia pacífica como una de las bases de la educación, contribuyendo a erradicar toda forma de violencia. (Página 7)",
+                page: 7
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let shuffledQuestions = [];
+        let selectedOption = null;
+
+        const questionNumberElement = document.getElementById('question-number');
+        const questionTextElement = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreDisplay = document.getElementById('score-display');
+        const quizContent = document.getElementById('quiz-content');
+        const finalResultsContainer = document.getElementById('final-results-container');
+        const finalScoreElement = document.getElementById('final-score');
+        const finalFeedbackElement = document.getElementById('final-feedback');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // Function to shuffle questions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Function to load a question
+        function loadQuestion() {
+            // Hide feedback and next button
+            feedbackContainer.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+            selectedOption = null; // Reset selected option
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            questionNumberElement.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+            questionTextElement.textContent = questionData.question;
+            optionsContainer.innerHTML = ''; // Clear previous options
+
+            // Shuffle options for the current question
+            const shuffledOptions = shuffleArray([...questionData.options]);
+
+            shuffledOptions.forEach((option, index) => {
+                const optionLabel = document.createElement('label');
+                optionLabel.className = 'option-label';
+                optionLabel.innerHTML = `
+                    <input type="radio" name="answer" value="${option}" class="align-middle">
+                    <span class="align-middle">${option}</span>
+                `;
+                optionLabel.addEventListener('click', () => {
+                    // Remove selected class from all options
+                    document.querySelectorAll('.option-label').forEach(label => {
+                        label.classList.remove('bg-blue-200', 'border-blue-500');
+                    });
+                    // Add selected class to the clicked option
+                    optionLabel.classList.add('bg-blue-200', 'border-blue-500');
+                    selectedOption = option;
+                });
+                optionsContainer.appendChild(optionLabel);
+            });
+
+            // Enable radio buttons
+            optionsContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.disabled = false;
+            });
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            if (!selectedOption) {
+                // Use a custom modal or message box instead of alert()
+                displayMessage("Por favor, selecciona una opción antes de responder.", "warning");
+                return;
+            }
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const isCorrect = selectedOption === questionData.answer;
+
+            // Disable radio buttons after submission
+            optionsContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.disabled = true;
+            });
+
+            // Display feedback
+            feedbackContainer.classList.remove('hidden');
+            feedbackContainer.classList.remove('correct', 'incorrect'); // Clear previous classes
+            if (isCorrect) {
+                score += 4; // Each question is worth 4 points
+                feedbackContainer.classList.add('correct');
+                feedbackContainer.innerHTML = `<strong>¡Correcto!</strong> ${questionData.feedback}`;
+            } else {
+                feedbackContainer.classList.add('incorrect');
+                feedbackContainer.innerHTML = `<strong>¡Incorrecto!</strong> La respuesta correcta era: "${questionData.answer}". ${questionData.feedback}`;
+            }
+
+            // Update score display
+            scoreDisplay.textContent = `Puntuación: ${score}`;
+
+            // Show next button, hide submit button
+            submitBtn.classList.add('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        // Function to display messages (replaces alert())
+        function displayMessage(message, type = 'info') {
+            const messageBox = document.createElement('div');
+            messageBox.className = `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 rounded-lg shadow-lg text-white z-50`;
+            if (type === 'warning') {
+                messageBox.classList.add('bg-orange-500');
+            } else {
+                messageBox.classList.add('bg-blue-500');
+            }
+            messageBox.textContent = message;
+            document.body.appendChild(messageBox);
+
+            setTimeout(() => {
+                messageBox.remove();
+            }, 3000);
+        }
+
+
+        // Function to show final results
+        function showFinalResults() {
+            quizContent.classList.add('hidden');
+            finalResultsContainer.classList.remove('hidden');
+            finalScoreElement.textContent = `${score} / ${shuffledQuestions.length * 4}`;
+
+            let generalFeedback = "";
+            const percentage = (score / (shuffledQuestions.length * 4)) * 100;
+
+            if (percentage >= 90) {
+                generalFeedback = "¡Felicidades! Has demostrado un conocimiento excepcional del protocolo. ¡Estás muy bien preparado!";
+            } else if (percentage >= 70) {
+                generalFeedback = "¡Buen trabajo! Tienes un sólido conocimiento del protocolo, pero hay áreas donde puedes mejorar para alcanzar la excelencia.";
+            } else if (percentage >= 50) {
+                generalFeedback = "Necesitas repasar algunos conceptos clave. Con un estudio adicional, puedes mejorar significativamente tu puntuación.";
+            } else {
+                generalFeedback = "Es importante que revises a fondo el protocolo. Con dedicación y estudio, podrás dominar el contenido.";
+            }
+            finalFeedbackElement.textContent = generalFeedback;
+        }
+
+        // Event Listeners
+        submitBtn.addEventListener('click', checkAnswer);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                loadQuestion();
+            } else {
+                showFinalResults();
+            }
+        });
+        restartBtn.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplay.textContent = `Puntuación: 0`;
+            finalResultsContainer.classList.add('hidden');
+            quizContent.classList.remove('hidden');
+            initQuiz(); // Re-initialize the quiz
+        });
+
+        // Initial quiz setup
+        function initQuiz() {
+            shuffledQuestions = shuffleArray([...questions]); // Shuffle questions at the start
+            loadQuestion();
+        }
+
+        // Start the quiz when the page loads
+        document.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario sobre "Bolivia, su Historia - Tomo V"</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .question-card {
+            background-color: #f8f8f8;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .question-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50; /* Dark blue-gray for text */
+            margin-bottom: 15px;
+        }
+        .options-container div {
+            margin-bottom: 10px;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 2px solid #cbd5e0; /* Light gray border */
+            background-color: #ffffff;
+            text-align: left;
+            font-size: 1rem;
+            color: #334155; /* Medium dark gray */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .option-button:hover:not(.correct):not(.incorrect):not(.selected) {
+            background-color: #f0f4f8;
+            border-color: #a0aec0; /* Slightly darker gray on hover */
+        }
+        .option-button.selected {
+            border-color: #3b82f6; /* Blue for selected */
+            background-color: #eff6ff; /* Light blue for selected */
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+        .option-button.correct {
+            background-color: #d1fae5; /* Light green for correct */
+            border-color: #10b981; /* Green border */
+            color: #065f46; /* Darker green text */
+        }
+        .option-button.incorrect {
+            background-color: #fee2e2; /* Light red for incorrect */
+            border-color: #ef4444; /* Red border */
+            color: #991b1b; /* Darker red text */
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .feedback.correct {
+            background-color: #ecfdf5; /* Very light green */
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .feedback.incorrect {
+            background-color: #fef2f2; /* Very light red */
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+        .nav-button:active {
+            transform: scale(0.98);
+        }
+        .prev-button {
+            background-color: #e2e8f0; /* Light gray */
+            color: #4a5568; /* Dark gray */
+            border: none;
+        }
+        .prev-button:hover {
+            background-color: #cbd5e0;
+        }
+        .next-button, .submit-button {
+            background-color: #10b981; /* Green */
+            color: white;
+            border: none;
+        }
+        .next-button:hover, .submit-button:hover {
+            background-color: #059669; /* Darker green */
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            height: 12px;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #10b981; /* Green */
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.4s ease-in-out;
+        }
+        .score-card {
+            background-color: #ecfdf5; /* Very light green */
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .score-card h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 15px;
+        }
+        .score-card p {
+            font-size: 1.2rem;
+            color: #065f46;
+            margin-bottom: 20px;
+        }
+        .score-card .restart-button {
+            background-color: #3b82f6; /* Blue */
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .score-card .restart-button:hover {
+            background-color: #2563eb; /* Darker blue */
+        }
+        .credits {
+            margin-top: 30px;
+            font-size: 0.85rem;
+            color: #6b7280; /* Gray text */
+            text-align: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .quiz-container {
+                padding: 20px;
+            }
+            .question-card h3 {
+                font-size: 1.25rem;
+            }
+            .option-button {
+                font-size: 0.9rem;
+                padding: 10px 15px;
+            }
+            .nav-button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .score-card h2 {
+                font-size: 1.75rem;
+            }
+            .score-card p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center p-5">
+    <div id="quiz-app" class="quiz-container">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Cuestionario sobre "Bolivia, su Historia - Tomo V"</h2>
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="quiz-content">
+            <!-- Questions will be loaded here -->
+        </div>
+        <div class="controls">
+            <button id="prev-btn" class="nav-button prev-button" style="display: none;">Pregunta Anterior</button>
+            <button id="next-btn" class="nav-button next-button">Siguiente Pregunta</button>
+            <button id="submit-btn" class="nav-button submit-button" style="display: none;">Ver Resultados</button>
+        </div>
+        <div class="credits">Desarrollado por Victor Crespo</div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Qué partido político gobernó Bolivia desde 1899 hasta 1920, y qué beneficios trajo la modernidad durante este periodo?",
+                options: [
+                    { text: "Partido Conservador; desarrollo agrícola y artesanal.", correct: false },
+                    { text: "Partido Liberal; crecimiento económico, reformas sociales y movilidad poblacional.", correct: true },
+                    { text: "Partido Republicano; estabilidad política y expansión territorial.", correct: false },
+                    { text: "Partido Socialista; justicia social y nacionalización de industrias.", correct: false }
+                ],
+                page: "Página 17",
+                feedback: "La respuesta correcta es: Partido Liberal; crecimiento económico, reformas sociales y movilidad poblacional. (Página 17)"
+            },
+            {
+                question: "¿Cuándo se evidenciaron los primeros síntomas de crisis del Estado liberal en Bolivia?",
+                options: [
+                    { text: "En 1900, con el inicio del auge del estaño.", correct: false },
+                    { text: "En 1914, a partir de las disidencias experimentadas al interior del partido gobernante.", correct: true },
+                    { text: "En 1920, con la llegada del Partido Republicano al poder.", correct: false },
+                    { text: "En 1932, al inicio de la Guerra del Chaco.", correct: false }
+                ],
+                page: "Página 17",
+                feedback: "La respuesta correcta es: En 1914, a partir de las disidencias experimentadas al interior del partido gobernante. (Página 17)"
+            },
+            {
+                question: "¿Cuál fue el acontecimiento que 'desnudó las graves falencias de un Estado excluyente y ausente' y marcó el rumbo para la construcción de un nuevo Estado?",
+                options: [
+                    { text: "La crisis económica mundial de 1929.", correct: false },
+                    { text: "La Primera Guerra Mundial (1914-1918).", correct: false },
+                    { text: "La Guerra del Chaco (1932-1935).", correct: true },
+                    { text: "La Revolución Nacional de 1952.", correct: false }
+                ],
+                page: "Página 17-18",
+                feedback: "La respuesta correcta es: La Guerra del Chaco (1932-1935). (Página 17-18)"
+            },
+            {
+                question: "¿En qué año Bolivia suscribió la carta de las Naciones Unidas, adhiriéndose a la alianza para construir un sistema internacional pacífico?",
+                options: [
+                    { text: "1939", correct: false },
+                    { text: "1945", correct: true },
+                    { text: "1952", correct: false },
+                    { text: "1918", correct: false }
+                ],
+                page: "Página 19",
+                feedback: "La respuesta correcta es: 1945. (Página 19)"
+            },
+            {
+                question: "¿Cuáles fueron los gobiernos de transición en Bolivia, resaltados por su tendencia nacionalista y de extracción popular?",
+                options: [
+                    { text: "Bautista Saavedra y Hernando Siles.", correct: false },
+                    { text: "Daniel Salamanca y José Luis Tejada Sorzano.", correct: false },
+                    { text: "Germán Busch (1937-1939) y Gualberto Villarroel (1943-1946).", correct: true },
+                    { text: "Víctor Paz Estenssoro y Hernán Siles Zuazo (post-1952).", correct: false }
+                ],
+                page: "Página 19",
+                feedback: "La respuesta correcta es: Germán Busch (1937-1939) y Gualberto Villarroel (1943-1946). (Página 19)"
+            },
+            {
+                question: "¿Qué evento marcó un hito en la historia del constitucionalismo boliviano al reflejar el pensamiento de posguerra y el germen de un programa de izquierda nacional?",
+                options: [
+                    { text: "La Constitución de 1931.", correct: false },
+                    { text: "La Convención Nacional de 1938.", correct: true },
+                    { text: "El Primer Congreso Minero de Huanuni.", correct: false },
+                    { text: "La Tesis de Pulacayo de 1946.", correct: false }
+                ],
+                page: "Página 98",
+                feedback: "La respuesta correcta es: La Convención Nacional de 1938. (Página 98)"
+            },
+            {
+                question: "¿Cuál fue una de las propuestas más importantes de la Tesis de Pulacayo, documento de gran trascendencia política en la historia nacional?",
+                options: [
+                    { text: "La abolición del fuero sindical.", correct: false },
+                    { text: "El control estatal de todas las empresas privadas.", correct: false },
+                    { text: "La creación de la Corporación Boliviana de Fomento (CBF).", correct: false },
+                    { text: "Salario mínimo vital con escala móvil y control obrero en las minas.", correct: true }
+                ],
+                page: "P113",
+                feedback: "La respuesta correcta es: Salario mínimo vital con escala móvil y control obrero en las minas. (Página 113)"
+            },
+            {
+                question: "¿Qué fue el 'Lloyd Aéreo Boliviano' y cuál fue su importancia durante la primera mitad del siglo XX?",
+                options: [
+                    { text: "Un importante ferrocarril que conectaba La Paz con el Pacífico.", correct: false },
+                    { text: "Una de las primeras empresas de aeronavegación de Sudamérica, fundamental para integrar el país.", correct: true },
+                    { text: "Una empresa minera fundada por Simón I. Patiño.", correct: false },
+                    { text: "Un partido político que promovía la modernización agrícola.", correct: false }
+                ],
+                page: "Página 31",
+                feedback: "La respuesta correcta es: Una de las primeras empresas de aeronavegación de Sudamérica, fundamental para integrar el país. (Página 31)"
+            },
+            {
+                question: "¿Qué evento provocó la 'Masacre de Uncía' en 1923, y cuál fue su consecuencia en las relaciones obrero-patronales?",
+                options: [
+                    { text: "Una huelga general de taxistas en La Paz, que llevó a la represión por parte del ejército.", correct: false },
+                    { text: "Una petición de los trabajadores mineros que culminó con la represión violenta por el ejército, profundizando la brecha en las relaciones obrero-patronales.", correct: true },
+                    { text: "El levantamiento campesino en Jesús de Machaca, que causó el asesinato del corregidor.", correct: false },
+                    { text: "La promulgación de la jornada laboral de ocho horas, rechazada por los empresarios.", correct: false }
+                ],
+                page: "Página 53",
+                feedback: "La respuesta correcta es: Una petición de los trabajadores mineros que culminó con la represión violenta por el ejército, profundizando la brecha en las relaciones obrero-patronales. (Página 53)"
+            },
+            {
+                question: "¿Cuál fue la posición del presidente Daniel Salamanca respecto al conflicto en el Chaco?",
+                options: [
+                    { text: "Consideraba que los problemas económicos y sociales del país eran más importantes que el conflicto del Chaco.", correct: false },
+                    { text: "Buscó la mediación internacional para evitar el conflicto armado a toda costa.", correct: false },
+                    { text: "Pensaba que el conflicto en el Chaco unificaría a la sociedad boliviana y fortaleció al ejército con un discurso nacionalista.", correct: true },
+                    { text: "Negó la existencia de reservas petroleras en la región en disputa.", correct: false }
+                ],
+                page: "Página 73",
+                feedback: "La respuesta correcta es: Pensaba que el conflicto en el Chaco unificaría a la sociedad boliviana y fortaleció al ejército con un discurso nacionalista. (Página 73)"
+            },
+            {
+                question: "¿Qué ley se creó en 1927 que reordenaba los esquemas jerárquicos de la sociedad en Bolivia?",
+                options: [
+                    { text: "Ley de Reforma Universitaria.", correct: false },
+                    { text: "Ley de Cédula de Identidad Obligatoria.", correct: true },
+                    { text: "Ley de Jornada Laboral de Ocho Horas.", correct: false },
+                    { text: "Ley de Autonomía Departamental.", correct: false }
+                ],
+                page: "Página 39",
+                feedback: "La respuesta correcta es: Ley de Cédula de Identidad Obligatoria. (Página 39)"
+            },
+            {
+                question: "¿Cuál fue uno de los principales problemas que enfrentó la industria manufacturera artesanal con la llegada del ferrocarril a Bolivia?",
+                options: [
+                    { text: "Aumento de los costos de producción y falta de mano de obra calificada.", correct: false },
+                    { text: "La competencia desleal de productos importados más baratos debido a la reducción de costos de transporte.", correct: true },
+                    { text: "La escasez de materias primas y la falta de inversión extranjera.", correct: false },
+                    { text: "La falta de demanda interna por productos artesanales.", correct: false }
+                ],
+                page: "Página 22",
+                feedback: "La respuesta correcta es: La competencia desleal de productos importados más baratos debido a la reducción de costos de transporte. (Página 22)"
+            },
+            {
+                question: "¿Qué institución se creó en 1936 y tuvo un papel trascendental en la economía boliviana?",
+                options: [
+                    { text: "Banco Central de Bolivia.", correct: false },
+                    { text: "Corporación Boliviana de Fomento (CBF).", correct: false },
+                    { text: "Yacimientos Petrolíferos Fiscales Bolivianos (YPFB).", correct: true },
+                    { text: "Caja de Jubilación y Ahorro Obrero (CADEJA).", correct: false }
+                ],
+                page: "Página 58",
+                feedback: "La respuesta correcta es: Yacimientos Petrolíferos Fiscales Bolivianos (YPFB). (Página 58)"
+            },
+            {
+                question: "¿Quiénes fueron los principales promotores de la educación indígena en Bolivia a principios del siglo XX?",
+                options: [
+                    { text: "El Estado y los gobiernos liberales.", correct: false },
+                    { text: "Los maestros extranjeros de la Misión Belga.", correct: false },
+                    { text: "Emprendimientos propios y privados, como la Normal de Warisata.", correct: true },
+                    { text: "Las logias masónicas y la juventud socialista.", correct: false }
+                ],
+                page: "Página 65",
+                feedback: "La respuesta correcta es: Emprendimientos propios y privados, como la Normal de Warisata. (Página 65)"
+            },
+            {
+                question: "¿Cuál era la situación de las mujeres en la sociedad boliviana a principios del siglo XX en cuanto a sus derechos cívicos y políticos?",
+                options: [
+                    { text: "Ya gozaban de pleno sufragio y participación en la política.", correct: false },
+                    { text: "Estaban legalmente consideradas menores de edad y enfrentaban triple discriminación.", correct: true },
+                    { text: "Podían acceder a cargos públicos, pero no al magisterio si estaban casadas.", correct: false },
+                    { text: "Tenían los mismos derechos que los hombres, excepto en el ámbito laboral.", correct: false }
+                ],
+                page: "Página 71",
+                feedback: "La respuesta correcta es: Estaban legalmente consideradas menores de edad y enfrentaban triple discriminación. (Página 71)"
+            },
+            {
+                question: "¿Qué personaje importante de la élite minera en Bolivia logró consolidar sus empresas y tener una influencia significativa en la política y economía nacional sin ocupar altos cargos de gobierno?",
+                options: [
+                    { text: "Carlos Víctor Aramayo.", correct: false },
+                    { text: "Mauricio Hochschild.", correct: false },
+                    { text: "Simón I. Patiño.", correct: true },
+                    { text: "Aniceto Arce.", correct: false }
+                ],
+                page: "Página 45-47",
+                feedback: "La respuesta correcta es: Simón I. Patiño. (Página 45-47)"
+            },
+            {
+                question: "¿Qué ocurrió con la Ley del Divorcio Absoluto, propuesta inicialmente por el Ateneo Femenino en 1926?",
+                options: [
+                    { text: "Fue rechazada por completo y nunca se implementó.", correct: false },
+                    { text: "Se promulgó en 1932, a pesar de las reacciones contrarias, y permitió la disolución del matrimonio bajo ciertas causas.", correct: true },
+                    { text: "Fue aprobada, pero solo para hombres, no para mujeres.", correct: false },
+                    { text: "Su discusión se pospuso indefinidamente debido a la Guerra del Chaco.", correct: false }
+                ],
+                page: "Página 71-72",
+                feedback: "La respuesta correcta es: Se promulgó en 1932, a pesar de las reacciones contrarias, y permitió la disolución del matrimonio bajo ciertas causas. (Página 71-72)"
+            },
+            {
+                question: "¿Cuál era la principal razón del descontento de los terratenientes bolivianos a fines de la década de 1930?",
+                options: [
+                    { text: "La escasez de mano de obra y la baja demanda de productos agrícolas.", correct: false },
+                    { text: "La Constitución de 1938 que intentaba negar sus derechos de propiedad y la creciente presión de los colonos.", correct: true },
+                    { text: "La falta de vías de comunicación para exportar sus productos.", correct: false },
+                    { text: "La competencia de productos importados más baratos en el mercado local.", correct: false }
+                ],
+                page: "Página 48",
+                feedback: "La respuesta correcta es: La Constitución de 1938 que intentaba negar sus derechos de propiedad y la creciente presión de los colonos. (Página 48)"
+            },
+            {
+                question: "¿Qué impacto tuvo la Ley de 10.XII.1927 en la sociedad boliviana en relación a la identificación de sus habitantes?",
+                options: [
+                    { text: "Unificó a toda la población bajo una única categoría de identidad, eliminando las diferencias de clase.", correct: false },
+                    { text: "Creó la cédula de identidad obligatoria con tres categorías de pago, manteniendo y recreando esquemas jerárquicos.", correct: true },
+                    { text: "Permitió que todos los habitantes, incluyendo los indígenas, tuvieran el mismo acceso a la ciudadanía.", correct: false },
+                    { text: "Generó una mayor movilidad social, haciendo que las categorías de identificación fueran irrelevantes.", correct: false }
+                ],
+                page: "Página 39-40",
+                feedback: "La respuesta correcta es: Creó la cédula de identidad obligatoria con tres categorías de pago, manteniendo y recreando esquemas jerárquicos. (Página 39-40)"
+            },
+            {
+                question: "¿Cuál fue el rol del movimiento estudiantil y universitario a fines de la década de 1920 en Bolivia?",
+                options: [
+                    { text: "Se mantuvieron al margen de la política, enfocándose solo en lo académico.", correct: false },
+                    { text: "Se aliaron con los partidos tradicionales para defender el statu quo.", correct: false },
+                    { text: "Se radicalizaron, tomaron posición sobre la política nacional y buscaron la autonomía universitaria, promoviendo la incorporación del indio a la vida civilizada.", correct: true },
+                    { text: "Promovieron la creación de nuevas carreras universitarias sin involucrarse en debates sociales.", correct: false }
+                ],
+                page: "Página 69-70",
+                feedback: "La respuesta correcta es: Se radicalizaron, tomaron posición sobre la política nacional y buscaron la autonomía universitaria, promoviendo la incorporación del indio a la vida civilizada. (Página 69-70)"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = [];
+        let questionsShuffled = [];
+        let quizSubmitted = false;
+
+        const quizContent = document.getElementById('quiz-content');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < 0 || currentQuestionIndex >= questionsShuffled.length) {
+                return;
+            }
+
+            const questionData = questionsShuffled[currentQuestionIndex];
+            quizContent.innerHTML = `
+                <div class="question-card">
+                    <h3 class="text-xl md:text-2xl mb-4">Pregunta ${currentQuestionIndex + 1} de ${questionsShuffled.length}:</h3>
+                    <p class="text-gray-700 text-lg mb-6">${questionData.question}</p>
+                    <div class="options-container flex flex-col gap-3">
+                        ${questionData.options.map((option, index) => `
+                            <button class="option-button" data-index="${index}">${option.text}</button>
+                        `).join('')}
+                    </div>
+                    <div class="feedback mt-4 rounded-lg p-3 text-sm hidden"></div>
+                </div>
+            `;
+
+            const optionButtons = quizContent.querySelectorAll('.option-button');
+            optionButtons.forEach(button => {
+                button.addEventListener('click', selectOption);
+                // Restore selected state if already answered
+                if (userAnswers[currentQuestionIndex] !== undefined) {
+                    // Reapply styles and feedback if an answer was previously selected for this question
+                    const selectedOptionIndex = userAnswers[currentQuestionIndex];
+                    if (selectedOptionIndex === parseInt(button.dataset.index)) {
+                        button.classList.add('selected');
+                    }
+                    showFeedback(questionData, selectedOptionIndex); // Show feedback immediately if already answered
+                    // Disable all buttons after feedback is shown
+                    optionButtons.forEach(btn => btn.disabled = true);
+                }
+            });
+
+            updateNavigationButtons();
+            updateProgressBar();
+        }
+
+        function selectOption(event) {
+            // Check if the current question has already been answered and feedback shown
+            const questionCard = event.target.closest('.question-card');
+            if (questionCard.querySelector('.feedback:not(.hidden)')) {
+                return; // Do nothing if feedback is already visible (meaning question answered)
+            }
+
+            const selectedOptionIndex = parseInt(event.target.dataset.index);
+            const questionData = questionsShuffled[currentQuestionIndex];
+            const optionsContainer = event.target.closest('.options-container');
+
+            // Remove 'selected' class from all options for this question
+            optionsContainer.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // Add 'selected' class to the clicked option
+            event.target.classList.add('selected');
+
+            userAnswers[currentQuestionIndex] = selectedOptionIndex;
+            showFeedback(questionData, selectedOptionIndex);
+
+            // Disable all option buttons for the current question after selection
+            optionsContainer.querySelectorAll('.option-button').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        function showFeedback(questionData, selectedOptionIndex) {
+            const feedbackDiv = quizContent.querySelector('.feedback');
+            feedbackDiv.classList.remove('hidden');
+
+            const optionButtons = quizContent.querySelectorAll('.option-button');
+            optionButtons.forEach((button, index) => {
+                if (questionData.options[index].correct) {
+                    button.classList.add('correct');
+                } else if (index === selectedOptionIndex && !questionData.options[index].correct) {
+                    button.classList.add('incorrect');
+                }
+            });
+
+            if (questionData.options[selectedOptionIndex] && questionData.options[selectedOptionIndex].correct) {
+                feedbackDiv.classList.add('correct');
+                feedbackDiv.classList.remove('incorrect');
+                feedbackDiv.innerHTML = `¡Correcto! ${questionData.feedback}`;
+            } else {
+                feedbackDiv.classList.add('incorrect');
+                feedbackDiv.classList.remove('correct');
+                feedbackDiv.innerHTML = `Incorrecto. ${questionData.feedback}`;
+            }
+        }
+
+        function updateNavigationButtons() {
+            prevBtn.style.display = currentQuestionIndex > 0 ? 'block' : 'none';
+            // The submit button is only shown if all questions are answered and it's the last question
+            submitBtn.style.display = (currentQuestionIndex === questionsShuffled.length - 1 && userAnswers.filter(a => a !== undefined).length === questionsShuffled.length) ? 'block' : 'none';
+
+            // Next button logic:
+            // It should be visible if not on the last question.
+            // If on the last question, it should be hidden (submit button takes its place if all answered).
+            nextBtn.style.display = (currentQuestionIndex < questionsShuffled.length - 1 && !quizSubmitted) ? 'block' : 'none';
+
+            // If the quiz is submitted, hide both next and submit buttons (results screen is shown)
+            if (quizSubmitted) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questionsShuffled.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function navigateQuestions(direction) {
+            // Ensure an option has been selected before navigating away
+            if (userAnswers[currentQuestionIndex] === undefined) {
+                // If on the first question, allow going back even if no answer is selected.
+                // Otherwise, require an answer to proceed.
+                if (direction === 'next' || currentQuestionIndex > 0) {
+                    alert('Por favor, selecciona una opción antes de avanzar.');
+                    return;
+                }
+            }
+
+            if (direction === 'next') {
+                if (currentQuestionIndex < questionsShuffled.length - 1) {
+                    currentQuestionIndex++;
+                }
+            } else if (direction === 'prev') {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                }
+            }
+            loadQuestion();
+        }
+
+        function calculateScore() {
+            score = 0;
+            let correctAnswersCount = 0;
+            questionsShuffled.forEach((question, qIndex) => {
+                const selectedOptionIndex = userAnswers[qIndex];
+                if (selectedOptionIndex !== undefined && question.options[selectedOptionIndex].correct) {
+                    score += 5; // Each question is worth 5 points
+                    correctAnswersCount++;
+                }
+            });
+            return { score, correctAnswersCount };
+        }
+
+        function showResults() {
+            // Recalculate score one last time to ensure accuracy
+            const { score: finalScore, correctAnswersCount } = calculateScore();
+            const totalQuestions = questionsShuffled.length;
+            let generalFeedback = "";
+
+            if (correctAnswersCount === totalQuestions) {
+                generalFeedback = "¡Excelente! Has respondido todas las preguntas correctamente. Demuestras un profundo conocimiento del Tomo V de 'Bolivia, su Historia'.";
+            } else if (correctAnswersCount >= totalQuestions * 0.75) {
+                generalFeedback = "¡Muy bien! Tienes un gran dominio del contenido. Sigue así y pronto serás un experto.";
+            } else if (correctAnswersCount >= totalQuestions * 0.5) {
+                generalFeedback = "Buen esfuerzo. Has captado las ideas clave, pero hay espacio para mejorar. ¡Sigue revisando el documento!";
+            } else {
+                generalFeedback = "Necesitas repasar un poco más el documento. ¡No te desanimes, con más estudio lo lograrás!";
+            }
+
+            quizSubmitted = true; // Mark quiz as submitted to disable further changes
+
+            quizContent.innerHTML = `
+                <div class="score-card">
+                    <h2 class="text-green-800">¡Cuestionario Terminado!</h2>
+                    <p class="text-green-800">Tu puntuación total es: <span class="font-bold text-2xl">${finalScore} / ${totalQuestions * 5}</span> puntos</p>
+                    <p class="text-green-800">Respuestas correctas: <span class="font-bold">${correctAnswersCount}</span> de <span class="font-bold">${totalQuestions}</span></p>
+                    <p class="text-gray-700 mt-4">${generalFeedback}</p>
+                    <button class="restart-button mt-6" onclick="restartQuiz()">Reiniciar Cuestionario</button>
+                </div>
+            `;
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'none';
+            progressBar.style.width = '100%'; // Mark as complete
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            quizSubmitted = false;
+            shuffleArray(questionsShuffled); // Reshuffle questions for a new attempt
+            loadQuestion();
+            updateNavigationButtons();
+            updateProgressBar();
+        }
+
+        // Initialize quiz
+        document.addEventListener('DOMContentLoaded', () => {
+            questionsShuffled = [...questions]; // Create a copy to shuffle
+            shuffleArray(questionsShuffled);
+            loadQuestion();
+
+            prevBtn.addEventListener('click', () => navigateQuestions('prev'));
+            nextBtn.addEventListener('click', () => navigateQuestions('next')); // No need to check answer here, check in navigateQuestions
+            submitBtn.addEventListener('click', showResults);
+        });
+    </script>
+</body>
+</html>

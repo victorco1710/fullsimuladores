@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo: Protocolo de Drogas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .feedback-correct {
+            border-left: 5px solid #22c55e; /* green-500 */
+        }
+        .feedback-incorrect {
+            border-left: 5px solid #ef4444; /* red-500 */
+        }
+        .option-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .correct-answer {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+        }
+        .incorrect-answer {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+        .disabled-button {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+    <div id="quiz-container" class="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 md:p-10">
+        
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Cuestionario sobre el Protocolo de Prevención de Drogas</h1>
+            <p class="text-gray-600 mb-8">Pon a prueba tus conocimientos sobre el "Protocolo de prevención y actuación ante la presencia, tenencia, consumo y microtráfico de drogas en las unidades educativas".</p>
+            <p class="text-gray-600 mb-8">Recibirás 4 puntos por cada respuesta correcta. ¡Mucha suerte!</p>
+            <button id="start-button" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-lg">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div id="progress-container" class="mb-4">
+                 <div class="flex justify-between items-center mb-2">
+                    <span id="question-counter" class="text-sm font-medium text-gray-600"></span>
+                    <span id="score" class="text-sm font-bold text-blue-600">Puntuación: 0</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+            <h2 id="question-text" class="text-2xl font-semibold mb-6"></h2>
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <div id="feedback-container" class="mt-6 p-4 rounded-lg hidden"></div>
+            <button id="next-button" class="w-full bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-colors duration-300 mt-8 hidden">
+                Siguiente Pregunta
+            </button>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold mb-4">¡Cuestionario Completado!</h2>
+            <p class="text-xl mb-2">Tu puntuación final es:</p>
+            <p id="final-score" class="text-6xl font-extrabold text-blue-600 mb-6"></p>
+            <div id="general-feedback" class="bg-gray-100 p-4 rounded-lg text-gray-700 mb-8"></div>
+            <button id="restart-button" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                Intentar de Nuevo
+            </button>
+        </div>
+        
+        <footer class="text-center text-xs text-gray-500 mt-10">
+            <p>PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el objeto principal del Protocolo?",
+                options: [
+                    "Sancionar a los estudiantes que consumen drogas.",
+                    "Definir lineamientos para la prevención y actuación en casos de drogas en Unidades Educativas.",
+                    "Realizar pruebas de dopaje aleatorias en los colegios.",
+                    "Clausurar las Unidades Educativas donde se encuentren drogas."
+                ],
+                answer: "Definir lineamientos para la prevención y actuación en casos de drogas en Unidades Educativas.",
+                feedback: "Correcto. El objetivo es establecer directrices para la prevención y actuación, salvaguardando la integridad de los estudiantes y dando una respuesta oportuna.",
+                page: 26
+            },
+            {
+                question: "Según la OMS, ¿qué es una 'droga'?",
+                options: [
+                    "Cualquier sustancia ilegal que altera el comportamiento.",
+                    "Solo las sustancias que causan adicción física.",
+                    "Toda sustancia que, introducida en el organismo, altera el funcionamiento del Sistema Nervioso Central y puede crear dependencia.",
+                    "Únicamente los medicamentos que se venden sin receta."
+                ],
+                answer: "Toda sustancia que, introducida en el organismo, altera el funcionamiento del Sistema Nervioso Central y puede crear dependencia.",
+                feedback: "¡Muy bien! Esta definición de la OMS es amplia e incluye la alteración del SNC y el potencial de dependencia física, psicológica o ambas.",
+                page: 18
+            },
+            {
+                question: "El protocolo aborda el consumo de drogas principalmente como un problema de...",
+                options: [
+                    "Salud pública.",
+                    "Delincuencia juvenil.",
+                    "Falta de moral.",
+                    "Indisciplina escolar."
+                ],
+                answer: "Salud pública.",
+                feedback: "Correcto. El documento enfoca el consumo de drogas como un problema de salud pública que afecta a la persona y su entorno, requiriendo apoyo en lugar de un enfoque puramente penal.",
+                page: 17
+            },
+            {
+                question: "¿A quién está dirigida la 'prevención universal'?",
+                options: [
+                    "Solo a estudiantes que ya han consumido drogas.",
+                    "A estudiantes en alto riesgo de consumo.",
+                    "Al conjunto de personas, independientemente de su nivel de riesgo.",
+                    "Únicamente a los padres de familia."
+                ],
+                answer: "Al conjunto de personas, independientemente de su nivel de riesgo.",
+                feedback: "¡Exacto! La prevención universal busca beneficiar a toda la comunidad educativa por igual, fomentando habilidades para la vida y valores.",
+                page: 18
+            },
+            {
+                question: "¿En qué se enfoca la 'prevención selectiva'?",
+                options: [
+                    "En toda la población escolar sin distinción.",
+                    "En sectores de la población con factores de riesgo que los hacen más vulnerables.",
+                    "En personas que ya tienen una adicción establecida.",
+                    "En maestros y personal administrativo."
+                ],
+                answer: "En sectores de la población con factores de riesgo que los hacen más vulnerables.",
+                feedback: "Correcto. La prevención selectiva se dirige a grupos específicos que, por sus características, tienen una mayor probabilidad de desarrollar problemas de consumo.",
+                page: 18
+            },
+            {
+                question: "La 'prevención indicada' está dirigida a...",
+                options: [
+                    "Personas que ya están haciendo consumos sistemáticos de drogas.",
+                    "Niños de primaria para evitar el primer contacto.",
+                    "La comunidad en general.",
+                    "Los directores de las unidades educativas."
+                ],
+                answer: "Personas que ya están haciendo consumos sistemáticos de drogas.",
+                feedback: "¡Así es! La prevención indicada se enfoca en individuos que ya presentan un consumo regular y/o problemas de conducta asociados.",
+                page: 18
+            },
+            {
+                question: "El alcohol y el tabaco son considerados drogas...",
+                options: [
+                    "Ilícitas en todas las circunstancias.",
+                    "Lícitas, pero su consumo por menores de 18 años se considera 'uso indebido'.",
+                    "Que no generan dependencia.",
+                    "Perturbadoras del sistema nervioso."
+                ],
+                answer: "Lícitas, pero su consumo por menores de 18 años se considera 'uso indebido'.",
+                feedback: "Correcto. Aunque son legales para adultos, su consumo por parte de menores de 18 años está prohibido y se clasifica como uso indebido.",
+                page: 20
+            },
+            {
+                question: "Si se encuentra droga lícita (alcohol/tabaco) en la escuela, sin que nadie la posea, ¿qué se debe hacer?",
+                options: [
+                    "Ignorarla para no causar problemas.",
+                    "Llamar inmediatamente a la policía.",
+                    "Recogerla, levantar un acta y destruirla en presencia de la Comisión de Convivencia.",
+                    "Guardarla en la dirección hasta que alguien la reclame."
+                ],
+                answer: "Recogerla, levantar un acta y destruirla en presencia de la Comisión de Convivencia.",
+                feedback: "¡Muy bien! El procedimiento indica recogerla de forma segura, registrar el hecho y proceder a su destrucción con testigos de la comunidad educativa.",
+                page: 29
+            },
+            {
+                question: "Ante el hallazgo de drogas ilícitas en la Unidad Educativa, ¿a quién se debe comunicar de inmediato?",
+                options: [
+                    "Al portero de la escuela.",
+                    "A la junta de padres de familia.",
+                    "A la Fuerza Especial de Lucha Contra el Narcotráfico (FELCN) o a la Policía Boliviana.",
+                    "A los medios de comunicación."
+                ],
+                answer: "A la Fuerza Especial de Lucha Contra el Narcotráfico (FELCN) o a la Policía Boliviana.",
+                feedback: "Correcto. En caso de drogas ilícitas, es mandatorio comunicar a las autoridades competentes (FELCN o Policía) y resguardar el lugar.",
+                page: 29
+            },
+            {
+                question: "Si un estudiante es encontrado con droga lícita (alcohol), un paso fundamental es:",
+                options: [
+                    "Expulsarlo inmediatamente de la escuela.",
+                    "Publicar su nombre para que sirva de ejemplo.",
+                    "Comunicarse con la madre, padre o tutor y solicitar su presencia.",
+                    "Obligarlo a realizar una disculpa pública."
+                ],
+                answer: "Comunicarse con la madre, padre o tutor y solicitar su presencia.",
+                feedback: "¡Exacto! Involucrar a la familia es un paso crucial. Se debe buscar un diálogo reflexivo y evitar medidas estigmatizantes o que vulneren los derechos del estudiante.",
+                page: 32
+            },
+            {
+                question: "Si un estudiante posee droga ilícita, además de la familia, se debe contactar a:",
+                options: [
+                    "Otros estudiantes para que lo aconsejen.",
+                    "La Defensoría de la Niñez y Adolescencia (DNA) y a la FELCN.",
+                    "El psicólogo de la escuela únicamente.",
+                    "No se debe contactar a nadie más para mantener la confidencialidad."
+                ],
+                answer: "La Defensoría de la Niñez y Adolescencia (DNA) y a la FELCN.",
+                feedback: "Correcto. El protocolo es claro: se debe involucrar tanto a la DNA para garantizar los derechos del menor, como a la FELCN por tratarse de una sustancia controlada.",
+                page: 33
+            },
+            {
+                question: "Un principio fundamental en todas las actuaciones del protocolo es:",
+                options: [
+                    "La máxima publicidad de los casos.",
+                    "La presunción de culpabilidad.",
+                    "La confidencialidad y el resguardo de la identidad.",
+                    "La aplicación de castigos físicos."
+                ],
+                answer: "La confidencialidad y el resguardo de la identidad.",
+                feedback: "¡Muy bien! Es vital actuar con discreción y proteger la identidad de los involucrados para no estigmatizar y salvaguardar su integridad.",
+                page: 28
+            },
+            {
+                question: "¿Se puede expulsar o suspender de clases a un estudiante involucrado en un caso de tenencia de drogas?",
+                options: [
+                    "Sí, es la primera medida a tomar.",
+                    "Depende de la cantidad de droga encontrada.",
+                    "No, por ningún motivo se debe vulnerar su derecho a la educación.",
+                    "Sí, pero solo si los padres están de acuerdo."
+                ],
+                answer: "No, por ningún motivo se debe vulnerar su derecho a la educación.",
+                feedback: "Correcto. El protocolo enfatiza que el derecho a la educación es primordial y no debe ser vulnerado. Se deben buscar medidas de apoyo y no de exclusión.",
+                page: 33
+            },
+            {
+                question: "¿Cuál de los siguientes es un factor de riesgo familiar para el consumo de drogas?",
+                options: [
+                    "Comunicación abierta y honesta.",
+                    "Establecimiento de normas claras.",
+                    "Ambientes familiares caóticos o con consumo de drogas por parte de los padres.",
+                    "Demostraciones de afecto y apoyo."
+                ],
+                answer: "Ambientes familiares caóticos o con consumo de drogas por parte de los padres.",
+                feedback: "¡Así es! Un entorno familiar conflictivo, violento o donde se normaliza el consumo, aumenta la probabilidad de que los adolescentes recurran a las drogas.",
+                page: 22
+            },
+            {
+                question: "Un factor de protección clave en la familia es:",
+                options: [
+                    "La falta de supervisión.",
+                    "Un vínculo fuerte entre padres e hijos y muestras de amor y cariño.",
+                    "Ser demasiado permisivo.",
+                    "Ignorar los problemas de los hijos."
+                ],
+                answer: "Un vínculo fuerte entre padres e hijos y muestras de amor y cariño.",
+                feedback: "Correcto. Un lazo afectivo sólido, la comunicación y el apoyo son pilares que protegen a los adolescentes del consumo de sustancias.",
+                page: 24
+            },
+            {
+                question: "Un factor de riesgo en el ámbito escolar es:",
+                options: [
+                    "Un buen desempeño académico.",
+                    "Relaciones de respeto entre maestros y estudiantes.",
+                    "El bajo rendimiento, el fracaso escolar y un clima escolar negativo.",
+                    "La participación en actividades extracurriculares."
+                ],
+                answer: "El bajo rendimiento, el fracaso escolar y un clima escolar negativo.",
+                feedback: "¡Exacto! Las experiencias escolares negativas y un ambiente hostil pueden hacer que el estudiante se sienta insatisfecho y busque refugio en las drogas.",
+                page: 22
+            },
+            {
+                question: "Según el protocolo, una responsabilidad primordial del Director de la Unidad Educativa es:",
+                options: [
+                    "Ignorar los problemas para mantener la reputación de la escuela.",
+                    "Delegar toda la responsabilidad a los maestros.",
+                    "Liderar la construcción del Plan de Convivencia Pacífica y Armónica.",
+                    "Realizar requisas personales a los estudiantes."
+                ],
+                answer: "Liderar la construcción del Plan de Convivencia Pacífica y Armónica.",
+                feedback: "Correcto. El Director debe liderar la creación de este plan con la participación de toda la comunidad educativa como una herramienta clave de prevención.",
+                page: 26
+            },
+            {
+                question: "¿Cuál es un rol importante de las maestras y maestros en la prevención?",
+                options: [
+                    "Actuar como policías dentro del aula.",
+                    "Fomentar el cuidado de la salud y detectar e intervenir tempranamente.",
+                    "Limitarse a enseñar su materia y no involucrarse.",
+                    "Sancionar duramente cualquier sospecha."
+                ],
+                answer: "Fomentar el cuidado de la salud y detectar e intervenir tempranamente.",
+                feedback: "¡Muy bien! Los maestros son actores clave para promover estilos de vida saludables, fortalecer factores de protección y ser los primeros en detectar señales de alerta.",
+                page: 27
+            },
+            {
+                question: "Una señal de alerta física que puede indicar consumo de drogas es:",
+                options: [
+                    "Buenas calificaciones.",
+                    "Participación en deportes.",
+                    "Ojos irritados y rojizos sin causa aparente, o falta de coordinación.",
+                    "Buena higiene personal."
+                ],
+                answer: "Ojos irritados y rojizos sin causa aparente, o falta de coordinación.",
+                feedback: "Correcto. Cambios físicos como ojos enrojecidos, problemas de memoria, falta de coordinación o descuido en la apariencia pueden ser señales a las que hay que prestar atención.",
+                page: 24
+            },
+            {
+                question: "Un cambio de comportamiento que puede ser una señal de alerta es:",
+                options: [
+                    "Mantener las mismas amistades de siempre.",
+                    "Buena comunicación con la familia.",
+                    "Cambios bruscos de personalidad, mentir frecuentemente o aislarse.",
+                    "Cumplir con las tareas escolares."
+                ],
+                answer: "Cambios bruscos de personalidad, mentir frecuentemente o aislarse.",
+                feedback: "¡Así es! Cambios drásticos en el carácter, el grupo de amigos, o faltar a casa son señales conductuales y sociales que requieren una exploración más profunda.",
+                page: 25
+            },
+            {
+                question: "Si un estudiante pide ayuda por su problema de consumo, lo primero que se debe hacer es:",
+                options: [
+                    "Reganarlo y decirle que es su culpa.",
+                    "Contarlo a todos sus compañeros para que lo presionen.",
+                    "Entablar un diálogo directo con él, aplicando la 'escucha activa'.",
+                    "Ignorarlo porque podría ser una mentira."
+                ],
+                answer: "Entablar un diálogo directo con él, aplicando la 'escucha activa'.",
+                feedback: "Correcto. Cuando un estudiante da el paso de pedir ayuda, es fundamental ofrecer un espacio de confianza, escuchar sin juzgar e informar discretamente al director para coordinar el apoyo.",
+                page: 36
+            },
+            {
+                question: "Ante un estudiante con signos de intoxicación por drogas, la prioridad es:",
+                options: [
+                    "Dejarlo solo hasta que se le pase el efecto.",
+                    "Buscar asistencia médica de manera inmediata.",
+                    "Llevarlo a la dirección y esperar a que lleguen sus padres.",
+                    "Preguntarle qué consumió para el registro."
+                ],
+                answer: "Buscar asistencia médica de manera inmediata.",
+                feedback: "¡Exacto! La salud y la vida del estudiante son la máxima prioridad. Se debe contactar a un centro médico y a los padres inmediatamente.",
+                page: 37
+            },
+            {
+                question: "Si se sospecha de venta o microtráfico dentro de la escuela, la Dirección tiene la responsabilidad de:",
+                options: [
+                    "Realizar una investigación por su cuenta.",
+                    "Confrontar directamente a los sospechosos.",
+                    "Denunciar el hecho a la Fuerza Especial de Lucha Contra el Narcotráfico (FELCN).",
+                    "No hacer nada para evitar represalias."
+                ],
+                answer: "Denunciar el hecho a la Fuerza Especial de Lucha Contra el Narcotráfico (FELCN).",
+                feedback: "Correcto. El microtráfico es un delito grave y la responsabilidad de la dirección es denunciarlo a las autoridades competentes, como la FELCN, para que ellos manejen la situación.",
+                page: 39
+            },
+            {
+                question: "El proceso de 'Referencia' en el protocolo significa:",
+                options: [
+                    "Anotar el nombre del estudiante en una lista negra.",
+                    "Darle una buena recomendación académica.",
+                    "Derivar al estudiante a otra instancia de apoyo (DNA, centro de salud, etc.) para recibir ayuda especializada.",
+                    "Cambiarlo de curso o de paralelo."
+                ],
+                answer: "Derivar al estudiante a otra instancia de apoyo (DNA, centro de salud, etc.) para recibir ayuda especializada.",
+                feedback: "¡Muy bien! La referencia es el proceso formal de canalizar el caso a una institución que pueda brindar el apoyo profesional que el estudiante necesita.",
+                page: 41
+            },
+            {
+                question: "La 'Contra Referencia' tiene como objetivo:",
+                options: [
+                    "Devolver al estudiante a la escuela sin ninguna información.",
+                    "Hacer seguimiento activo a la recuperación del estudiante, manteniendo contacto entre la escuela y la instancia de derivación.",
+                    "Referir al estudiante a una tercera institución.",
+                    "Cerrar el caso del estudiante permanentemente."
+                ],
+                answer: "Hacer seguimiento activo a la recuperación del estudiante, manteniendo contacto entre la escuela y la instancia de derivación.",
+                feedback: "¡Exacto! La contra referencia asegura que la escuela se mantenga informada y participe en el proceso de recuperación del estudiante, creando una red de apoyo continua.",
+                page: 41
+            }
+        ];
+
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startButton = document.getElementById('start-button');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        
+        const questionCounter = document.getElementById('question-counter');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const finalScoreDisplay = document.getElementById('final-score');
+        const generalFeedback = document.getElementById('general-feedback');
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function startQuiz() {
+            shuffledQuestions = shuffleArray([...quizData]);
+            currentQuestionIndex = 0;
+            score = 0;
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            scoreDisplay.textContent = `Puntuación: 0`;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            questionCounter.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+            const progressPercentage = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+
+            questionText.textContent = currentQuestion.question;
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('w-full', 'p-4', 'border-2', 'border-gray-300', 'rounded-lg', 'text-left', 'hover:bg-gray-100', 'hover:border-blue-500', 'transition-colors', 'duration-200', 'option-button');
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextButton.classList.add('hidden');
+            feedbackContainer.classList.add('hidden');
+            feedbackContainer.classList.remove('feedback-correct', 'feedback-incorrect');
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correct = selectedButton.textContent === shuffledQuestions[currentQuestionIndex].answer;
+            
+            if (correct) {
+                score += 4;
+                scoreDisplay.textContent = `Puntuación: ${score}`;
+                feedbackContainer.classList.add('feedback-correct');
+            } else {
+                feedbackContainer.classList.add('feedback-incorrect');
+            }
+
+            const feedback = shuffledQuestions[currentQuestionIndex].feedback;
+            const page = shuffledQuestions[currentQuestionIndex].page;
+            feedbackContainer.innerHTML = `<p class="font-semibold">${correct ? '¡Correcto!' : 'Incorrecto.'}</p><p>${feedback}</p><p class="text-sm text-gray-600 mt-2"><em>Consulta la página ${page} del PDF para más información.</em></p>`;
+            feedbackContainer.classList.remove('hidden');
+
+            Array.from(optionsContainer.children).forEach(button => {
+                button.classList.add('disabled-button');
+                if (button.textContent === shuffledQuestions[currentQuestionIndex].answer) {
+                    button.classList.add('correct-answer');
+                } else if (button === selectedButton) {
+                    button.classList.add('incorrect-answer');
+                }
+            });
+
+            if (shuffledQuestions.length > currentQuestionIndex + 1) {
+                nextButton.classList.remove('hidden');
+            } else {
+                const progressPercentage = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+                setTimeout(showResults, 1500);
+            }
+        }
+        
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScoreDisplay.textContent = `${score} / 100`;
+
+            let feedbackText = '';
+            if (score >= 90) {
+                feedbackText = '¡Excelente! Tienes un conocimiento sobresaliente del protocolo. Tu compromiso con un entorno educativo seguro es admirable.';
+            } else if (score >= 70) {
+                feedbackText = '¡Muy bien! Demuestras un buen entendimiento de los procedimientos clave. Sigue repasando para dominar todos los detalles.';
+            } else if (score >= 50) {
+                feedbackText = '¡Buen intento! Conocés las bases, pero hay aspectos importantes que reforzar. Te recomendamos una nueva lectura al documento para afianzar conceptos.';
+            } else {
+                feedbackText = 'Necesitas repasar el protocolo. Te animamos a leer el documento detenidamente para comprender mejor los procedimientos y principios. ¡Cada paso es crucial para la seguridad de los estudiantes!';
+            }
+            generalFeedback.textContent = feedbackText;
+        }
+
+        function handleNextButton() {
+            currentQuestionIndex++;
+            showQuestion();
+            const progressPercentage = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        startButton.addEventListener('click', startQuiz);
+        nextButton.addEventListener('click', handleNextButton);
+        restartButton.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

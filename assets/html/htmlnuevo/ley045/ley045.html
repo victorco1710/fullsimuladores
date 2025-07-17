@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Ley N° 045</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+        }
+        .question-card {
+            background-color: #f9fafb;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            text-align: left;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #374151;
+            font-weight: 500;
+        }
+        .option-button:hover:not(.correct):not(.incorrect) {
+            background-color: #e0e7ff;
+            border-color: #818cf8;
+        }
+        .option-button.selected {
+            background-color: #bfdbfe;
+            border-color: #60a5fa;
+        }
+        .option-button.correct {
+            background-color: #d1fae5;
+            border-color: #34d399;
+            color: #065f46;
+            font-weight: 600;
+        }
+        .option-button.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+            font-weight: 600;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        .feedback.correct {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .feedback.incorrect {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:active {
+            transform: translateY(1px);
+        }
+        .prev-button {
+            background-color: #6b7280;
+            color: #ffffff;
+        }
+        .prev-button:hover {
+            background-color: #4b5563;
+        }
+        .next-button {
+            background-color: #4f46e5;
+            color: #ffffff;
+        }
+        .next-button:hover {
+            background-color: #4338ca;
+        }
+        .submit-button {
+            background-color: #22c55e;
+            color: #ffffff;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .submit-button:hover {
+            background-color: #16a34a;
+        }
+        .results-card {
+            background-color: #f9fafb;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+        .footer-credits {
+            margin-top: 30px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.85em;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            .nav-button {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Cuestionario: Ley N° 045</h1>
+        <div id="quiz-container">
+            <!-- Questions will be loaded here by JavaScript -->
+        </div>
+        <div id="results-container" class="hidden">
+            <div class="results-card">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Resultados del Cuestionario</h2>
+                <p class="text-xl text-gray-700 mb-2">Puntuación Total: <span id="total-score" class="font-bold text-indigo-600"></span> / 100</p>
+                <p id="feedback-message" class="text-lg text-gray-600"></p>
+                <button onclick="restartQuiz()" class="submit-button mt-6 bg-indigo-600 hover:bg-indigo-700">Reiniciar Cuestionario</button>
+            </div>
+        </div>
+        <div class="footer-credits">
+            PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el objeto principal de la Ley N° 045, según el Artículo 1, Parágrafo I?",
+                options: [
+                    "Establecer un marco general para la convivencia social.",
+                    "Promover la diversidad cultural y lingüística en Bolivia.",
+                    "Establecer mecanismos y procedimientos para la prevención y sanción de actos de racismo y discriminación.",
+                    "Garantizar la libertad de expresión en todos los ámbitos."
+                ],
+                answer: "Establecer mecanismos y procedimientos para la prevención y sanción de actos de racismo y discriminación.",
+                feedback: "El Artículo 1, Parágrafo I, establece claramente el objeto de la ley.",
+                page: 1
+            },
+            {
+                question: "Según el Artículo 2, ¿cuál de los siguientes NO es un principio general de la Ley N° 045?",
+                options: [
+                    "Interculturalidad.",
+                    "Transparencia.",
+                    "Igualdad.",
+                    "Equidad."
+                ],
+                answer: "Transparencia.",
+                feedback: "Los principios generales de la Ley N° 045 son Interculturalidad, Igualdad y Equidad. La transparencia no se menciona en este artículo.",
+                page: 1
+            },
+            {
+                question: "¿Qué se entiende por 'Discriminación' según el Artículo 5, inciso a) de la Ley N° 045?",
+                options: [
+                    "Cualquier diferencia de trato basada en la nacionalidad.",
+                    "Toda forma de distinción, exclusión, restricción o preferencia fundada en diversas razones que anule o menoscabe el goce de derechos humanos.",
+                    "Medidas de acción afirmativa para grupos vulnerables.",
+                    "La valoración de diferencias biológicas en perjuicio de un grupo."
+                ],
+                answer: "Toda forma de distinción, exclusión, restricción o preferencia fundada en diversas razones que anule o menoscabe el goce de derechos humanos.",
+                feedback: "La definición de discriminación es amplia y abarca múltiples motivos que afecten el ejercicio de derechos.",
+                page: 2
+            },
+            {
+                question: "¿Cuál es la definición de 'Racismo' de acuerdo con el Artículo 5, inciso c)?",
+                options: [
+                    "La aversión a personas de diferentes culturas.",
+                    "Cualquier teoría que valore diferencias biológicas y/o culturales en provecho de un grupo y en perjuicio de otro para justificar dominación.",
+                    "La negación de oportunidades laborales por origen étnico.",
+                    "La promoción de la diversidad cultural en la sociedad."
+                ],
+                answer: "Cualquier teoría que valore diferencias biológicas y/o culturales en provecho de un grupo y en perjuicio de otro para justificar dominación.",
+                feedback: "El racismo, según la ley, se basa en la justificación de la dominación a través de supuestas superioridades.",
+                page: 3
+            },
+            {
+                question: "¿Qué se entiende por 'Acción Afirmativa' según el Artículo 5, inciso k) de la Ley N° 045?",
+                options: [
+                    "Medidas punitivas contra actos discriminatorios.",
+                    "Campañas de concientización y educación sobre derechos humanos.",
+                    "Medidas y políticas de carácter temporal en favor de sectores en situación de desventaja para superar obstáculos hacia la igualdad real.",
+                    "La imposición de sanciones disciplinarias a infractores."
+                ],
+                answer: "Medidas y políticas de carácter temporal en favor de sectores en situación de desventaja para superar obstáculos hacia la igualdad real.",
+                feedback: "Las acciones afirmativas buscan corregir desigualdades históricas o estructurales.",
+                page: 4
+            },
+            {
+                question: "¿Quién es el encargado de definir y adoptar una política pública de prevención y lucha contra el racismo y toda forma de discriminación, según el Artículo 6?",
+                options: [
+                    "El Ministerio de Justicia.",
+                    "La Defensoría del Pueblo.",
+                    "El Estado Plurinacional de Bolivia.",
+                    "El Comité Nacional contra el Racismo y toda Forma de Discriminación."
+                ],
+                answer: "El Estado Plurinacional de Bolivia.",
+                feedback: "Es un deber del Estado en su conjunto definir y adoptar esta política pública.",
+                page: 4
+            },
+            {
+                question: "En el ámbito educativo, ¿qué deben promover las Universidades e Institutos Normales Superiores según el Artículo 6, I, a)?",
+                options: [
+                    "El diseño de programas de intercambio estudiantil.",
+                    "La implementación de políticas institucionales de prevención y lucha contra el racismo y la discriminación.",
+                    "La creación de nuevas carreras universitarias.",
+                    "La investigación científica en todas las áreas."
+                ],
+                answer: "La implementación de políticas institucionales de prevención y lucha contra el racismo y la discriminación.",
+                feedback: "La ley enfatiza la necesidad de políticas internas en las instituciones educativas para combatir el racismo y la discriminación.",
+                page: 4
+            },
+            {
+                question: "¿Qué se establece en el Artículo 6, III, d) respecto a los medios de comunicación?",
+                options: [
+                    "Deben promover el uso de lenguajes inclusivos.",
+                    "Deben difundir únicamente noticias positivas.",
+                    "Deben eliminar de sus programaciones, lenguajes, expresiones y manifestaciones racistas, xenófobas y otros de contenido discriminatorio.",
+                    "Deben priorizar la información sobre eventos culturales."
+                ],
+                answer: "Deben eliminar de sus programaciones, lenguajes, expresiones y manifestaciones racistas, xenófobas y otros de contenido discriminatorio.",
+                feedback: "La ley impone una responsabilidad clara a los medios de comunicación para evitar la difusión de contenido discriminatorio.",
+                page: 6
+            },
+            {
+                question: "¿Qué entidad está a cargo de la tuición del Comité Nacional contra el Racismo y toda Forma de Discriminación, según el Artículo 7?",
+                options: [
+                    "El Ministerio de Justicia.",
+                    "El Ministerio de la Presidencia.",
+                    "El Ministerio de Culturas a través del Viceministerio de Descolonización.",
+                    "La Procuraduría General del Estado."
+                ],
+                answer: "El Ministerio de Culturas a través del Viceministerio de Descolonización.",
+                feedback: "El Comité se encuentra bajo la tuición del Ministerio de Culturas, específicamente del Viceministerio de Descolonización.",
+                page: 6
+            },
+            {
+                question: "¿Cuántas comisiones conforman el Comité Nacional contra el Racismo y toda Forma de Discriminación, según el Artículo 7?",
+                options: [
+                    "Una comisión.",
+                    "Dos comisiones.",
+                    "Tres comisiones.",
+                    "Cuatro comisiones."
+                ],
+                answer: "Dos comisiones.",
+                feedback: "El Comité está conformado por la Comisión de Lucha contra el Racismo y la Comisión de Lucha contra toda forma de Discriminación.",
+                page: 6
+            },
+            {
+                question: "¿Cuál de las siguientes instituciones NO forma parte del Comité contra el Racismo y toda forma de Discriminación, según el Artículo 8, I, a)?",
+                options: [
+                    "Órgano Judicial.",
+                    "Órgano Legislativo: Comisión de Derechos Humanos de la Cámara de Diputados.",
+                    "Ministerio de Relaciones Exteriores.",
+                    "Gobiernos Autónomos Municipales."
+                ],
+                answer: "Ministerio de Relaciones Exteriores.",
+                feedback: "El Artículo 8 detalla los integrantes del Comité, y el Ministerio de Relaciones Exteriores no figura entre ellos.",
+                page: 7
+            },
+            {
+                question: "¿Cuál es una de las tareas principales del Comité contra el Racismo y toda forma de Discriminación, según el Artículo 9, inciso a)?",
+                options: [
+                    "Administrar los recursos económicos del Estado.",
+                    "Dirigir la elaboración de un Diagnóstico y un Plan Nacional de Acción contra el Racismo y toda Forma de Discriminación.",
+                    "Representar al Estado en foros internacionales.",
+                    "Supervisar la aplicación de sanciones penales."
+                ],
+                answer: "Dirigir la elaboración de un Diagnóstico y un Plan Nacional de Acción contra el Racismo y toda Forma de Discriminación.",
+                feedback: "Una función clave del Comité es la planificación estratégica para combatir el racismo y la discriminación.",
+                page: 7
+            },
+            {
+                question: "¿Qué tipo de información sistematizará y producirá el Comité Nacional Contra el Racismo y toda forma de Discriminación, según el Artículo 10?",
+                options: [
+                    "Datos sobre la diversidad cultural del país.",
+                    "Información sobre los procesos administrativos y judiciales iniciados por causa de racismo y toda forma de discriminación.",
+                    "Estudios sobre el impacto económico de la discriminación.",
+                    "Registros de organizaciones sociales."
+                ],
+                answer: "Información sobre los procesos administrativos y judiciales iniciados por causa de racismo y toda forma de discriminación.",
+                feedback: "El Comité tiene la función de registrar y dar seguimiento a los casos de racismo y discriminación.",
+                page: 8
+            },
+            {
+                question: "¿Qué vías pueden optar las personas que hubiesen sufrido actos de racismo o discriminación, según el Artículo 12?",
+                options: [
+                    "Únicamente la vía penal.",
+                    "La vía constitucional, administrativa o disciplinaria y/o penal.",
+                    "Solo la vía administrativa.",
+                    "La vía civil y la vía laboral."
+                ],
+                answer: "La vía constitucional, administrativa o disciplinaria y/o penal.",
+                feedback: "La ley ofrece múltiples vías para la protección de las víctimas, dependiendo de la naturaleza del acto.",
+                page: 8
+            },
+            {
+                question: "¿Cuál de las siguientes conductas NO constituye una falta en el ejercicio de la función pública, según el Artículo 13, I?",
+                options: [
+                    "Agresiones verbales fundadas en motivos racistas y/o discriminatorios.",
+                    "Denegación de acceso al servicio por motivos racistas y/o discriminatorios.",
+                    "Maltrato físico, psicológico y sexual por motivos racistas y discriminatorios que no constituya delito.",
+                    "Críticas constructivas al desempeño laboral."
+                ],
+                answer: "Críticas constructivas al desempeño laboral.",
+                feedback: "Las faltas descritas se refieren específicamente a actos de racismo o discriminación, no a la crítica constructiva.",
+                page: 9
+            },
+            {
+                question: "¿Qué debe hacer la institución pública si en un proceso administrativo o interno se determina la existencia de responsabilidad penal, según el Artículo 13, V?",
+                options: [
+                    "Archivar el caso.",
+                    "Remitir el caso al Ministerio Público.",
+                    "Aplicar únicamente sanciones administrativas.",
+                    "Resolver el caso internamente sin intervención externa."
+                ],
+                answer: "Remitir el caso al Ministerio Público.",
+                feedback: "Si hay indicios de delito, la institución debe derivar el caso a la instancia penal correspondiente.",
+                page: 9
+            },
+            {
+                question: "¿Qué debe incluir la modificación de los Reglamentos Internos de Personal en instituciones públicas, según el Artículo 13, IV?",
+                options: [
+                    "Nuevas políticas de vacaciones.",
+                    "Las faltas descritas en el parágrafo I del Artículo 13 como causal de inicio de proceso interno y motivo de sanción administrativa o disciplinaria.",
+                    "Un código de vestimenta para los empleados.",
+                    "Procedimientos para la evaluación de desempeño."
+                ],
+                answer: "Las faltas descritas en el parágrafo I del Artículo 13 como causal de inicio de proceso interno y motivo de sanción administrativa o disciplinaria.",
+                feedback: "Es fundamental que los reglamentos internos reflejen las nuevas faltas y sanciones establecidas por la ley.",
+                page: 9
+            },
+            {
+                question: "¿Qué sanción se aplica por primera vez a los locales o establecimientos de atención, servicio o entretenimiento abiertos al público que restrinjan ilegalmente el ingreso, según el Artículo 15, I?",
+                options: [
+                    "Una multa económica.",
+                    "Clausura por tres días.",
+                    "Suspensión de licencia de funcionamiento.",
+                    "Advertencia formal."
+                ],
+                answer: "Clausura por tres días.",
+                feedback: "La ley establece sanciones progresivas para la restricción ilegal de acceso a locales públicos.",
+                page: 10
+            },
+            {
+                question: "¿Qué texto es obligatorio exhibir en el ingreso a los establecimientos públicos y privados de atención, servicio o entretenimiento abiertos al público, según el Artículo 15, III?",
+                options: [
+                    "'Prohibido discriminar'.",
+                    "'Respeto a la diversidad'.",
+                    "'Todas las personas son iguales ante la Ley'.",
+                    "'Espacio libre de racismo'."
+                ],
+                answer: "'Todas las personas son iguales ante la Ley'.",
+                feedback: "Este cartel busca promover la igualdad y la no discriminación de manera visible.",
+                page: 10
+            },
+            {
+                question: "¿Qué sanción puede recibir un medio de comunicación que autorice y publique ideas racistas y discriminatorias, según el Artículo 16?",
+                options: [
+                    "Una advertencia pública.",
+                    "Sanciones económicas y suspensión de licencia de funcionamiento.",
+                    "La obligación de emitir disculpas.",
+                    "La revocación de su personería jurídica."
+                ],
+                answer: "Sanciones económicas y suspensión de licencia de funcionamiento.",
+                feedback: "La ley prevé sanciones severas para los medios que difundan contenido racista o discriminatorio.",
+                page: 10
+            },
+            {
+                question: "¿Qué sucede si una persona sindicada de insultos u otras agresiones verbales por motivos racistas o discriminatorios se retracta antes o a tiempo de la imputación formal, según el Artículo 281 octies, II?",
+                options: [
+                    "La pena se reduce a la mitad.",
+                    "La acción penal quedará extinguida.",
+                    "Se le impone una multa adicional.",
+                    "Debe realizar trabajo comunitario obligatorio."
+                ],
+                answer: "La acción penal quedará extinguida.",
+                feedback: "La retractación oportuna puede extinguir la acción penal en este tipo de delitos.",
+                page: 13
+            },
+            {
+                question: "¿Cuál es la pena privativa de libertad para el delito de 'Racismo' según el Artículo 281 bis, I?",
+                options: [
+                    "Uno a tres años.",
+                    "Dos a cinco años.",
+                    "Tres a siete años.",
+                    "Cinco a diez años."
+                ],
+                answer: "Tres a siete años.",
+                feedback: "El delito de racismo tiene una pena privativa de libertad significativa.",
+                page: 11
+            },
+            {
+                question: "¿Cuándo se agrava la sanción para el delito de 'Discriminación' (Artículo 281 ter, I)?",
+                options: [
+                    "Cuando el hecho es cometido por un particular en un espacio privado.",
+                    "Cuando el hecho es cometido sin violencia.",
+                    "Cuando el hecho es cometido por una servidora o servidor público o autoridad pública.",
+                    "Cuando el hecho es cometido por primera vez."
+                ],
+                answer: "Cuando el hecho es cometido por una servidora o servidor público o autoridad pública.",
+                feedback: "La ley establece agravantes cuando el delito es cometido por personas con autoridad o en el ejercicio de una función pública.",
+                page: 12
+            },
+            {
+                question: "¿Cuál es la pena privativa de libertad para el delito de 'Difusión e Incitación al Racismo o a la Discriminación' según el Artículo 281 quater?",
+                options: [
+                    "Seis meses a dos años.",
+                    "Uno a cinco años.",
+                    "Dos a seis años.",
+                    "Tres a ocho años."
+                ],
+                answer: "Uno a cinco años.",
+                feedback: "La difusión e incitación al racismo o la discriminación también conlleva una pena privativa de libertad.",
+                page: 12
+            },
+            {
+                question: "¿Qué se modifica en el Código Penal con el Artículo 22 de la Ley N° 045?",
+                options: [
+                    "El Título I del Libro Primero.",
+                    "El Título VIII del Libro Segundo, que pasa a denominarse 'Delitos Contra la Vida, la Integridad y la Dignidad del Ser Humano'.",
+                    "El Capítulo III del Libro Tercero.",
+                    "El Artículo 100 del Código Penal."
+                ],
+                answer: "El Título VIII del Libro Segundo, que pasa a denominarse 'Delitos Contra la Vida, la Integridad y la Dignidad del Ser Humano'.",
+                feedback: "Esta modificación redenomina un título importante del Código Penal para incluir la dignidad del ser humano.",
+                page: 11
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let shuffledQuestions = [];
+
+        // Function to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = ''; // Clear previous question
+
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                showResults();
+                return;
+            }
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            const questionCard = document.createElement('div');
+            questionCard.className = 'question-card';
+            questionCard.innerHTML = `
+                <p class="text-lg font-semibold text-gray-700 mb-4">Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}:</p>
+                <p class="text-xl font-bold text-gray-900 mb-6">${q.question}</p>
+                <div class="options-container">
+                    ${q.options.map((option, index) => `
+                        <button class="option-button" data-option="${option}" data-index="${index}">
+                            ${option}
+                        </button>
+                    `).join('')}
+                </div>
+                <div id="feedback-${currentQuestionIndex}" class="feedback hidden"></div>
+                <div class="navigation-buttons">
+                    <button class="nav-button prev-button ${currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''}" onclick="prevQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>
+                        Anterior
+                    </button>
+                    <button class="nav-button next-button" onclick="nextQuestion()">
+                        ${currentQuestionIndex === shuffledQuestions.length - 1 ? 'Finalizar Cuestionario' : 'Siguiente'}
+                    </button>
+                </div>
+            `;
+            quizContainer.appendChild(questionCard);
+
+            const optionButtons = questionCard.querySelectorAll('.option-button');
+            optionButtons.forEach(button => {
+                button.addEventListener('click', () => selectOption(button, q.answer, q.feedback, q.page));
+            });
+
+            // Restore selected answer if exists
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const selectedButton = questionCard.querySelector(`[data-option="${userAnswers[currentQuestionIndex].selectedOption}"]`);
+                if (selectedButton) {
+                    selectedButton.classList.add('selected');
+                    // Show feedback immediately if already answered
+                    const feedbackDiv = document.getElementById(`feedback-${currentQuestionIndex}`);
+                    feedbackDiv.classList.remove('hidden');
+                    feedbackDiv.innerHTML = userAnswers[currentQuestionIndex].feedbackText;
+                    if (userAnswers[currentQuestionIndex].isCorrect) {
+                        selectedButton.classList.add('correct');
+                        feedbackDiv.classList.add('correct');
+                    } else {
+                        selectedButton.classList.add('incorrect');
+                        feedbackDiv.classList.add('incorrect');
+                        // Highlight correct answer if incorrect
+                        const correctAnswerButton = questionCard.querySelector(`[data-option="${q.answer}"]`);
+                        if (correctAnswerButton) {
+                            correctAnswerButton.classList.add('correct');
+                        }
+                    }
+                    optionButtons.forEach(btn => btn.disabled = true); // Disable further selection
+                }
+            }
+        }
+
+        function selectOption(selectedButton, correctAnswer, feedbackText, page) {
+            const optionsContainer = selectedButton.closest('.options-container');
+            const allButtons = optionsContainer.querySelectorAll('.option-button');
+            const feedbackDiv = document.getElementById(`feedback-${currentQuestionIndex}`);
+
+            // Disable all buttons after selection
+            allButtons.forEach(button => {
+                button.disabled = true;
+                button.classList.remove('selected'); // Remove selected from others if any
+            });
+
+            const isCorrect = selectedButton.dataset.option === correctAnswer;
+            selectedButton.classList.add('selected');
+
+            let currentFeedback = '';
+            if (isCorrect) {
+                selectedButton.classList.add('correct');
+                feedbackDiv.classList.add('correct');
+                currentFeedback = `¡Correcto! ${feedbackText} (Página ${page})`;
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackDiv.classList.add('incorrect');
+                currentFeedback = `Incorrecto. La respuesta correcta era: "${correctAnswer}". ${feedbackText} (Página ${page})`;
+                // Highlight the correct answer
+                const correctButton = optionsContainer.querySelector(`[data-option="${correctAnswer}"]`);
+                if (correctButton) {
+                    correctButton.classList.add('correct');
+                }
+            }
+            feedbackDiv.innerHTML = currentFeedback;
+            feedbackDiv.classList.remove('hidden');
+
+            // Store user's answer and feedback
+            userAnswers[currentQuestionIndex] = {
+                selectedOption: selectedButton.dataset.option,
+                isCorrect: isCorrect,
+                feedbackText: currentFeedback
+            };
+        }
+
+        function nextQuestion() {
+            if (userAnswers[currentQuestionIndex] === null) {
+                alert("Por favor, selecciona una opción antes de continuar.");
+                return;
+            }
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('results-container').classList.remove('hidden');
+
+            score = 0;
+            userAnswers.forEach((answer, index) => {
+                if (answer && answer.isCorrect) {
+                    score += 4; // Each question is worth 4 points
+                }
+            });
+
+            document.getElementById('total-score').textContent = score;
+
+            let feedbackMessage = '';
+            if (score === 100) {
+                feedbackMessage = "¡Felicidades! Has respondido todas las preguntas correctamente. ¡Estás muy bien preparado!";
+            } else if (score >= 80) {
+                feedbackMessage = "¡Excelente trabajo! Tienes un gran dominio de la Ley N° 045. Sigue repasando los puntos débiles.";
+            } else if (score >= 60) {
+                feedbackMessage = "Buen esfuerzo. Has comprendido los conceptos clave, pero hay áreas que necesitan más repaso.";
+            } else {
+                feedbackMessage = "Necesitas repasar más a fondo la Ley N° 045. ¡No te desanimes, con más estudio lo lograrás!";
+            }
+            document.getElementById('feedback-message').textContent = feedbackMessage;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = new Array(questions.length).fill(null);
+            shuffledQuestions = shuffleArray([...questions]); // Reshuffle for a new quiz
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('results-container').classList.add('hidden');
+            loadQuestion();
+        }
+
+        // Initialize the quiz
+        document.addEventListener('DOMContentLoaded', () => {
+            shuffledQuestions = shuffleArray([...questions]);
+            loadQuestion();
+        });
+    </script>
+</body>
+</html>

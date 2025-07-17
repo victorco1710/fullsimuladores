@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .question-card {
+            background-color: #f8fafc;
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .question-text {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        .options-grid {
+            display: grid;
+            gap: 10px;
+        }
+        .option-button {
+            background-color: #edf2f7;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            padding: 12px 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+            font-size: 0.95em;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .option-button:hover:not(.correct):not(.incorrect) {
+            background-color: #e2e8f0;
+            border-color: #a0aec0;
+            transform: translateY(-2px);
+        }
+        .option-button.selected {
+            border-color: #4299e1;
+            background-color: #ebf8ff;
+        }
+        .option-button.correct {
+            background-color: #c6f6d5;
+            border-color: #38a169;
+            color: #276749;
+            font-weight: 600;
+        }
+        .option-button.incorrect {
+            background-color: #fed7d7;
+            border-color: #e53e3e;
+            color: #9b2c2c;
+            font-weight: 600;
+        }
+        .feedback-text {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+        .feedback-text.correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .feedback-text.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .quiz-button {
+            background-color: #4299e1;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 10px rgba(66, 153, 225, 0.3);
+        }
+        .quiz-button:hover:not(:disabled) {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+        }
+        .quiz-button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 5px;
+            height: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #38a169;
+            width: 0%;
+            border-radius: 5px;
+            transition: width 0.3s ease-in-out;
+        }
+        .score-section {
+            background-color: #e6fffa;
+            border: 2px solid #38a169;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        .score-section h2 {
+            font-size: 2em;
+            color: #276749;
+            margin-bottom: 10px;
+        }
+        .score-section p {
+            font-size: 1.2em;
+            color: #2d3748;
+        }
+        .footer-credits {
+            margin-top: 20px;
+            font-size: 0.85em;
+            color: #718096;
+            width: 100%;
+            text-align: right;
+            padding-right: 10px;
+        }
+        .radio-input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #a0aec0;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: border-color 0.3s;
+        }
+        .radio-input:checked {
+            border-color: #4299e1;
+        }
+        .radio-input:checked::before {
+            content: '';
+            display: block;
+            width: 10px;
+            height: 10px;
+            background-color: #4299e1;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .option-button.correct .radio-input {
+            border-color: #38a169;
+        }
+        .option-button.correct .radio-input::before {
+            background-color: #38a169;
+        }
+        .option-button.incorrect .radio-input {
+            border-color: #e53e3e;
+        }
+        .option-button.incorrect .radio-input::before {
+            background-color: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-app" class="quiz-container">
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="question-card" class="question-card">
+            <!-- Question will be loaded here -->
+        </div>
+        <div class="navigation-buttons">
+            <button id="prev-button" class="quiz-button" disabled>Anterior</button>
+            <button id="next-button" class="quiz-button">Siguiente</button>
+        </div>
+        <div id="score-section" class="score-section hidden">
+            <!-- Score will be displayed here -->
+        </div>
+        <div class="footer-credits">
+            Desarrollado por Victor Crespo
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es uno de los desafíos a los que se enfrenta la sociedad en relación con la conservación del ambiente y el manejo sostenible de los recursos naturales?",
+                options: [
+                    "Aumentar la contaminación del aire.",
+                    "Generar conocimientos, habilidades, prácticas, actitudes y valores.",
+                    "Disminuir la disponibilidad de recursos naturales.",
+                    "Promover el uso indiscriminado de plaguicidas."
+                ],
+                answer: 1, // Index of the correct option
+                feedback: "La formación en conocimientos, habilidades, prácticas, actitudes y valores es clave para la conservación ambiental.",
+                page: 1
+            },
+            {
+                question: "¿Qué teoría explica la formación de cadenas montañosas como la Cordillera de los Andes?",
+                options: [
+                    "Teoría de la Gravedad.",
+                    "Teoría de la Tectónica de Placas o Deriva Continental.",
+                    "Teoría de la Expansión Oceánica.",
+                    "Teoría de la Contracción Terrestre."
+                ],
+                answer: 1,
+                feedback: "La Tectónica de Placas explica el movimiento de los continentes y la formación de grandes cadenas montañosas.",
+                page: 4
+            },
+            {
+                question: "¿Qué porcentaje de la extensión de Bolivia cubre la región andina?",
+                options: [
+                    "25%",
+                    "38%",
+                    "50%",
+                    "62%"
+                ],
+                answer: 1,
+                feedback: "La región andina abarca un 38% del territorio boliviano.",
+                page: 9
+            },
+            {
+                question: "¿Qué tipo de relieve presenta la Cordillera Occidental de los Andes en Bolivia?",
+                options: [
+                    "Relieve plano con extensas mesetas.",
+                    "Relieve ondulado con valles anchos.",
+                    "Relieve abrupto, bastante erosionado, con formaciones volcánicas activas.",
+                    "Relieve de suaves colinas y depresiones."
+                ],
+                answer: 2,
+                feedback: "La Cordillera Occidental se caracteriza por su relieve abrupto y evidencia de vulcanismo.",
+                page: 9
+            },
+            {
+                question: "¿Cuál de los siguientes lagos NO es mencionado como parte de la cuenca cerrada o endorreica del Altiplano?",
+                options: [
+                    "Lago Titicaca",
+                    "Lago Poopó",
+                    "Lago Superior",
+                    "Salar de Uyuni"
+                ],
+                answer: 2,
+                feedback: "El Lago Superior no es parte de la cuenca endorreica boliviana mencionada.",
+                page: 9
+            },
+            {
+                question: "¿Cómo se formaron las llanuras o planicies aluviales del oriente de Bolivia?",
+                options: [
+                    "Por el levantamiento del macizo andino.",
+                    "Sobre el Escudo Precámbrico, cubierto por la acumulación y depósito de sedimentos.",
+                    "Por la actividad volcánica intensa.",
+                    "Debido a la sequía extrema y la erosión eólica."
+                ],
+                answer: 1,
+                feedback: "Se formaron sobre el Escudo Precámbrico debido a la acumulación de sedimentos.",
+                page: 7
+            },
+            {
+                question: "¿Qué evento geológico importante sufrió el muro Cordillerano a la altura del 'codo de Santa Cruz' en el Terciario?",
+                options: [
+                    "Una glaciación intensa.",
+                    "Un cambio de dirección debido al choque con el borde cratónico del Escudo Brasilero.",
+                    "Una serie de terremotos de gran magnitud.",
+                    "La formación de nuevos lagos y salares."
+                ],
+                answer: 1,
+                feedback: "El 'codo de Santa Cruz' es resultado del choque del muro Cordillerano con el Escudo Precámbrico.",
+                page: 7
+            },
+            {
+                question: "¿Qué porcentaje del territorio boliviano cubre la Cuenca del Amazonas?",
+                options: [
+                    "50%",
+                    "66%",
+                    "75%",
+                    "88%"
+                ],
+                answer: 3,
+                feedback: "La Cuenca del Amazonas es la más grande de Bolivia, abarcando el 88% del territorio.",
+                page: 32
+            },
+            {
+                question: "¿Qué porcentaje del territorio boliviano cubre la Cuenca del Río de la Plata?",
+                options: [
+                    "10%",
+                    "15%",
+                    "20%",
+                    "25%"
+                ],
+                answer: 1,
+                feedback: "La Cuenca del Río de la Plata cubre aproximadamente el 15% del territorio boliviano.",
+                page: 34
+            },
+            {
+                question: "¿Qué porcentaje del territorio boliviano abarca la Cuenca Endorreica o del Altiplano?",
+                options: [
+                    "5.5%",
+                    "10.5%",
+                    "15.5%",
+                    "20.5%"
+                ],
+                answer: 0,
+                feedback: "La Cuenca Endorreica o del Altiplano representa el 5.5% del territorio boliviano.",
+                page: 35
+            },
+            {
+                question: "¿Cuál de los siguientes es un factor determinante del clima en Bolivia?",
+                options: [
+                    "La distancia de los océanos.",
+                    "La presencia de montañas y la altura.",
+                    "La actividad volcánica constante.",
+                    "Los patrones de migración de aves."
+                ],
+                answer: 1,
+                feedback: "La presencia de la Cordillera de los Andes y las diferencias de altura influyen significativamente en el clima.",
+                page: 46
+            },
+            {
+                question: "¿Qué es el fenómeno de 'El Niño'?",
+                options: [
+                    "Un evento geológico que causa terremotos.",
+                    "Un cambio en la dirección del viento en las montañas.",
+                    "Un fenómeno climático global que afecta a Bolivia.",
+                    "Un periodo de sequía prolongada."
+                ],
+                answer: 2,
+                feedback: "El Niño' es un fenómeno climático global con impactos significativos en Bolivia.",
+                page: 60
+            },
+            {
+                question: "¿Cuál es una de las consecuencias principales del fenómeno de 'El Niño' en Bolivia mencionada en el texto?",
+                options: [
+                    "Aumento de la producción agrícola.",
+                    "Disminución de las lluvias en todo el país.",
+                    "Inundaciones y pérdidas en la agricultura.",
+                    "Temperaturas extremadamente bajas."
+                ],
+                answer: 2,
+                feedback: "El Niño' suele causar inundaciones y afectar la producción agrícola en Bolivia.",
+                page: 61
+            },
+            {
+                question: "¿Qué es el efecto invernadero, según el documento?",
+                options: [
+                    "Un fenómeno natural que permite la vida en la Tierra al retener calor.",
+                    "Un tipo de contaminación del aire causada por fábricas.",
+                    "La erosión de los suelos por el viento.",
+                    "La formación de salares en el altiplano."
+                ],
+                answer: 0,
+                feedback: "El efecto invernadero es un proceso natural esencial para mantener la temperatura del planeta.",
+                page: 64
+            },
+            {
+                question: "¿Cuál es la principal causa del cambio climático mencionada en el texto?",
+                options: [
+                    "Las eruppciones volcánicas.",
+                    "Las fluctuaciones naturales del clima.",
+                    "El aumento de los gases de efecto invernadero por actividades humanas.",
+                    "La disminución de la capa de ozono."
+                ],
+                answer: 2,
+                feedback: "El aumento de los gases de efecto invernadero debido a la actividad humana es la causa principal del cambio climático.",
+                page: 64
+            },
+            {
+                question: "¿Qué porcentaje de la superficie de Bolivia se encuentra en proceso de desertificación o en riesgo de ello?",
+                options: [
+                    "25%",
+                    "50%",
+                    "75%",
+                    "88%"
+                ],
+                answer: 2,
+                feedback: "Aproximadamente el 75% del territorio boliviano se ve afectado por la desertificación o está en riesgo.",
+                page: 82
+            },
+            {
+                question: "¿Qué se considera la 'base estructural y factor condicionante de la vegetación'?",
+                options: [
+                    "El clima.",
+                    "El relieve.",
+                    "El agua.",
+                    "El suelo."
+                ],
+                answer: 3,
+                feedback: "El suelo es fundamental para el desarrollo de la vegetación.",
+                page: 74
+            },
+            {
+                question: "¿Cuál es la composición aproximada de materia orgánica en el suelo según el documento?",
+                options: [
+                    "Menos del 1%",
+                    "5-10%",
+                    "20-30%",
+                    "Más del 50%"
+                ],
+                answer: 1,
+                feedback: "La materia orgánica constituye una pequeña pero vital parte del suelo.",
+                page: 75
+            },
+            {
+                question: "¿Qué porcentaje del volumen del suelo está compuesto por minerales y materia orgánica?",
+                options: [
+                    "25%",
+                    "30%",
+                    "40%",
+                    "50%"
+                ],
+                answer: 3,
+                feedback: "Los minerales y la materia orgánica representan aproximadamente el 50% del volumen del suelo.",
+                page: 75
+            },
+            {
+                question: "¿Qué porcentaje del volumen del suelo está ocupado por agua y aire?",
+                options: [
+                    "25%",
+                    "30%",
+                    "40%",
+                    "50%"
+                ],
+                answer: 3,
+                feedback: "Los espacios porosos ocupados por agua y aire también suman aproximadamente el 50%.",
+                page: 75
+            },
+            {
+                question: "¿Qué tipo de uso de suelo predomina en Bolivia, según el documento?",
+                options: [
+                    "Uso agrícola intensivo.",
+                    "Tierras con aptitud para la actividad forestal (bosques).",
+                    "Áreas urbanas.",
+                    "Tierras para la ganadería."
+                ],
+                answer: 1,
+                feedback: "Las tierras con aptitud forestal (bosques) representan el mayor porcentaje de uso potencial del suelo en Bolivia.",
+                page: 79
+            },
+            {
+                question: "¿Cuál es una amenaza ambiental constante y creciente para los suelos en Bolivia?",
+                options: [
+                    "La fertilización excesiva.",
+                    "La erosión.",
+                    "La reforestación.",
+                    "La agricultura de conservación."
+                ],
+                answer: 1,
+                feedback: "La erosión es una amenaza significativa para los suelos en Bolivia.",
+                page: 80
+            },
+            {
+                question: "¿Qué causa principalmente la desertificación?",
+                options: [
+                    "El aumento de la biodiversidad.",
+                    "Las prácticas de manejo sostenible del suelo.",
+                    "La combinación de factores climáticos y actividades humanas.",
+                    "La implementación de áreas protegidas."
+                ],
+                answer: 2,
+                feedback: "La desertificación es un proceso complejo influenciado por el clima y, en gran medida, por las actividades humanas.",
+                page: 81
+            },
+            {
+                question: "¿Cómo se puede mitigar el cambio climático según las acciones sugeridas en el documento?",
+                options: [
+                    "Aumentando el uso de combustibles fósiles.",
+                    "Reduciendo las emisiones de gases de efecto invernadero.",
+                    "Ignorando los informes científicos.",
+                    "Incrementando la deforestación."
+                ],
+                answer: 1,
+                feedback: "Reducir las emisiones de gases de efecto invernadero es fundamental para mitigar el cambio climático.",
+                page: 67
+            },
+            {
+                question: "¿Quién es la autora del 'Módulo de Formación Ambiental: La Conservación de la Diversidad Biológica en Bolivia'?",
+                options: [
+                    "Victor Crespo",
+                    "Sylvia Estenssoro Cernadas",
+                    "Morales (1990)",
+                    "Villca y Olivera (2006)"
+                ],
+                answer: 1,
+                feedback: "Sylvia Estenssoro Cernadas es la autora principal del módulo.",
+                page: 2
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let shuffledQuestions = [];
+
+        const questionCard = document.getElementById('question-card');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreSection = document.getElementById('score-section');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                displayResults();
+                return;
+            }
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            questionCard.innerHTML = `
+                <div class="question-text">${currentQuestionIndex + 1}. ${q.question}</div>
+                <div class="options-grid">
+                    ${q.options.map((option, index) => `
+                        <label class="option-button group ${userAnswers[currentQuestionIndex] === index ? (index === q.answer ? 'correct' : 'incorrect') : ''}">
+                            <input type="radio" name="question-${currentQuestionIndex}" value="${index}" class="radio-input" ${userAnswers[currentQuestionIndex] !== null && userAnswers[currentQuestionIndex] !== index ? 'disabled' : ''} ${userAnswers[currentQuestionIndex] === index ? 'checked' : ''}>
+                            <span>${option}</span>
+                        </label>
+                    `).join('')}
+                </div>
+                ${userAnswers[currentQuestionIndex] !== null ? `
+                    <div class="feedback-text ${userAnswers[currentQuestionIndex] === q.answer ? 'correct' : 'incorrect'}">
+                        <strong>${userAnswers[currentQuestionIndex] === q.answer ? '¡Correcto!' : '¡Incorrecto!'}</strong> ${q.feedback} (Página del PDF: ${q.page})
+                    </div>
+                ` : ''}
+            `;
+
+            document.querySelectorAll(`input[name="question-${currentQuestionIndex}"]`).forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    const selectedOption = parseInt(event.target.value);
+                    userAnswers[currentQuestionIndex] = selectedOption;
+                    evaluateAnswer(selectedOption);
+                    loadQuestion(); // Reload to show feedback immediately
+                });
+            });
+
+            updateNavigationButtons();
+            updateProgressBar();
+            scrollToTop();
+        }
+
+        function evaluateAnswer(selectedOption) {
+            const q = shuffledQuestions[currentQuestionIndex];
+            if (selectedOption === q.answer) {
+                // If the user already answered this question correctly, don't add points again.
+                // This check is important because `evaluateAnswer` is called on every change.
+                // If it was previously incorrect, and now correct, then add points.
+                if (q.isAnsweredCorrectly === false || q.isAnsweredCorrectly === undefined) {
+                    score += 4;
+                    q.isAnsweredCorrectly = true;
+                }
+            } else {
+                // Mark as incorrect if chosen answer is wrong.
+                q.isAnsweredCorrectly = false;
+            }
+        }
+
+
+        function updateNavigationButtons() {
+            prevButton.disabled = currentQuestionIndex === 0;
+            nextButton.disabled = userAnswers[currentQuestionIndex] === null;
+
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                nextButton.textContent = 'Ver Resultados';
+            } else {
+                nextButton.textContent = 'Siguiente';
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function displayResults() {
+            questionCard.classList.add('hidden');
+            navigationButtons.classList.add('hidden');
+            progressBar.parentElement.classList.add('hidden'); // Hide progress bar container
+
+            let feedbackMessage = '';
+            if (score === 100) {
+                feedbackMessage = "¡Felicidades! Has respondido todas las preguntas correctamente. Eres un experto en la conservación de la diversidad biológica en Bolivia.";
+            } else if (score >= 80) {
+                feedbackMessage = "¡Excelente trabajo! Tienes un gran conocimiento sobre el tema. Sigue así.";
+            } else if (score >= 60) {
+                feedbackMessage = "Buen esfuerzo. Has demostrado un conocimiento sólido, pero hay áreas que puedes reforzar.";
+            } else {
+                feedbackMessage = "Necesitas repasar algunos conceptos clave. ¡No te desanimes, sigue aprendiendo!";
+            }
+
+            scoreSection.classList.remove('hidden');
+            scoreSection.innerHTML = `
+                <h2 class="text-green-700">Cuestionario Completado</h2>
+                <p class="font-bold text-2xl mb-4">Puntuación Total: ${score} / 100</p>
+                <p class="text-lg">${feedbackMessage}</p>
+                <button id="restart-quiz" class="quiz-button mt-6 bg-purple-600 hover:bg-purple-700">Reiniciar Cuestionario</button>
+            `;
+
+            document.getElementById('restart-quiz').addEventListener('click', () => {
+                currentQuestionIndex = 0;
+                score = 0;
+                userAnswers = new Array(questions.length).fill(null);
+                shuffledQuestions = shuffleArray([...questions]);
+                questionCard.classList.remove('hidden');
+                navigationButtons.classList.remove('hidden');
+                progressBar.parentElement.classList.remove('hidden'); // Show progress bar container
+                scoreSection.classList.add('hidden');
+                loadQuestion();
+            });
+            scrollToTop();
+        }
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex < shuffledQuestions.length - 1 && userAnswers[currentQuestionIndex] !== null) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else if (currentQuestionIndex === shuffledQuestions.length - 1 && userAnswers[currentQuestionIndex] !== null) {
+                displayResults();
+            }
+        });
+
+        // Initial load
+        shuffledQuestions = shuffleArray([...questions]);
+        loadQuestion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Biodesarrollo y Diálogo Interreligioso</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* Verde muy claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            padding: 30px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .question-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid #7ae9c0; /* Verde esmeralda */
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: 1px solid #D1FAE5; /* Verde claro */
+            background-color: #F0FDF4; /* Verde muy claro */
+            color: #082b20; /* Verde esmeralda oscuro */
+            text-align: left;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .option-button:hover:not(.selected):not(.correct):not(.incorrect) {
+            background-color: #D1FAE5; /* Verde más claro al pasar el ratón */
+            color: #065F46; /* Verde oscuro */
+        }
+        .option-button.selected {
+            border-color: #10B981; /* Verde esmeralda */
+            background-color: #A7F3D0; /* Verde medio */
+            color: #065F46; /* Verde oscuro */
+        }
+        .option-button.correct {
+            background-color: #34D399; /* Verde correcto */
+            color: #1b0f0f;
+            border-color: #065F46;
+            font-weight: bold;
+        }
+        .option-button.incorrect {
+            background-color: #EF4444; /* Rojo incorrecto */
+            color: #FFFFFF;
+            border-color: #7F1D1D;
+            font-weight: bold;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            display: none; /* Oculto por defecto */
+        }
+        .feedback.correct {
+            background-color: #D1FAE5; /* Verde claro para feedback */
+            color: #065F46; /* Verde oscuro para texto */
+            border: 1px solid #34D399;
+        }
+        .feedback.incorrect {
+            background-color: #FEE2E2; /* Rojo claro para feedback */
+            color: #7F1D1D; /* Rojo oscuro para texto */
+            border: 1px solid #EF4444;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .nav-button {
+            padding: 12px 25px;
+            background-color: #10B981; /* Verde esmeralda */
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .nav-button:hover {
+            background-color: #059669; /* Verde más oscuro al pasar el ratón */
+            transform: translateY(-2px);
+        }
+        .nav-button:disabled {
+            background-color: #A7F3D0; /* Verde grisáceo para deshabilitado */
+            cursor: not-allowed;
+        }
+        .score-section {
+            text-align: center;
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #ECFDF5; /* Verde muy claro */
+            border-radius: 15px;
+            border: 2px solid #34D399; /* Verde esmeralda */
+        }
+        .score-section h2 {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #065F46; /* Verde oscuro */
+            margin-bottom: 15px;
+        }
+        .score-section p {
+            font-size: 1.2em;
+            color: #34D399; /* Verde esmeralda */
+            margin-bottom: 10px;
+        }
+        .total-feedback {
+            font-size: 1.1em;
+            color: #059669; /* Verde medio */
+            line-height: 1.6;
+        }
+        .credits {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 0.85em;
+            color: #6B7280; /* Gris */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="quiz-container">
+        <h1 class="text-3xl font-bold text-center text-green-700 mb-8">Cuestionario de Biodesarrollo y Diálogo Interreligioso</h1>
+
+        <div id="quiz-content">
+            <!-- Las preguntas se inyectarán aquí -->
+        </div>
+
+        <div class="navigation-buttons">
+            <button id="prev-button" class="nav-button" disabled>Anterior</button>
+            <button id="next-button" class="nav-button">Siguiente</button>
+            <button id="submit-button" class="nav-button hidden">Finalizar</button>
+        </div>
+
+        <div id="score-section" class="score-section hidden">
+            <h2>Puntuación Total</h2>
+            <p id="final-score" class="text-green-600 font-bold text-4xl mb-4"></p>
+            <p id="total-feedback" class="total-feedback"></p>
+        </div>
+
+        <div class="credits">
+            PREPÁRATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © Victor
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Qué autor expresaba de manera preocupante que las guerras y conflictos del siglo XXI serían choques culturales, jalonados principalmente por la religión?",
+                options: [
+                    "Hans Küng",
+                    "Alberto Ramírez",
+                    "Samuel Huntington",
+                    "Herbert Marcuse"
+                ],
+                answer: "Samuel Huntington",
+                feedback: "Según la Introducción del artículo, Samuel Huntington (2001) en su famoso texto: The crash of civilizations expresaba de manera preocupante esta idea. ",
+                page: "Página 2"
+            },
+            {
+                question: "¿Qué teólogo alemán ha llamado la atención sobre el hecho de que no habrá paz en el mundo sin el diálogo serio de las distintas perspectivas religiosas de la humanidad?",
+                options: [
+                    "Alberto Ramírez",
+                    "Samuel Huntington",
+                    "Hans Küng",
+                    "Teilhard de Chardin"
+                ],
+                answer: "Hans Küng",
+                feedback: "Como se menciona en la Introducción, Hans Küng ha propugnado un nuevo modo de ver el desarrollo a escala humana desde la mirada ética y el diálogo interreligioso.",
+                page: "Página 2"
+            },
+            {
+                question: "Según el artículo, ¿qué concepto es la 'única tabla de salvación del género humano en el siglo XXI'?",
+                options: [
+                    "La tecnología",
+                    "La economía",
+                    "La ética",
+                    "La política"
+                ],
+                answer: "La ética",
+                feedback: "En la página 2 se afirma: 'La ética pasa a ser la única tabla de salvación del género humano en el siglo XXI.'",
+                page: "Página 2"
+            },
+            {
+                question: "¿Qué se entiende por Biodesarrollo según el texto?",
+                options: [
+                    "El desarrollo económico de los países",
+                    "El desarrollo exclusivo de la tecnología",
+                    "El desarrollo de la vida en general, y por ende, la humana",
+                    "El desarrollo de la cultura occidental únicamente"
+                ],
+                answer: "El desarrollo de la vida en general, y por ende, la humana",
+                feedback: "La página 2 explica: 'El Biodesarrollo, entiéndase el desarrollo de la vida en general y, por ende, la humana está, pues, íntimamente ligado a las concepciones sociales, religiosas y culturales.'",
+                page: "Página 2"
+            },
+            {
+                question: "Según Macionis y Plummer, ¿qué es el multiculturalismo?",
+                options: [
+                    "Una corriente que busca la uniformidad cultural",
+                    "Una corriente de pensamiento orientada hacia el reconocimiento de la diversidad cultural y la igualdad de todas las tradiciones culturales",
+                    "Un fenómeno que promueve el conflicto entre culturas",
+                    "La imposición de una única perspectiva occidental"
+                ],
+                answer: "Una corriente de pensamiento orientada hacia el reconocimiento de la diversidad cultural y la igualdad de todas las tradiciones culturales",
+                feedback: "La página 4 define el multiculturalismo según Macionis y Plummer.",
+                page: "Página 4"
+            },
+            {
+                question: "¿Cuál es el fin del diálogo interreligioso según Arboleda (2003)?",
+                options: [
+                    "Unirse como el diálogo ecuménico",
+                    "Conocernos más, respetarnos y colaborar para construir un mundo mejor",
+                    "Crear un conflicto entre civilizaciones",
+                    "Promover una única religión mundial"
+                ],
+                answer: "Conocernos más, respetarnos y colaborar para construir un mundo mejor",
+                feedback: "En la página 4 se cita a Arboleda (2003) explicando el fin del diálogo interreligioso.",
+                page: "Página 4"
+            },
+            {
+                question: "¿Qué autor criticó el universalismo occidental por basarse en un espejismo de la centralidad de Occidente en la historia universal?",
+                options: [
+                    "Hans Küng",
+                    "Herbert Marcuse",
+                    "Oswald Spengler",
+                    "Samuel Huntington"
+                ],
+                answer: "Samuel Huntington",
+                feedback: "La página 5 presenta la tesis del universalismo occidental de Huntington.",
+                page: "Página 5"
+            },
+            {
+                question: "Según Herbert Marcuse en 'El hombre unidimensional', ¿qué crítica se hace a la sociedad cerrada construida por el capitalismo exacerbado?",
+                options: [
+                    "Que permite un Biodesarrollo amplio y equitativo.",
+                    "Que no permite pensar en un Biodesarrollo donde las culturas distintas tengan participación efectiva y real.",
+                    "Que promueve la libertad económica sin restricciones.",
+                    "Que fomenta el diálogo entre todas las naciones."
+                ],
+                answer: "Que no permite pensar en un Biodesarrollo donde las culturas distintas tengan participación efectiva y real.",
+                feedback: "En la página 6, se describe la crítica de Marcuse a una sociedad cerrada por el capitalismo.",
+                page: "Página 6"
+            },
+            {
+                question: "¿Cuál es la fórmula de Hans Küng para alcanzar la paz mundial?",
+                options: [
+                    "No hay paz entre las religiones sin conflicto.",
+                    "No hay paz entre las naciones sin un mínimo de componentes éticos fundamentales y diálogo entre las religiones.",
+                    "La paz solo se logra a través de la dominación cultural.",
+                    "La paz es una utopía inalcanzable."
+                ],
+                answer: "No hay paz entre las naciones sin un mínimo de componentes éticos fundamentales y diálogo entre las religiones.",
+                feedback: "La fórmula de Küng se detalla en las páginas 7 y 8, enfatizando la ética y el diálogo interreligioso.",
+                page: "Páginas 7-8"
+            },
+            {
+                question: "Según Alberto Ramírez, ¿qué se constituyó en una de las prioridades fundamentales del 'aggiornamento' del Concilio Vaticano II?",
+                options: [
+                    "La centralización del poder eclesiástico",
+                    "El aislamiento de la Iglesia del mundo moderno",
+                    "Lo ecuménico y lo macro ecuménico",
+                    "La negación del pluralismo cultural"
+                ],
+                answer: "Lo ecuménico y lo macro ecuménico",
+                feedback: "En la página 9, se explica que el Concilio Vaticano II, con su 'aggiornamento', priorizó el diálogo a todos los niveles, incluyendo lo ecuménico y macro ecuménico.",
+                page: "Página 9"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const userAnswers = {}; // Para almacenar las respuestas del usuario
+        let shuffledQuestions = [];
+
+        const quizContent = document.getElementById('quiz-content');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const submitButton = document.getElementById('submit-button');
+        const scoreSection = document.getElementById('score-section');
+        const finalScore = document.getElementById('final-score');
+        const totalFeedback = document.getElementById('total-feedback');
+
+        // Función para barajar las preguntas
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function displayQuestion(index) {
+            quizContent.innerHTML = ''; // Limpiar contenido anterior
+
+            if (index < 0 || index >= shuffledQuestions.length) {
+                return; // Fuera de los límites
+            }
+
+            const questionData = shuffledQuestions[index];
+            const questionCard = document.createElement('div');
+            questionCard.className = 'question-card';
+
+            const questionText = document.createElement('p');
+            questionText.className = 'text-xl font-semibold text-green-800 mb-6';
+            questionText.textContent = `${index + 1}. ${questionData.question}`;
+            questionCard.appendChild(questionText);
+
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'options-container';
+
+            // Mezclar opciones para cada pregunta
+            const shuffledOptions = shuffleArray([...questionData.options]);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option;
+                button.dataset.option = option;
+                button.onclick = () => selectOption(index, option, button);
+
+                if (userAnswers[index] && userAnswers[index].selectedOption === option) {
+                    button.classList.add('selected');
+                }
+                optionsContainer.appendChild(button);
+            });
+
+            questionCard.appendChild(optionsContainer);
+
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback';
+            feedbackDiv.id = `feedback-${index}`;
+            questionCard.appendChild(feedbackDiv);
+
+            quizContent.appendChild(questionCard);
+
+            updateNavigationButtons();
+            // Mostrar feedback si la pregunta ya fue respondida
+            if (userAnswers[index] && userAnswers[index].answered) {
+                showFeedback(index, userAnswers[index].selectedOption);
+            }
+        }
+
+        function selectOption(questionIndex, selectedOption, clickedButton) {
+            const questionData = shuffledQuestions[questionIndex];
+            const feedbackDiv = document.getElementById(`feedback-${questionIndex}`);
+            const buttons = quizContent.querySelectorAll('.option-button');
+
+            // Resetear estilos de todos los botones
+            buttons.forEach(button => {
+                button.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            // Marcar la opción seleccionada
+            clickedButton.classList.add('selected');
+
+            userAnswers[questionIndex] = {
+                selectedOption: selectedOption,
+                answered: true
+            };
+
+            showFeedback(questionIndex, selectedOption);
+        }
+
+        function showFeedback(questionIndex, selectedOption) {
+            const questionData = shuffledQuestions[questionIndex];
+            const feedbackDiv = document.getElementById(`feedback-${questionIndex}`);
+            const buttons = quizContent.querySelectorAll('.option-button');
+
+            if (!feedbackDiv) return; // Salir si el elemento de feedback no existe
+
+            let isCorrect = selectedOption === questionData.answer;
+            let feedbackMessage = questionData.feedback + ` (${questionData.page})`;
+
+            feedbackDiv.textContent = feedbackMessage;
+            feedbackDiv.style.display = 'block'; // Mostrar el feedback
+
+            // Aplicar colores de feedback
+            feedbackDiv.classList.remove('correct', 'incorrect');
+            if (isCorrect) {
+                feedbackDiv.classList.add('correct');
+            } else {
+                feedbackDiv.classList.add('incorrect');
+            }
+
+            // Aplicar colores a los botones después de la selección
+            buttons.forEach(button => {
+                button.classList.remove('selected', 'correct', 'incorrect');
+                if (button.dataset.option === questionData.answer) {
+                    button.classList.add('correct'); // Siempre resalta la correcta
+                } else if (button.dataset.option === selectedOption && !isCorrect) {
+                    button.classList.add('incorrect'); // Si es incorrecta y seleccionada
+                }
+                button.disabled = true; // Deshabilitar botones una vez respondida
+            });
+        }
+
+
+        function updateNavigationButtons() {
+            prevButton.disabled = currentQuestionIndex === 0;
+            if (currentQuestionIndex === shuffledQuestions.length - 1) {
+                nextButton.classList.add('hidden');
+                submitButton.classList.remove('hidden');
+            } else {
+                nextButton.classList.remove('hidden');
+                submitButton.classList.add('hidden');
+            }
+        }
+
+        function calculateScore() {
+            score = 0;
+            shuffledQuestions.forEach((q, index) => {
+                if (userAnswers[index] && userAnswers[index].selectedOption === q.answer) {
+                    score += 10;
+                }
+            });
+            return score;
+        }
+
+        function showResults() {
+            quizContent.classList.add('hidden');
+            document.querySelector('.navigation-buttons').classList.add('hidden');
+            scoreSection.classList.remove('hidden');
+
+            const finalScoreValue = calculateScore();
+            finalScore.textContent = `${finalScoreValue} / ${shuffledQuestions.length * 10} puntos`;
+
+            let feedbackText = '';
+            if (finalScoreValue === shuffledQuestions.length * 10) {
+                feedbackText = "¡Excelente! Has respondido correctamente a todas las preguntas. ¡Dominas el tema!";
+            } else if (finalScoreValue >= (shuffledQuestions.length * 10) / 2) {
+                feedbackText = "¡Bien hecho! Tienes un buen entendimiento del tema, pero hay espacio para mejorar. ¡Sigue practicando!";
+            } else {
+                feedbackText = "Necesitas repasar algunos conceptos clave. ¡No te desanimes, el estudio te ayudará a mejorar!";
+            }
+            totalFeedback.textContent = feedbackText;
+        }
+
+        prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion(currentQuestionIndex);
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion(currentQuestionIndex);
+            }
+        });
+
+        submitButton.addEventListener('click', () => {
+            showResults();
+        });
+
+        // Inicializar el cuestionario al cargar la página
+        window.onload = () => {
+            shuffledQuestions = shuffleArray([...questions]);
+            displayQuestion(currentQuestionIndex);
+        };
+    </script>
+</body>
+</html>

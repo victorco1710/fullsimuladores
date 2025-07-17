@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Primeros Auxilios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .feedback-correct {
+            color: #16a34a; /* green-600 */
+        }
+        .feedback-incorrect {
+            color: #dc2626; /* red-600 */
+        }
+        .option-btn.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #16a34a; /* green-600 */
+            color: #15803d; /* green-700 */
+        }
+        .option-btn.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #dc2626; /* red-600 */
+            color: #b91c1c; /* red-700 */
+        }
+        .disabled-pointer {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="w-full max-w-2xl bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+        <div id="quiz-start" class="text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Cuestionario Básico de Primeros Auxilios</h1>
+            <p class="text-gray-600 mb-6">Pon a prueba tus conocimientos. Responde 25 preguntas de opción múltiple. Cada pregunta vale 4 puntos.</p>
+            <button id="start-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <div id="quiz-main" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <div id="question-counter" class="text-sm font-semibold text-gray-500"></div>
+                <div id="score-display" class="text-sm font-semibold text-gray-500">Puntuación: 0</div>
+            </div>
+            <div id="progress-bar-container" class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+
+            <h2 id="question-text" class="text-xl font-semibold mb-6 text-gray-800"></h2>
+            <div id="options-container" class="grid grid-cols-1 gap-4">
+                <!-- Opciones se generarán aquí -->
+            </div>
+
+            <div id="feedback-container" class="mt-6 p-4 rounded-lg hidden">
+                <p id="feedback-text" class="font-medium"></p>
+                <p id="feedback-page" class="text-sm text-gray-600 mt-2"></p>
+            </div>
+
+            <button id="next-btn" class="w-full mt-6 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md hidden">
+                Siguiente Pregunta
+            </button>
+        </div>
+
+        <div id="quiz-end" class="text-center hidden">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">¡Cuestionario Completado!</h1>
+            <p class="text-gray-600 text-lg mb-2">Tu puntuación final es:</p>
+            <p id="final-score" class="text-5xl font-extrabold text-blue-600 mb-6"></p>
+            <p id="final-feedback" class="text-gray-700 font-medium mb-8"></p>
+            <button id="restart-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md">
+                Intentar de Nuevo
+            </button>
+        </div>
+        
+        <footer class="text-center text-xs text-gray-400 mt-8">
+            <p>PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- PREGUNTAS DEL CUESTIONARIO ---
+        const questions = [
+            {
+                question: "¿Cuál es la definición de primeros auxilios?",
+                options: [
+                    "Atenciones médicas especializadas en un hospital.",
+                    "Atenciones inmediatas, adecuadas y provisionales a un accidentado.",
+                    "Un diagnóstico completo de la enfermedad de una persona.",
+                    "El transporte de un herido a su casa."
+                ],
+                answer: "Atenciones inmediatas, adecuadas y provisionales a un accidentado.",
+                feedback: "Correcto. Los primeros auxilios son la primera asistencia que se le da a una persona herida o enferma antes de la llegada de ayuda profesional.",
+                page: 3
+            },
+            {
+                question: "¿Cuál es un objetivo principal de los primeros auxilios?",
+                options: [
+                    "Reemplazar la atención médica profesional.",
+                    "Administrar medicamentos complejos.",
+                    "Mantener y salvar la vida.",
+                    "Realizar cirugías de emergencia."
+                ],
+                answer: "Mantener y salvar la vida.",
+                feedback: "Correcto. El objetivo más importante es preservar la vida, evitar que las lesiones empeoren y promover la recuperación.",
+                page: 3
+            },
+            {
+                question: "Según el manual, ¿cuál es el rango normal del pulso en un adulto en reposo?",
+                options: [
+                    "40-60 latidos por minuto.",
+                    "60-100 latidos por minuto.",
+                    "100-120 latidos por minuto.",
+                    "Más de 120 latidos por minuto."
+                ],
+                answer: "60-100 latidos por minuto.",
+                feedback: "Correcto. Un pulso en reposo para un adulto sano generalmente se encuentra entre 60 y 100 latidos por minuto.",
+                page: 4
+            },
+            {
+                question: "¿Qué significa el diagnóstico V.E.S.?",
+                options: [
+                    "Valorar, Examinar, Socorrer.",
+                    "Vendar, Elevar, Sujetar.",
+                    "Ver, Escuchar y Sentir.",
+                    "Vía, Estómago, Sangre."
+                ],
+                answer: "Ver, Escuchar y Sentir.",
+                feedback: "Correcto. Se usa para evaluar la respiración: Ver si el tórax se mueve, Escuchar ruidos respiratorios y Sentir el aire en la mejilla.",
+                page: 5
+            },
+            {
+                question: "En la evaluación de conciencia A.V.D.S., ¿qué significa la 'V'?",
+                options: [
+                    "La víctima está Vigilante.",
+                    "La víctima responde a estímulos Verbales.",
+                    "La víctima tiene una Vía aérea despejada.",
+                    "La víctima presenta Vómito."
+                ],
+                answer: "La víctima responde a estímulos Verbales.",
+                feedback: "Correcto. En la escala A.V.D.S., la 'V' indica que la víctima responde cuando se le habla.",
+                page: 6
+            },
+            {
+                question: "¿Para qué se utiliza la Posición Lateral de Seguridad?",
+                options: [
+                    "Para tratar fracturas de pierna.",
+                    "Para realizar la reanimación cardiopulmonar (RCP).",
+                    "Para facilitar el transporte de la víctima.",
+                    "Para mantener despejada la vía aérea en una víctima inconsciente que respira."
+                ],
+                answer: "Para mantener despejada la vía aérea en una víctima inconsciente que respira.",
+                feedback: "Correcto. Esta posición evita que la lengua obstruya la garganta y permite que los fluidos (como el vómito) salgan de la boca.",
+                page: 6
+            },
+            {
+                question: "¿Cuál es el signo universal de asfixia o atragantamiento?",
+                options: [
+                    "La víctima grita pidiendo ayuda.",
+                    "La víctima tose fuertemente.",
+                    "La víctima se lleva las manos al cuello.",
+                    "La víctima señala el abdomen."
+                ],
+                answer: "La víctima se lleva las manos al cuello.",
+                feedback: "Correcto. Es un gesto instintivo que indica que una persona se está ahogando y no puede respirar.",
+                page: 7
+            },
+            {
+                question: "¿En qué consiste la Maniobra de Heimlich?",
+                options: [
+                    "Dar golpes en la espalda a la víctima.",
+                    "Introducir los dedos en la boca para sacar el objeto.",
+                    "Ejercer presión bajo el esternón para expulsar un cuerpo extraño.",
+                    "Realizar respiración boca a boca."
+                ],
+                answer: "Ejercer presión bajo el esternón para expulsar un cuerpo extraño.",
+                feedback: "Correcto. Las compresiones abdominales (Maniobra de Heimlich) crean una tos artificial para desalojar la obstrucción.",
+                page: 7
+            },
+            {
+                question: "Una hemorragia de color rojo vivo que sale a chorros es de tipo:",
+                options: [
+                    "Venosa.",
+                    "Capilar.",
+                    "Arterial.",
+                    "Interna."
+                ],
+                answer: "Arterial.",
+                feedback: "Correcto. La sangre arterial es rica en oxígeno y fluye con la fuerza de los latidos del corazón.",
+                page: 8
+            },
+            {
+                question: "¿Cuál es el primer paso para tratar una hemorragia externa?",
+                options: [
+                    "Aplicar un torniquete.",
+                    "Elevar la extremidad.",
+                    "Aplicar presión directa sobre la herida.",
+                    "Limpiar la herida con alcohol."
+                ],
+                answer: "Aplicar presión directa sobre la herida.",
+                feedback: "Correcto. La presión directa es el método más eficaz y el primero que se debe intentar para controlar una hemorragia.",
+                page: 8
+            },
+            {
+                question: "¿Cuándo se debe utilizar un torniquete como último recurso?",
+                options: [
+                    "En cualquier herida que sangre mucho.",
+                    "En casos de amputación o cuando la presión directa no funciona.",
+                    "Para cortes pequeños en los dedos.",
+                    "Cuando la víctima está consciente."
+                ],
+                answer: "En casos de amputación o cuando la presión directa no funciona.",
+                feedback: "Correcto. El torniquete es una medida extrema que puede tener graves consecuencias, por lo que se reserva para situaciones de vida o muerte.",
+                page: 8
+            },
+            {
+                question: "¿Cuál es el tratamiento inicial para una persona en estado de shock?",
+                options: [
+                    "Darle de beber agua.",
+                    "Sentarla en una silla.",
+                    "Elevarle los pies 45 grados y mantenerla abrigada.",
+                    "Hacer que camine para mejorar la circulación."
+                ],
+                answer: "Elevarle los pies 45 grados y mantenerla abrigada.",
+                feedback: "Correcto. Elevar las piernas ayuda a que la sangre fluya hacia los órganos vitales, y mantener el calor corporal es crucial.",
+                page: 9
+            },
+            {
+                question: "¿Qué es un esguince?",
+                options: [
+                    "La ruptura total de un hueso.",
+                    "El desplazamiento permanente de una articulación.",
+                    "Una lesión en los músculos por sobreesfuerzo.",
+                    "El desplazamiento temporal de las carillas articulares."
+                ],
+                answer: "El desplazamiento temporal de las carillas articulares.",
+                feedback: "Correcto. Un esguince es una lesión de los ligamentos que rodean una articulación.",
+                page: 10
+            },
+            {
+                question: "¿Cuál es la diferencia principal entre un esguince y una luxación?",
+                options: [
+                    "Un esguince duele más que una luxación.",
+                    "En la luxación el desplazamiento es permanente y en el esguince es temporal.",
+                    "Un esguince siempre presenta herida abierta.",
+                    "La luxación solo ocurre en los dedos."
+                ],
+                answer: "En la luxación el desplazamiento es permanente y en el esguince es temporal.",
+                feedback: "Correcto. En una luxación, los huesos de la articulación quedan separados de forma permanente hasta que se reducen médicamente.",
+                page: 11
+            },
+            {
+                question: "En caso de una fractura, la inmovilización debe incluir:",
+                options: [
+                    "Solamente el punto exacto de la fractura.",
+                    "La articulación más cercana por debajo de la fractura.",
+                    "La articulación proximal (superior) y distal (inferior) a la fractura.",
+                    "No es necesario inmovilizar, solo vendar."
+                ],
+                answer: "La articulación proximal (superior) y distal (inferior) a la fractura.",
+                feedback: "Correcto. Inmovilizar las articulaciones por encima y por debajo de la fractura previene el movimiento de los extremos del hueso roto.",
+                page: 13
+            },
+            {
+                question: "¿Qué es una herida punzante?",
+                options: [
+                    "Una herida que afecta solo la capa superficial de la piel (epidermis).",
+                    "Una herida producida por un objeto cortante como un cuchillo.",
+                    "Una herida producida por un instrumento filoso que penetra en la piel.",
+                    "Un raspón o escoriación."
+                ],
+                answer: "Una herida producida por un instrumento filoso que penetra en la piel.",
+                feedback: "Correcto. Las heridas punzantes (clavo, aguja) pueden ser profundas y conllevan un alto riesgo de infección.",
+                page: 13
+            },
+             {
+                question: "¿Cuál NO es una vía de entrada de tóxicos al organismo?",
+                options: [
+                    "Aparato digestivo.",
+                    "Vías respiratorias.",
+                    "Piel y mucosas.",
+                    "A través del cabello."
+                ],
+                answer: "A través del cabello.",
+                feedback: "Correcto. El cabello no absorbe sustancias tóxicas de forma que causen una intoxicación sistémica.",
+                page: 13
+            },
+            {
+                question: "¿Qué tipo de quemadura se caracteriza por la aparición de ampollas?",
+                options: [
+                    "Primer grado.",
+                    "Segundo grado.",
+                    "Tercer grado.",
+                    "Cuarto grado."
+                ],
+                answer: "Segundo grado.",
+                feedback: "Correcto. Las quemaduras de segundo grado afectan a las capas más profundas de la piel y provocan la formación de ampollas.",
+                page: 14
+            },
+            {
+                question: "En el tratamiento de quemaduras, ¿qué NO se debe hacer?",
+                options: [
+                    "Enfriar el área con agua fría.",
+                    "Cubrir con un apósito húmedo y limpio.",
+                    "Aplicar hielo directamente o pomadas.",
+                    "Trasladar a un centro hospitalario si es de 2do o 3er grado."
+                ],
+                answer: "Aplicar hielo directamente o pomadas.",
+                feedback: "Correcto. El hielo puede dañar más el tejido y las pomadas pueden interferir con el tratamiento médico posterior.",
+                page: 14
+            },
+            {
+                question: "¿Cuál es el propósito de un antiséptico en un botiquín?",
+                options: [
+                    "Aliviar el dolor.",
+                    "Reducir la inflamación.",
+                    "Prevenir la infección evitando el desarrollo de gérmenes.",
+                    "Bajar la fiebre."
+                ],
+                answer: "Prevenir la infección evitando el desarrollo de gérmenes.",
+                feedback: "Correcto. Los antisépticos se usan para limpiar heridas y reducir el riesgo de infección.",
+                page: 15
+            },
+            {
+                question: "¿Para qué se utiliza el alcohol al 70% según el manual?",
+                options: [
+                    "Para limpiar heridas abiertas profundamente.",
+                    "Para desinfectar instrumental como pinzas y tijeras.",
+                    "Para beber como remedio casero.",
+                    "Para aplicar directamente en quemaduras."
+                ],
+                answer: "Para desinfectar instrumental como pinzas y tijeras.",
+                feedback: "Correcto. No es aconsejable usarlo en heridas abiertas porque irrita los tejidos, pero es útil para desinfectar instrumentos.",
+                page: 17
+            },
+            {
+                question: "¿Para qué se debe usar el algodón en primeros auxilios?",
+                options: [
+                    "Para aplicarlo directamente sobre una herida abierta.",
+                    "Para limpiar la sangre de una hemorragia arterial.",
+                    "Para forrar tablillas o inmovilizadores e improvisar apósitos.",
+                    "Para hacer torniquetes."
+                ],
+                answer: "Para forrar tablillas o inmovilizadores e improvisar apósitos.",
+                feedback: "Correcto. El algodón nunca debe ponerse en contacto directo con una herida porque sus fibras pueden adherirse.",
+                page: 18
+            },
+            {
+                question: "¿Cuál es el propósito principal de un analgésico en el botiquín?",
+                options: [
+                    "Curar la infección.",
+                    "Aliviar el dolor causado por traumatismos.",
+                    "Funcionar como antihistamínico.",
+                    "Detener una hemorragia."
+                ],
+                answer: "Aliviar el dolor causado por traumatismos.",
+                feedback: "Correcto. Los analgésicos como el paracetamol o el ibuprofeno ayudan a controlar el dolor.",
+                page: 19
+            },
+            {
+                question: "Según el manual, ¿cuándo se debe mover a una persona herida del lugar del accidente?",
+                options: [
+                    "Inmediatamente para llevarla al hospital.",
+                    "Solo en casos extremos como incendios o riesgo de electrocución.",
+                    "Siempre, para que esté más cómoda.",
+                    "Nunca, bajo ninguna circunstancia."
+                ],
+                answer: "Solo en casos extremos como incendios o riesgo de electrocución.",
+                feedback: "Correcto. Mover a un herido sin la debida precaución puede agravar sus lesiones, especialmente las de columna.",
+                page: 20
+            },
+            {
+                question: "Al transportar un herido en camilla, ¿qué es fundamental para los camilleros?",
+                options: [
+                    "Caminar lo más rápido posible.",
+                    "Ir con el paso cambiado y mantener la camilla horizontal.",
+                    "Hablar en voz alta para mantener despierto al herido.",
+                    "Llevar la camilla inclinada para que la cabeza vaya más alta."
+                ],
+                answer: "Ir con el paso cambiado y mantener la camilla horizontal.",
+                feedback: "Correcto. Caminar con el paso cambiado evita el balanceo y mantener la camilla horizontal garantiza la estabilidad del herido.",
+                page: 25
+            }
+        ];
+
+        // --- ELEMENTOS DEL DOM ---
+        const startScreen = document.getElementById('quiz-start');
+        const mainQuizScreen = document.getElementById('quiz-main');
+        const endScreen = document.getElementById('quiz-end');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        const questionCounterEl = document.getElementById('question-counter');
+        const scoreDisplayEl = document.getElementById('score-display');
+        const progressBar = document.getElementById('progress-bar');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackTextEl = document.getElementById('feedback-text');
+        const feedbackPageEl = document.getElementById('feedback-page');
+        
+        const finalScoreEl = document.getElementById('final-score');
+        const finalFeedbackEl = document.getElementById('final-feedback');
+
+        // --- VARIABLES DE ESTADO ---
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // --- FUNCIONES ---
+
+        // Función para barajar las preguntas
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Función para iniciar el cuestionario
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            mainQuizScreen.classList.remove('hidden');
+            
+            shuffledQuestions = [...questions];
+            shuffle(shuffledQuestions);
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            scoreDisplayEl.textContent = `Puntuación: 0`;
+            showQuestion();
+        }
+
+        // Función para mostrar una pregunta
+        function showQuestion() {
+            resetState();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            questionCounterEl.textContent = `Pregunta ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+            questionTextEl.textContent = currentQuestion.question;
+            
+            const shuffledOptions = [...currentQuestion.options];
+            shuffle(shuffledOptions);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-btn', 'w-full', 'p-4', 'text-left', 'border-2', 'border-gray-300', 'rounded-lg', 'hover:bg-gray-100', 'hover:border-blue-500', 'transition-all', 'duration-200');
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            });
+            
+            updateProgressBar();
+        }
+        
+        // Función para reiniciar el estado entre preguntas
+        function resetState() {
+            optionsContainer.innerHTML = '';
+            feedbackContainer.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+        }
+
+        // Función para manejar la selección de respuesta
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const selectedAnswer = selectedBtn.textContent;
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const correctAnswer = currentQuestion.answer;
+
+            // Deshabilitar todos los botones de opción
+            Array.from(optionsContainer.children).forEach(button => {
+                button.classList.add('disabled-pointer');
+            });
+
+            if (selectedAnswer === correctAnswer) {
+                score += 4;
+                scoreDisplayEl.textContent = `Puntuación: ${score}`;
+                selectedBtn.classList.add('correct');
+                feedbackContainer.classList.remove('bg-red-50');
+                feedbackContainer.classList.add('bg-green-50');
+                feedbackTextEl.textContent = currentQuestion.feedback;
+                feedbackTextEl.classList.remove('feedback-incorrect');
+                feedbackTextEl.classList.add('feedback-correct');
+            } else {
+                selectedBtn.classList.add('incorrect');
+                feedbackContainer.classList.remove('bg-green-50');
+                feedbackContainer.classList.add('bg-red-50');
+                feedbackTextEl.textContent = `Incorrecto. La respuesta correcta es: "${correctAnswer}"`;
+                feedbackTextEl.classList.remove('feedback-correct');
+                feedbackTextEl.classList.add('feedback-incorrect');
+
+                // Resaltar la respuesta correcta
+                Array.from(optionsContainer.children).forEach(button => {
+                    if (button.textContent === correctAnswer) {
+                        button.classList.add('correct');
+                    }
+                });
+            }
+
+            feedbackPageEl.innerHTML = `Puedes encontrar la respuesta en la <strong>página ${currentQuestion.page}</strong> del manual.`;
+            feedbackContainer.classList.remove('hidden');
+            
+            if(currentQuestionIndex < shuffledQuestions.length - 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.textContent = 'Ver Resultados';
+                nextBtn.classList.remove('hidden');
+            }
+        }
+        
+        // Función para ir a la siguiente pregunta o finalizar
+        function handleNextButton() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                showQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+        
+        // Función para finalizar el cuestionario
+        function endQuiz() {
+            mainQuizScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            
+            finalScoreEl.textContent = `${score} / 100`;
+            
+            let feedback = '';
+            if (score >= 88) {
+                feedback = '¡Excelente trabajo! Tienes un conocimiento sólido de los primeros auxilios.';
+                finalScoreEl.classList.add('text-green-600');
+                finalScoreEl.classList.remove('text-yellow-600', 'text-red-600');
+            } else if (score >= 60) {
+                feedback = '¡Buen resultado! Tienes una buena base, pero repasar algunos conceptos te ayudará a estar aún más preparado.';
+                finalScoreEl.classList.add('text-yellow-600');
+                 finalScoreEl.classList.remove('text-green-600', 'text-red-600');
+            } else {
+                feedback = 'Parece que necesitas repasar el manual. ¡No te desanimes! Aprender primeros auxilios es muy importante.';
+                finalScoreEl.classList.add('text-red-600');
+                finalScoreEl.classList.remove('text-green-600', 'text-yellow-600');
+            }
+            finalFeedbackEl.textContent = feedback;
+            nextBtn.textContent = 'Siguiente Pregunta'; // Reset button text
+        }
+        
+        // Función para actualizar la barra de progreso
+        function updateProgressBar() {
+            const progressPercentage = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', handleNextButton);
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

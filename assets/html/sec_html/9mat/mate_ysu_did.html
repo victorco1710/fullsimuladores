@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Matemáticas y su Didáctica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .question-card {
+            border: 2px solid #e2e8f0; /* Light border for question card */
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background-color: #f8fafc; /* Lighter background for question */
+        }
+        .option-button {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.75rem; /* Rounded options */
+            background-color: #ffffff;
+            text-align: left;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .option-button:hover:not(.selected):not(.correct):not(.incorrect) {
+            background-color: #eff6ff; /* Light blue on hover */
+            border-color: #93c5fd; /* Blue border on hover */
+        }
+        .option-button.selected {
+            background-color: #bfdbfe; /* Light blue for selected */
+            border-color: #3b82f6; /* Blue border for selected */
+        }
+        .option-button.correct {
+            background-color: #d1fae5; /* Light green for correct */
+            border-color: #34d399; /* Green border for correct */
+            pointer-events: none; /* Disable clicks after selection */
+        }
+        .option-button.incorrect {
+            background-color: #fee2e2; /* Light red for incorrect */
+            border-color: #ef4444; /* Red border for incorrect */
+            pointer-events: none; /* Disable clicks after selection */
+        }
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+        }
+        .feedback.correct {
+            background-color: #ecfdf5; /* Very light green */
+            color: #059669; /* Dark green text */
+            border: 1px solid #a7f3d0;
+        }
+        .feedback.incorrect {
+            background-color: #fef2f2; /* Very light red */
+            color: #dc2626; /* Dark red text */
+            border: 1px solid #fecaca;
+        }
+        .navigation-buttons button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            margin: 0 0.5rem;
+        }
+        .navigation-buttons button:hover {
+            opacity: 0.9;
+        }
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.875rem; /* sm text */
+            color: #64748b; /* Slate 500 */
+        }
+        .score-summary {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 2rem;
+            background-color: #e0f2fe; /* Light blue for summary */
+            border-radius: 1.5rem;
+            border: 2px solid #93c5fd;
+        }
+        .score-summary h2 {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 700;
+            color: #1d4ed8; /* Blue 700 */
+            margin-bottom: 1rem;
+        }
+        .score-summary p {
+            font-size: 1.125rem; /* text-lg */
+            color: #334155; /* Slate 700 */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Cuestionario: Matemáticas y su Didáctica</h1>
+        <div id="quiz-container">
+            <!-- Questions will be loaded here by JavaScript -->
+        </div>
+        <div class="navigation-buttons flex justify-center mt-6">
+            <button id="prev-btn" class="bg-gray-200 text-gray-700 hover:bg-gray-300 mr-2" style="display: none;">Anterior</button>
+            <button id="next-btn" class="bg-blue-500 text-white hover:bg-blue-600 ml-2" style="display: none;">Siguiente</button>
+            <button id="submit-btn" class="bg-green-500 text-white hover:bg-green-600" style="display: none;">Finalizar Cuestionario</button>
+        </div>
+    </div>
+    <div class="footer">
+        Desarrollado por Victor Crespo
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el objetivo principal del trabajo 'Matemáticas y su Didáctica-l'?",
+                options: [
+                    "Proporcionar herramientas para la enseñanza de física en primaria.",
+                    "Ofrecer un instrumento para completar contenidos de la asignatura 'Matemáticas y su Didáctica-l' para estudiantes de Magisterio de Educación Primaria.",
+                    "Detallar la historia de la filosofía griega.",
+                    "Analizar la evolución de la educación secundaria."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "El trabajo está diseñado específicamente para los alumnos del Título de Grado de Maestro de Educación Primaria.",
+                page: 2
+            },
+            {
+                question: "Según el texto, ¿de qué origen es la palabra 'matemáticas'?",
+                options: [
+                    "Latín, de 'calculus'.",
+                    "Árabe, de 'al-jabr'.",
+                    "Griego, de 'mathema'.",
+                    "Egipcio, de 'hieroglyph'."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "La palabra 'matemáticas' y 'matemáticos' es de origen griego, derivada del verbo conocer o aprender. 'Mathema' significaba en griego 'lo que se ha aprendido o entendido, o conocimiento adquirido'.",
+                page: 5
+            },
+            {
+                question: "¿Qué tipo de números se representan con una Q y comprenden todos los cocientes de números enteros con divisor distinto de 0?",
+                options: [
+                    "Naturales",
+                    "Enteros",
+                    "Racionales",
+                    "Irracionales"
+                ],
+                correctAnswerIndex: 2,
+                feedback: "Los números racionales, quebrados o fraccionarios, cuyo conjunto se representa con una Q, son los que comprenden a todos los cocientes de números enteros con divisor (o denominador) distinto de 0.",
+                page: 9
+            },
+            {
+                question: "¿Cuál es una característica principal del sistema de numeración egipcio?",
+                options: [
+                    "Es posicional y sustractivo.",
+                    "Es de base 60.",
+                    "Es no posicional y aditivo.",
+                    "Utiliza símbolos para la 'nada' (cero)."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "El sistema egipcio es 'no posicional' porque el orden de los signos es indiferente, y es 'aditivo' porque el valor se obtiene sumando los valores de cada símbolo.",
+                page: 10
+            },
+            {
+                question: "¿Qué sistema de numeración, que ha perdurado hasta nuestros días en la medición de ángulos y del tiempo, tenía una base de 60?",
+                options: [
+                    "Egipcio",
+                    "Griego",
+                    "Babilónico",
+                    "Romano"
+                ],
+                correctAnswerIndex: 2,
+                feedback: "El sistema de numeración babilónico era sexagesimal (de base 60) y se utiliza hoy en la medición de ángulos y del tiempo.",
+                page: 11
+            },
+            {
+                question: "En el sistema de numeración griego, ¿qué se utilizaba para representar números?",
+                options: [
+                    "Nudos en cordeles.",
+                    "Letras del alfabeto.",
+                    "Marcas de conteo en huesos.",
+                    "Solo números naturales."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "Los griegos recurrieron al empleo del alfabeto para representar los números.",
+                page: 12
+            },
+            {
+                question: "¿Cuál de las siguientes afirmaciones sobre el sistema de numeración romano es correcta?",
+                options: [
+                    "Es un sistema posicional y multiplicativo.",
+                    "Combina la base 10 con la base 5, y es aditivo y no posicional.",
+                    "Utiliza un sistema sexagesimal.",
+                    "Los símbolos se leen de derecha a izquierda."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "El sistema romano combina la base 10 con la base 5, es no posicional y aditivo.",
+                page: 13
+            },
+            {
+                question: "¿Qué cultura fue la primera en utilizar un símbolo para representar la 'nada' (cero) en un sistema de numeración?",
+                options: [
+                    "Egipcia",
+                    "Griega",
+                    "Hindú",
+                    "Romana"
+                ],
+                correctAnswerIndex: 2,
+                feedback: "Casi cinco mil años le llevó a la humanidad encontrar la solución de un símbolo para la 'nada', siendo los hindúes los primeros en utilizarlo (sunya), recogido por los árabes (cífer) y dando origen a 'cero' y 'cifra'.",
+                page: 14
+            },
+            {
+                question: "¿Cuál de las siguientes es una característica principal del actual sistema decimal de numeración?",
+                options: [
+                    "Es no posicional.",
+                    "Es de base 11.",
+                    "Es aditivo-multiplicativo y posicional.",
+                    "No utiliza el cero."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "El actual sistema decimal de numeración es posicional, emplea nueve símbolos más el cero, es decimal (base 10) y es aditivo-multiplicativo.",
+                page: 14
+            },
+            {
+                question: "¿Cómo realizaban la multiplicación los antiguos egipcios, según el texto?",
+                options: [
+                    "Utilizando un ábaco complejo.",
+                    "Mediante duplicaciones sucesivas y sumas.",
+                    "Con tablas de multiplicar hasta el 100.",
+                    "Dividiendo por 10 y sustituyendo símbolos."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "Los egipcios multiplicaban haciendo duplicaciones sucesivas, lo que evitaba la necesidad de aprender tablas de multiplicar más allá del 2.",
+                page: 17
+            },
+            {
+                question: "Según la 'regla del perezoso' para multiplicar, ¿cómo se obtiene la cifra de las unidades del resultado de multiplicar dos números?",
+                options: [
+                    "Sumando los complementarios de los números respecto a 10.",
+                    "Restando el complementario de un número al otro.",
+                    "Multiplicando los complementarios de los números respecto a 10.",
+                    "Doblando el dedo correspondiente a la unidad."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "La cifra de las unidades se obtiene multiplicando los complementarios de los dos números respecto a 10.",
+                page: 19
+            },
+            {
+                question: "¿Para qué se utiliza la 'prueba de los 9' en aritmética?",
+                options: [
+                    "Para transformar números decimales periódicos en fracciones.",
+                    "Para comprobar si una división o multiplicación está bien hecha.",
+                    "Para realizar sumas y restas en el sistema sexagesimal.",
+                    "Para calcular raíces cuadradas."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "La prueba de los 9 consiste en una comprobación para verificar si una división o multiplicación ha sido realizada correctamente.",
+                page: 20
+            },
+            {
+                question: "¿Cuál es el origen etimológico de la palabra 'Geometría'?",
+                options: [
+                    "Del latín 'numerus' y 'metron'.",
+                    "Del griego 'geo' (tierra) y 'metron' (medida).",
+                    "Del egipcio 'pyramid' y 'logic'.",
+                    "Del babilónico 'sexagesimal' y 'angle'."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "Etimológicamente, 'Geometría' proviene del griego 'geo' (tierra) y de 'metron' (medida).",
+                page: 22
+            },
+            {
+                question: "¿Cuál de los siguientes no es uno de los cinco postulados básicos de Euclides mencionados en el texto?",
+                options: [
+                    "Se puede trazar una línea recta que pase por dos puntos.",
+                    "Se puede prolongar una línea recta indefinidamente.",
+                    "La suma de los ángulos interiores de un triángulo es exactamente 180º.",
+                    "Todos los ángulos rectos son iguales."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "La suma de los ángulos interiores de un triángulo es un teorema en la geometría euclídea, no un postulado. De hecho, es una de las propiedades que difiere en las geometrías no euclidianas.",
+                page: 22
+            },
+            {
+                question: "¿Qué rama de la geometría surgió del estudio de los problemas de 'perspectiva' por artistas como Leonardo da Vinci y Alberto Durero?",
+                options: [
+                    "Geometría analítica.",
+                    "Geometría euclídea.",
+                    "Geometría proyectiva.",
+                    "Topología."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "La geometría proyectiva se interesó por las propiedades geométricas 'invariantes en la proyección', fundamentales para el estudio de la perspectiva en el arte.",
+                page: 24
+            },
+            {
+                question: "¿Qué matemático, junto con Pierre Fermat, es considerado fundamental en la aparición de la geometría analítica?",
+                options: [
+                    "Euclides",
+                    "René Descartes",
+                    "Lobachevsky",
+                    "Euler"
+                ],
+                correctAnswerIndex: 1,
+                feedback: "La geometría analítica apareció de la mano de Pierre Fermat y, sobre todo, René Descartes.",
+                page: 25
+            },
+            {
+                question: "La Topología, como rama de la geometría, se enfoca en el estudio de propiedades que subsisten incluso si las figuras se someten a deformaciones. ¿Qué acciones están 'prohibidas' en estas deformaciones?",
+                options: [
+                    "Rotar o trasladar.",
+                    "Escalar o reflejar.",
+                    "Cortar o pegar.",
+                    "Ampliar o reducir."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "En topología se puede hacer, con los cuerpos y figuras geométricos, 'casi de todo', 'salvo cortar o pegar'.",
+                page: 26
+            },
+            {
+                question: "Según el texto, ¿cuál de las siguientes es una acepción de la palabra 'estadística'?",
+                options: [
+                    "El estudio de la geometría euclídea.",
+                    "La ciencia que utiliza conjuntos de datos numéricos para obtener inferencias basadas en el cálculo de probabilidades.",
+                    "La colección de reglas para operaciones numéricas.",
+                    "La forma de contar con los dedos."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "Una de las acepciones de 'estadística' es la ciencia que utiliza conjuntos de datos numéricos para obtener inferencias basadas en el cálculo de probabilidades.",
+                page: 29
+            },
+            {
+                question: "¿Qué evento se considera el origen de la teoría de probabilidades?",
+                options: [
+                    "La publicación de 'Elementos' de Euclides.",
+                    "La correspondencia entre Blaise Pascal y Pierre Fermat sobre problemas de juegos de azar.",
+                    "El descubrimiento del cero por los hindúes.",
+                    "La invención de la geometría analítica."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "La correspondencia epistolar entre Blaise Pascal y Pierre Fermat sobre cuestiones probabilísticas puede considerarse el origen de la teoría de probabilidades.",
+                page: 30
+            },
+            {
+                question: "En matemáticas, ¿cómo se define un 'axioma'?",
+                options: [
+                    "Un enunciado que debe ser demostrado.",
+                    "Una proposición que prepara el establecimiento de un teorema.",
+                    "Una proposición cuya validez se admite sin demostración.",
+                    "Una consecuencia lógica de un teorema."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "Un axioma es una proposición cuya validez se admite sin demostración.",
+                page: 33
+            },
+            {
+                question: "¿Qué tipo de demostración se utiliza cuando se supone que la tesis es falsa y se razona hasta encontrar una contradicción con la hipótesis?",
+                options: [
+                    "Demostración directa.",
+                    "Demostración por contraejemplo.",
+                    "Demostración por reducción al absurdo.",
+                    "Demostración por inducción."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "La demostración indirecta, o por reducción al absurdo, implica suponer que la tesis es falsa y buscar una contradicción con la hipótesis.",
+                page: 34
+            },
+            {
+                question: "¿Cuál de los siguientes es el primer paso en una demostración matemática por inducción?",
+                options: [
+                    "Suponer que la fórmula es cierta para un valor n=k.",
+                    "Comprobar la validez de la proposición para el primer valor de n.",
+                    "Demostrar que la fórmula es cierta para n=k+1.",
+                    "Encontrar un contraejemplo."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "El primer paso en una demostración por inducción es comprobar la validez de la proposición para el primer valor de n.",
+                page: 35
+            },
+            {
+                question: "La paradoja de 'Aquiles y la tortuga' es un ejemplo de qué tipo de paradoja matemática.",
+                options: [
+                    "Proposiciones absurdas de razonamientos falaces.",
+                    "Proposiciones lógicamente aceptables que chocan con la intuición.",
+                    "Paradojas lógicas relacionadas con la teoría de conjuntos.",
+                    "Paradojas de la geometría proyectiva."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "La paradoja de Aquiles y la tortuga es un ejemplo de una proposición que es lógicamente aceptable pero que choca con la intuición.",
+                page: 37
+            },
+            {
+                question: "¿Quién es considerado el matemático que revolucionó las matemáticas con su trabajo sobre la teoría de conjuntos a finales del siglo XIX?",
+                options: [
+                    "Euclides",
+                    "Pierre Fermat",
+                    "Georg Cantor",
+                    "Blaise Pascal"
+                ],
+                correctAnswerIndex: 2,
+                feedback: "A finales del siglo XIX, el matemático alemán Georg Cantor revolucionó las matemáticas con su trabajo sobre la teoría de conjuntos.",
+                page: 38
+            },
+            {
+                question: "Si un conjunto A tiene $n$ elementos, ¿cuántos elementos tendrá el conjunto de las partes de A, $P(A)$?",
+                options: [
+                    "$n^2$",
+                    "$2n$",
+                    "$n+2$",
+                    "$2^n$"
+                ],
+                correctAnswerIndex: 3,
+                feedback: "Si un conjunto A tiene $n$ elementos, el conjunto de sus partes, $P(A)$, tendrá $2^n$ elementos.",
+                page: 39
+            },
+            {
+                question: "¿Cuál es la expresión correcta para la Ley de Morgan que relaciona el complementario de la unión de dos conjuntos A y B?",
+                options: [
+                    "$(A \cup B)' = A' \cup B'$",
+                    "$(A \cup B)' = A' \cap B'$",
+                    "$(A \cap B)' = A' \cup B'$",
+                    "$(A \cap B)' = A' \cap B'$"
+                ],
+                correctAnswerIndex: 1,
+                feedback: "La primera Ley de Morgan establece que el complementario de la unión de dos conjuntos es igual a la intersección de sus complementarios.",
+                page: 40
+            },
+            {
+                question: "¿Qué símbolo se utiliza para indicar la idea de infinitud y representa el cardinal de conjuntos infinitos, como el de los números naturales?",
+                options: [
+                    "$\pi$",
+                    "$e$",
+                    "$\aleph_0$",
+                    "$\Sigma$"
+                ],
+                correctAnswerIndex: 2,
+                feedback: "El símbolo $\aleph_0$ (alef-sub-cero) indica la idea de infinitud y fue establecido por Georg Cantor para representar el cardinal de los números naturales.",
+                page: 41
+            },
+            {
+                question: "Según el texto, ¿dónde se remontan las raíces de la educación matemática?",
+                options: [
+                    "Antigua Roma.",
+                    "Escribas sumerios del 3.000 a.C.",
+                    "Grecia clásica con Euclides.",
+                    "El Renacimiento en Europa."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "Las raíces de la educación matemática se remontan a los escribas sumerios del 3.000 a.C.",
+                page: 45
+            },
+            {
+                question: "¿Qué autor pronunció la famosa frase '¡Abajo Euclides!' en el Coloquio de Royaumont, influyendo en la enseñanza de las Matemáticas?",
+                options: [
+                    "Jean Piaget",
+                    "Morris Kline",
+                    "J. Dieudonné",
+                    "John Glenn"
+                ],
+                correctAnswerIndex: 2,
+                feedback: "J. Dieudonné pronunció su muy famoso e histórico grito de '¡Abajo Euclides!' en el Coloquio de Royaumont.",
+                page: 46
+            },
+            {
+                question: "¿Cuál de los siguientes aspectos no es mencionado por Cockcroft como un elemento que debe incluir la enseñanza de las Matemáticas?",
+                options: [
+                    "Exposición por parte del profesor.",
+                    "Discusión entre profesor y alumnos.",
+                    "Memorización extensiva de fórmulas sin comprensión.",
+                    "Resolución de problemas."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "Cockcroft enfatiza la discusión, el trabajo práctico y la resolución de problemas, no la memorización extensiva sin comprensión.",
+                page: 47
+            },
+            {
+                question: "¿Qué ley española de 1857 establecía que en la enseñanza superior para niñas, las matemáticas se omitían y se reemplazaban por 'labores propias del sexo'?",
+                options: [
+                    "Ley General de Educación de 1970.",
+                    "Ley Romanones.",
+                    "Ley Moyano.",
+                    "LOGSE."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "La Ley Moyano de 1857 estipulaba que para las niñas, los estudios de geometría y agrimensura se omitían, reemplazándose por 'labores propias del sexo'.",
+                page: 48
+            },
+            {
+                question: "¿Qué característica destacada tuvo el plan de estudios de la II República para la formación de maestros en 1931?",
+                options: [
+                    "Redujo la importancia de la didáctica matemática.",
+                    "Elevó los estudios de magisterio al nivel universitario.",
+                    "Eliminó la necesidad de prácticas en escuelas.",
+                    "Se centró exclusivamente en la aritmética básica."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "En 1931, el plan de estudios de la II República elevó los estudios de magisterio al nivel universitario.",
+                page: 49
+            },
+            {
+                question: "¿Cuál fue una de las principales innovaciones de la Ley General de Educación (LOGSE) de 1990 con respecto a la Educación Primaria?",
+                options: [
+                    "Se centró exclusivamente en el aprendizaje memorístico.",
+                    "Estableció la educación primaria como voluntaria.",
+                    "Dividió la Educación Primaria en 3 ciclos de 2 cursos cada uno.",
+                    "Eliminó las matemáticas del currículo de primaria."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "La LOGSE de 1990 dividió la Educación Primaria en 3 ciclos de 2 cursos cada uno.",
+                page: 51
+            },
+            {
+                question: "Según el Decreto 175/2007 del currículo vasco, ¿cuál de los siguientes es considerado un 'eje central' que recorre transversalmente todos los bloques de contenido en la enseñanza de las Matemáticas?",
+                options: [
+                    "La memorización de tablas de multiplicar.",
+                    "La resolución de problemas.",
+                    "El estudio de la historia de las matemáticas.",
+                    "El uso exclusivo de ábacos."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "La resolución de problemas actúa como eje central, que recorre transversalmente todos los bloques y, por ello, hay que dedicarle una especial atención.",
+                page: 52
+            },
+            {
+                question: "Según el Artículo 36 del Decreto 175/2007, ¿qué carácter tiene la evaluación de diagnóstico realizada al finalizar el segundo ciclo de Educación Primaria?",
+                options: [
+                    "Académico y sancionador.",
+                    "Formativo y orientador para los centros, e informativo para las familias.",
+                    "Clasificatorio para el acceso a la secundaria.",
+                    "Exclusivamente para la Administración Educativa."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "La evaluación de diagnóstico no tendrá efectos académicos, sino carácter formativo y orientador para los centros e informativo para las familias y para el conjunto de la comunidad educativa.",
+                page: 53
+            },
+            {
+                question: "En el problema del 'hombre anumérico' sobre la probabilidad de una bomba en el avión, ¿por qué el hombre decide llevar una bomba en su maleta?",
+                options: [
+                    "Porque es una forma de protesta.",
+                    "Para reducir la probabilidad de que haya dos bombas a bordo, considerándola infinitesimal.",
+                    "Para estudiar el comportamiento de las probabilidades.",
+                    "Porque es un requisito de la aerolínea."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "El hombre anumérico calcula que la probabilidad de que haya dos bombas a bordo es infinitesimal, por lo que lleva una para reducir el riesgo de una sola bomba.",
+                page: 7
+            },
+            {
+                question: "¿Cuál de los siguientes conjuntos de números se representa con una N y está formado por 0, 1, 2, 3, 4, 5...?",
+                options: [
+                    "Números enteros",
+                    "Números racionales",
+                    "Números naturales",
+                    "Números irracionales"
+                ],
+                correctAnswerIndex: 2,
+                feedback: "Los números naturales, cuyo conjunto se representa con una N, están formados por 0, 1, 2, 3, 4, 5, ...",
+                page: 9
+            },
+            {
+                question: "En el sistema de numeración romano, ¿qué regla se aplica a los símbolos I, X, C, M para sumar o restar?",
+                options: [
+                    "Pueden repetirse hasta cinco veces para sumar.",
+                    "Solo pueden restar si se colocan a la derecha de un símbolo mayor.",
+                    "Pueden repetirse hasta tres veces para sumar y se puede colocar una letra a la izquierda de un símbolo mayor para restar.",
+                    "Siempre suman, independientemente de su posición."
+                ],
+                correctAnswerIndex: 2,
+                feedback: "Los símbolos I, X, C, M pueden repetirse hasta tres veces para sumar y se puede colocar una letra a la izquierda de un símbolo mayor para restar.",
+                page: 13
+            },
+            {
+                question: "¿Cómo se llamaban los cordeles con nudos que empleaban los Incas para contar y registrar información?",
+                options: [
+                    "Abacos",
+                    "Quipu",
+                    "Jeroglíficos",
+                    "Cíferes"
+                ],
+                correctAnswerIndex: 1,
+                feedback: "Los incas empleaban un sistema de cordeles con nudos, llamados 'quipu'.",
+                page: 16
+            },
+            {
+                question: "¿Cuál de los siguientes objetos es mencionado como un objeto de estudio de la topología en el texto?",
+                options: [
+                    "Un triángulo equilátero.",
+                    "Una banda de Möbius.",
+                    "Un prisma.",
+                    "Una circunferencia."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "La banda de Möbius es uno de los objetos de estudio de la topología mencionados.",
+                page: 26
+            },
+            {
+                question: "Según Georg Cantor, ¿qué se entiende por 'conjunto'?",
+                options: [
+                    "Un número que no tiene fin.",
+                    "La agrupación, en un todo, de objetos bien diferenciados, de nuestra intuición o de nuestra mente.",
+                    "Una demostración lógica para un teorema.",
+                    "Un sistema de numeración posicional."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "Cantor definió un conjunto como la agrupación, en un todo, de objetos bien diferenciados, de nuestra intuición o de nuestra mente, a los que llamamos elementos del conjunto.",
+                page: 38
+            },
+            {
+                question: "Si A y B son dos conjuntos, ¿qué representa la expresión A ∩ B?",
+                options: [
+                    "El conjunto formado por todos los elementos que están en A o en B.",
+                    "El conjunto formado por todos los elementos que están en A y en B.",
+                    "El conjunto de elementos de A que no están en B.",
+                    "El producto cartesiano de A y B."
+                ],
+                correctAnswerIndex: 1,
+                feedback: "A ∩ B (intersección) es el conjunto formado por todos los elementos que están en A y en B.",
+                page: 40
+            },
+            {
+                question: "¿Qué matemático estableció diferentes categorías de infinitud, a las que llamó 'números transfinitos'?",
+                options: [
+                    "Pitágoras",
+                    "Euclides",
+                    "Georg Cantor",
+                    "René Descartes"
+                ],
+                correctAnswerIndex: 2,
+                feedback: "Fue Georg Cantor quien estableció diferentes categorías de infinitud, a las que llamó 'números transfinitos'.",
+                page: 41
+            },
+            {
+                question: "Según el Decreto 175/2007 del currículo vasco, ¿cuántos bloques de contenido, además de los 'Contenidos comunes', establece para la Educación Primaria en Matemáticas?",
+                options: [
+                    "Tres",
+                    "Cuatro",
+                    "Cinco",
+                    "Seis"
+                ],
+                correctAnswerIndex: 2,
+                feedback: "El currículo vasco establece cinco bloques de contenido principales: Números y operaciones, La medida, Geometría, Tratamiento de la información, azar y probabilidad, y Resolución de problemas.",
+                page: 52
+            }
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // Stores {questionIndex: selectedOptionIndex}
+        let score = 0;
+        const quizContainer = document.getElementById('quiz-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const totalQuestions = questions.length;
+        const pointsPerQuestion = 4;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex < 0 || currentQuestionIndex >= shuffledQuestions.length) {
+                return;
+            }
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            const currentQuestionId = currentQuestionIndex; // Use a unique ID for the question
+
+            let questionHtml = `
+                <div class="question-card" id="question-${currentQuestionId}">
+                    <p class="text-xl font-semibold text-gray-700 mb-4">Pregunta ${currentQuestionIndex + 1}/${totalQuestions}:</p>
+                    <p class="text-lg text-gray-800 mb-6">${q.question}</p>
+                    <div class="options-container">
+            `;
+
+            q.options.forEach((option, index) => {
+                const isSelected = userAnswers[currentQuestionIndex] === index;
+                const isCorrect = userAnswers[currentQuestionIndex] !== undefined && index === q.correctAnswerIndex;
+                const isIncorrect = userAnswers[currentQuestionIndex] !== undefined && index !== q.correctAnswerIndex && isSelected;
+
+                let classes = 'option-button';
+                if (isSelected) {
+                    classes += ' selected';
+                }
+                if (isCorrect && userAnswers[currentQuestionIndex] !== undefined) {
+                    classes += ' correct';
+                } else if (isIncorrect) {
+                    classes += ' incorrect';
+                }
+
+                questionHtml += `
+                    <button class="${classes}" data-question-index="${currentQuestionIndex}" data-option-index="${index}">${option}</button>
+                `;
+            });
+
+            questionHtml += `
+                    </div>
+                    <div id="feedback-${currentQuestionId}" class="feedback" style="display: none;"></div>
+                </div>
+            `;
+            quizContainer.innerHTML = questionHtml;
+
+            // Add event listeners to newly created buttons
+            quizContainer.querySelectorAll('.option-button').forEach(button => {
+                button.addEventListener('click', handleOptionClick);
+            });
+
+            updateNavigationButtons();
+            showFeedback(); // Re-show feedback if already answered
+        }
+
+        function handleOptionClick(event) {
+            const selectedOptionIndex = parseInt(event.target.dataset.optionIndex);
+            const questionIndex = parseInt(event.target.dataset.questionIndex);
+
+            // If an answer is already selected for this question, prevent changing it
+            if (userAnswers[questionIndex] !== undefined) {
+                return;
+            }
+
+            userAnswers[questionIndex] = selectedOptionIndex; // Store the user's choice
+            markOptions(questionIndex, selectedOptionIndex);
+            showFeedback();
+        }
+
+        function markOptions(qIndex, selectedIndex) {
+            const questionElement = document.getElementById(`question-${qIndex}`);
+            const buttons = questionElement.querySelectorAll('.option-button');
+            const questionData = shuffledQuestions[qIndex];
+
+            buttons.forEach((button, index) => {
+                button.classList.remove('selected', 'correct', 'incorrect');
+                if (index === selectedIndex) {
+                    button.classList.add('selected');
+                }
+                // Always show correct answer if user has selected
+                if (selectedIndex !== undefined) {
+                     if (index === questionData.correctAnswerIndex) {
+                        button.classList.add('correct');
+                    } else if (index === selectedIndex && index !== questionData.correctAnswerIndex) {
+                        button.classList.add('incorrect');
+                    }
+                }
+                button.disabled = true; // Disable all buttons after an answer is selected
+            });
+        }
+
+        function showFeedback() {
+            const q = shuffledQuestions[currentQuestionIndex];
+            const feedbackElement = document.getElementById(`feedback-${currentQuestionIndex}`);
+            const selectedAnswer = userAnswers[currentQuestionIndex];
+
+            if (selectedAnswer !== undefined) {
+                let feedbackText = q.feedback + ` (Página ${q.page} del PDF)`;
+                feedbackElement.style.display = 'block';
+                if (selectedAnswer === q.correctAnswerIndex) {
+                    feedbackElement.textContent = `¡Correcto! ${feedbackText}`;
+                    feedbackElement.className = 'feedback correct';
+                } else {
+                    feedbackElement.textContent = `Incorrecto. La respuesta correcta era: ${q.options[q.correctAnswerIndex]}. ${feedbackText}`;
+                    feedbackElement.className = 'feedback incorrect';
+                }
+            } else {
+                feedbackElement.style.display = 'none';
+            }
+        }
+
+        function updateNavigationButtons() {
+            prevBtn.style.display = currentQuestionIndex > 0 ? 'inline-block' : 'none';
+            nextBtn.style.display = currentQuestionIndex < totalQuestions - 1 ? 'inline-block' : 'none';
+            submitBtn.style.display = currentQuestionIndex === totalQuestions - 1 ? 'inline-block' : 'none';
+        }
+
+        function goToNextQuestion() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function goToPrevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function calculateScore() {
+            score = 0;
+            shuffledQuestions.forEach((q, index) => {
+                if (userAnswers[index] !== undefined && userAnswers[index] === q.correctAnswerIndex) {
+                    score += pointsPerQuestion;
+                }
+            });
+        }
+
+        function submitQuiz() {
+            calculateScore();
+            let finalFeedback = "";
+            if (score === totalQuestions * pointsPerQuestion) {
+                finalFeedback = "¡Felicidades! Has obtenido una puntuación perfecta. ¡Dominas el tema!";
+            } else if (score >= (totalQuestions * pointsPerQuestion) * 0.8) {
+                finalFeedback = "¡Muy bien hecho! Tienes un excelente conocimiento del material.";
+            } else if (score >= (totalQuestions * pointsPerQuestion) * 0.5) {
+                finalFeedback = "Buen intento. Has respondido correctamente a muchas preguntas, sigue practicando para mejorar.";
+            } else {
+                finalFeedback = "Necesitas repasar el material. ¡No te desanimes y vuelve a intentarlo!";
+            }
+
+            quizContainer.innerHTML = `
+                <div class="score-summary">
+                    <h2 class="text-4xl">Resultados del Cuestionario</h2>
+                    <p class="text-2xl font-bold text-gray-800 mt-4">Puntuación Total: ${score} / ${totalQuestions * pointsPerQuestion} puntos</p>
+                    <p class="text-lg mt-2">${finalFeedback}</p>
+                    <button onclick="restartQuiz()" class="mt-8 bg-blue-600 text-white hover:bg-blue-700 py-3 px-6 rounded-lg font-semibold shadow-md">Volver a Empezar</button>
+                </div>
+            `;
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'none';
+        }
+
+        function restartQuiz() {
+            shuffledQuestions = shuffleArray([...questions]);
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            score = 0;
+            displayQuestion();
+        }
+
+        // Initialize quiz
+        document.addEventListener('DOMContentLoaded', () => {
+            restartQuiz(); // Initial shuffle and display first question
+            nextBtn.addEventListener('click', goToNextQuestion);
+            prevBtn.addEventListener('click', goToPrevQuestion);
+            submitBtn.addEventListener('click', submitQuiz);
+        });
+    </script>
+</body>
+</html>
